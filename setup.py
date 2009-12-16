@@ -22,6 +22,7 @@ setup(name='toppcloud',
           'libcloud',
           'Tempita',
           'argparse',
+          'virtualenv',
       ],
       entry_points="""
       [console_scripts]

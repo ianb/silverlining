@@ -5,6 +5,7 @@ import argparse
 from UserDict import UserDict
 from ConfigParser import ConfigParser
 import subprocess
+import virtualenv
 from cmdutils.arg import add_verbose, create_logger
 from cmdutils import CommandError
 from libcloud.types import Provider
@@ -291,6 +292,9 @@ def command_update(config):
         config.args.site_name = os.path.basename(os.path.abspath(config.args.dir))
     if not config.args.serve_host:
         config.args.serve_host = config.host
+    config.logger.info('Fixing up .pth and .egg-info files')
+    virtualenv.logger = config.logger
+    virtualenv.fixup_pth_and_egg_link(config.args.dir)
     app = App(config.args.dir, config.args.site_name, config.args.serve_host)
     ssh_host = '%s@%s' % (config['remote_username'], config.host)
     proc = subprocess.Popen(
@@ -316,6 +320,10 @@ def command_update(config):
     proc.communicate()
     ip = get_host_ip(config.host)
     set_etc_hosts(config.logger, config.args.serve_host,
+                  ip)
+    set_etc_hosts(config.logger, '%s.%s' % (app.version, config.args.serve_host),
+                  ip)
+    set_etc_hosts(config.logger, 'prev.' + config.args.serve_host,
                   ip)
 
 if __name__ == '__main__':
