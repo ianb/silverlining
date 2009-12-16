@@ -1,0 +1,9 @@
+#!/bin/sh
+
+if [ ! -e /root/.ssh ] ; then
+    mkdir /root/.ssh
+fi
+
+echo 'Adding key to /root/.ssh/authorized_keys (and www-mgr)'
+cat ./root_authorized_keys >> /root/.ssh/authorized_keys
+cat ./root_authorized_keys >> /home/www-mgr/.ssh/authorized_keys

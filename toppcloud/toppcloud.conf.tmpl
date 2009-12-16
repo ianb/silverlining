@@ -1,0 +1,10 @@
+[provider:default]
+provider = rackspace
+username = {{username}}
+secret = {{api_key}}
+image_name = base_image_*
+size_id = 1
+{{if id_dsa}}
+root_authorized_keys = 
+    {{id_dsa}}
+{{endif}}
