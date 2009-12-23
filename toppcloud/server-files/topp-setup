@@ -1,0 +1,17 @@
+#!/bin/sh
+
+for ZIP in /var/topp/build-files/build-*.zip ; do
+    DIR="$(dirname $ZIP)/$(basename $ZIP .zip)"
+    mkdir $DIR
+    cd $DIR
+    unzip $ZIP && rm $ZIP
+    LOG="/var/log/topp-setup/build-$(date +%Y-%m-%dT%H:%M:%S).log"
+    echo "Running build from $DIR" >> $LOG
+    chmod +x build
+    ./build 2>&1 >> $LOG
+    if $? ; then
+        date > date-built.txt
+        cd ..
+        mv $(basename $DIR) $(dirname $DIR)/finished-$(basename $DIR)
+    fi
+done
