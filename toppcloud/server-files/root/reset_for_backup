@@ -1,0 +1,24 @@
+#!/bin/bash
+
+if [ "$(hostname)" != "base_image" ] ; then
+    echo "This isn't the base_image host; so don't run this"
+    exit 1
+fi
+
+echo "Clearing /var/log/apache2"
+rm /var/log/apache2/access.*
+rm /var/log/apache2/error.*
+echo "Clearing auth.log, btmp, wtmp"
+rm /var/log/auth.log* /var/log/btmp* /var/log/wtmp*
+echo "Clearing messages, syslog"
+rm /var/log/messages* /var/log/syslog*
+echo "Clearing kern.log, lpr.log fsck"
+rm /var/log/kern.log* /var/log/lpr.log* /var/log/fsck/*
+echo "Clearing daemon.log"
+rm /var/log/daemon.log*
+echo "Clearing dmesg, debug"
+rm /var/log/dmesg* /var/log/debug*
+echo "Clearing postgres logs"
+rm /var/log/postgresql/*
+
+apt-get clean
