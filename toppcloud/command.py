@@ -1,4 +1,5 @@
 import os
+import shutil
 import fnmatch
 import re
 import argparse
@@ -86,6 +87,32 @@ parser_update.add_argument(
     '--node',
     metavar='NODE_HOSTNAME',
     help="The hostname of the node to upload to")
+
+parser_init = subcommands.add_parser(
+    'init', help="Create a new application structure")
+
+parser_init.add_argument(
+    'dir',
+    metavar='DIR',
+    help="A directory to initialize")
+
+parser_init.add_argument(
+    '--config',
+    action='store_true',
+    help="Use config.ini (not main.py)")
+
+parser_init.add_argument(
+    '--main',
+    action='store_true',
+    help="Use main.py (not config.ini)")
+
+parser_serve = subcommands.add_parser(
+    'serve', help="Serve up an application for development")
+
+parser_serve.add_argument(
+    'dir',
+    metavar='APP_DIR',
+    help='Directory holding app')
 
 def main():
     if not os.path.exists(createconf.toppcloud_conf):
@@ -368,6 +395,62 @@ def command_update(config):
     set_etc_hosts(config.logger, 'prev.' + config.args.host,
                   ip)
 
+def command_init(config):
+    dir = config.args.dir
+    app_name = os.path.basename(os.path.abspath(dir))
+    vars = dict(app_name=app_name)
+    virtualenv.logger = config.logger
+    virtualenv.create_environment(
+        dir,
+        site_packages=False,
+        unzip_setuptools=True,
+        use_distribute=True)
+    init_copy('README.txt', os.path.join(dir, 'README.txt'), config.logger, vars)
+    init_copy('app.ini', os.path.join(dir, 'app.ini'), config.logger, vars)
+    if config.args.config:
+        init_copy('config.ini', os.path.join(dir, 'config.ini'), config.logger, vars)
+    if config.args.main:
+        init_copy('main.py', os.path.join(dir, 'main.py'), config.logger, vars)
+    src = os.path.join(dir, 'src')
+    if not os.path.exists(src):
+        os.mkdir(src)
+
+def init_copy(source, dest, logger, vars):
+    import tempita
+    source = os.path.join(
+        os.path.dirname(__file__),
+        'init-files',
+        source)
+    if os.path.exists(source+'.tmpl'):
+        source = source+'.tmpl'
+        template = tempita.Template.from_filename(source)
+        source_content = template.substitute(vars)
+    else:
+        fp = open(source, 'rb')
+        source_content = fp.read()
+        fp.close()
+    if os.path.exists(dest):
+        fp = open(dest, 'rb')
+        content = fp.read()
+        fp.close()
+        fp = open(source, 'rb')
+        source_content = fp.read()
+        fp.close()
+        if content == source_content:
+            logger.info(
+                'Not overwriting %s (same content)' % dest)
+        else:
+            logger.notify(
+                'Not overwriting %s (content differs)' % dest)
+    else:
+        fp = open(dest, 'wb')
+        fp.write(source_content)
+        fp.close()
+
+def command_serve(config):
+    from toppcloud import server
+    server.serve(config)
+        
 if __name__ == '__main__':
     main()
 
