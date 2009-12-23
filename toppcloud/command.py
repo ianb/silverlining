@@ -3,7 +3,7 @@ import fnmatch
 import re
 import argparse
 from UserDict import UserDict
-from ConfigParser import ConfigParser
+from initools.configparser import ConfigParser
 import subprocess
 import virtualenv
 from cmdutils.arg import add_verbose, create_logger
@@ -42,10 +42,28 @@ parser_list_nodes = subcommands.add_parser(
     'list-nodes', help="List all active nodes")
 
 parser_destroy = subcommands.add_parser(
-    'destroy', help="Destroy the given node")
+    'destroy-node', help="Destroy the given node")
+
+parser_destroy.add_argument(
+    'node',
+    metavar='HOSTNAME',
+    help="The hostname of the node to destroy")
 
 parser_create = subcommands.add_parser(
-    'create', help="Create a new node")
+    'create-node', help="Create a new node")
+
+parser_create.add_argument(
+    'node',
+    metavar='HOSTNAME',
+    help="The hostname of the node to create")
+
+parser_default = subcommands.add_parser(
+    'default-node', help="Set a node as the default node")
+
+parser_default.add_argument(
+    'node',
+    metavar='HOSTNAME',
+    help="The hostname of the node to set as default")
 
 parser_update = subcommands.add_parser(
     'update', help="Update an application")
@@ -55,20 +73,19 @@ parser_update.add_argument(
     help="The directory to upload to the server")
 
 parser_update.add_argument(
-    '--serve-host',
+    '--host',
     metavar="HOST",
     help="Hostname to server off of")
 
 parser_update.add_argument(
-    '--site-name',
+    '--name',
     metavar="NAME",
     help="'Name' of the site; defaults to directory name")
 
-for host_parser in parser_destroy, parser_create, parser_update:
-    host_parser.add_argument(
-        '-H', '--host',
-        metavar='HOSTNAME',
-        help="Hostname of the server/node")
+parser_update.add_argument(
+    '--node',
+    metavar='NODE_HOSTNAME',
+    help="The hostname of the node to upload to")
 
 def main():
     if not os.path.exists(createconf.toppcloud_conf):
@@ -105,31 +122,30 @@ class Config(UserDict):
     def from_config_file(cls, filename, section, args):
         parser = ConfigParser()
         parser.read([filename])
-        if not parser.has_section(section):
+        full_config = parser.asdict()
+        if section not in full_config:
             args.logger.fatal('No section [%s]' % section)
             args.logger.fatal('Available sections in %s:' % filename)
-            for name in parser.sections():
+            for name in full_config:
                 if name.startswith('provider:'):
                     args.logger.fatal('  [%s] (--provider=%s)'
                                  % (name, name[len('provider:'):]))
             raise CommandError("Bad --provider=%s"
                                % section[len('provider:'):])
-        config = {}
-        for name in parser.options(section):
-            config[name] = parser.get(section, name)
+        config = full_config[section]
         config['section_name'] = section
         DriverClass = libcloud_get_driver(getattr(Provider, config['provider'].upper()))
         driver = DriverClass(config['username'], config['secret'])
         return cls(config, driver, args=args)
 
     @property
-    def host(self):
-        host = self.args.host
-        if not host:
-            raise CommandError(
-                "You must give a --host option")
-        host = host.lower()
-        return host
+    def node_hostname(self):
+        if getattr(self.args, 'node', None):
+            return self.args.node
+        if self.get('default_node'):
+            return self['default_node']
+        raise CommandError(
+            "You must give a --ndoe option or set default-node")
 
     def select_image(self, images=None):
         if images is None:
@@ -174,25 +190,33 @@ class Config(UserDict):
         raise LookupError("Cannot find any size by the id %r"
                           % size_id)
 
+    def set_default_node(self, node_name):
+        parser = ConfigParser()
+        parser.read([createconf.toppcloud_conf])
+        parser.set(self['section_name'],
+                   'default_node', node_name)
+        fp = open(createconf.toppcloud_conf, 'w')
+        parser.write(fp)
+        fp.close()
+        self.logger.notify('Set default_node in %s to %s'
+                           % (createconf.toppcloud_conf,
+                              node_name))
+
 class App(object):
     """Represents an app to be uploaded/updated"""
     
-    def __init__(self, dir, site_name, serve_host):
+    def __init__(self, dir, site_name, host):
         self.dir = dir
         self.site_name = site_name
-        self.serve_host = serve_host
+        self.host = host
         parser = ConfigParser()
         assert parser.read([os.path.join(self.dir, 'app.ini')]), (
             "No %s/app.ini found!" % self.dir)
-        self.config = {}
-        for section in parser.sections():
-            self.config[section] = {}
-            for option in parser.options(section):
-                self.config[section][option] = parser.get(section, option)
+        self.config = parser.asdict()
         self.version = int(self.config['production']['version'])
 
-    def sync(self, host, app_dir):
-        dest_dir = os.path.join('/var/www', app_dir)
+    def sync(self, host, instance_name):
+        dest_dir = os.path.join('/var/www', instance_name)
         exclude_from = os.path.join(os.path.dirname(__file__), 'rsync-exclude.txt')
         cmd = ['rsync',
                '--recursive',
@@ -246,21 +270,31 @@ def command_list_sizes(config):
             size.id, size.name, size.ram, size.disk, default))
 
 def command_list_nodes(config):
+    try:
+        default_node_name = config.node_hostname
+    except CommandError:
+        default_node_name = None
     for node in config.driver.list_nodes():
+        if node.name == default_node_name:
+            default = '** default **'
+        else:
+            default = ''
         config.logger.notify(
-            '%s:%s %6s  %s' % (
-                node.name, ' '*(22-len(node.name)), node.state, ', '.join(node.public_ip)))
+            '%s:%s %6s  %15s %s' % (
+                node.name, ' '*(22-len(node.name)), node.state,
+                ', '.join(node.public_ip), default))
 
 def command_destroy(config):
-    host = config.host
+    node_hostname = config.node_hostname
     ## FIXME: should update /etc/hosts
     for node in config.driver.list_nodes():
-        if node.name == host:
+        if node.name == node_hostname:
             config.logger.notify('Destroying node %s' % node.name)
             node.destroy()
             break
     else:
-        config.logger.warn('No node found with the name %s' % host)
+        config.logger.warn('No node found with the name %s' %
+                           node_hostname)
 
 def command_create(config):
     config.logger.info('Getting image/size info')
@@ -269,10 +303,10 @@ def command_create(config):
     files = renderscripts.render_files(config=config)
     config.logger.notify('Creating node (image=%s; size=%s)' % (
         image.name, size.name))
-    name = config.host
-    assert name, "No --host"
+    node_hostname = config.node_hostname
+    assert node_hostname
     resp = config.driver.create_node(
-        name=name,
+        name=node_hostname,
         image=image,
         size=size,
         files=files,
@@ -280,50 +314,58 @@ def command_create(config):
     public_ip = resp.public_ip[0]
     config.logger.notify('Status %s at IP %s' % (
         resp.state, public_ip))
-    set_etc_hosts(config.logger, config.args.host, public_ip)
+    set_etc_hosts(config.logger, node_hostname, public_ip)
 
-_app_dir_re = re.compile(r'app_dir="(.*?)"')
+def command_default_node(config):
+    default_node = config.args.node
+    assert default_node
+    config.set_default_node(default_node)
+
+_instance_name_re = re.compile(r'app_dir="(.*?)"')
 
 def command_update(config):
     if not os.path.exists(config.args.dir):
         raise CommandError(
             "No directory in %s" % config.args.dir)
-    if not config.args.site_name:
-        config.args.site_name = os.path.basename(os.path.abspath(config.args.dir))
-    if not config.args.serve_host:
-        config.args.serve_host = config.host
+    if not config.args.name:
+        config.args.name = os.path.basename(os.path.abspath(config.args.dir))
+        config.logger.info('Using app name=%r' % config.args.name)
+    if not config.args.host:
+        ## FIXME: not sure if this is a good default?
+        config.args.host = config.node_hostname
     config.logger.info('Fixing up .pth and .egg-info files')
     virtualenv.logger = config.logger
     virtualenv.fixup_pth_and_egg_link(config.args.dir)
-    app = App(config.args.dir, config.args.site_name, config.args.serve_host)
-    ssh_host = '%s@%s' % (config['remote_username'], config.host)
+    app = App(config.args.dir, config.args.name, config.args.host)
+    ssh_host = '%s@%s' % (config['remote_username'], config.node_hostname)
     proc = subprocess.Popen(
         ['ssh', ssh_host,
-         '/var/www/support/prepare-new-site.py %s %s' % (app.site_name, app.version)],
+         '/var/www/support/prepare-new-site.py %s %s' % (app.name, app.version)],
         stdout=subprocess.PIPE)
     stdout, stderr = proc.communicate()
-    match = _app_dir_re.search(stdout)
+    match = _instance_name_re.search(stdout)
     if not match:
-        config.logger.fatal("Did not get the new app_dir from prepare_new_app.py")
+        config.logger.fatal("Did not get the new instance_name from prepare-new-site.py")
         config.logger.fatal("Output: %s" % stdout)
-        raise Exception("Bad app_dir output")
-    app_dir = match.group(1)
-    assert app_dir.startswith(app.site_name)
-    app.sync(ssh_host, app_dir)
+        raise Exception("Bad instance_name output")
+    instance_name = match.group(1)
+    assert instance_name.startswith(app.name)
+    app.sync(ssh_host, instance_name)
     proc = subprocess.Popen(
         ['ssh', ssh_host,
-         '/var/www/support/update-hostmap.py %(app_dir)s %(serve_host)s %(version)s.%(serve_host)s; '
-         '/var/www/support/update-service.py %(app_dir)s'
-         % dict(app_dir=app_dir, serve_host=app.serve_host,
+         '/var/www/support/update-hostmap.py %(instance_name)s %(serve_host)s %(version)s.%(host)s; '
+         '/var/www/support/update-service.py %(instance_name)s'
+         % dict(instance_name=instance_name,
+                host=config.args.host,
                 version=app.version),
          ])
     proc.communicate()
-    ip = get_host_ip(config.host)
-    set_etc_hosts(config.logger, config.args.serve_host,
+    ip = get_host_ip(config.node_hostname)
+    set_etc_hosts(config.logger, config.args.host,
                   ip)
-    set_etc_hosts(config.logger, '%s.%s' % (app.version, config.args.serve_host),
+    set_etc_hosts(config.logger, '%s.%s' % (app.version, config.args.host),
                   ip)
-    set_etc_hosts(config.logger, 'prev.' + config.args.serve_host,
+    set_etc_hosts(config.logger, 'prev.' + config.args.host,
                   ip)
 
 if __name__ == '__main__':

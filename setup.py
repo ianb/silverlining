@@ -23,6 +23,7 @@ setup(name='toppcloud',
           'Tempita',
           'argparse',
           'virtualenv',
+          'INITools',
       ],
       entry_points="""
       [console_scripts]
