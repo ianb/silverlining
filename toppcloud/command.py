@@ -544,7 +544,8 @@ def command_init(config):
     virtualenv.logger = config.logger
     virtualenv.create_environment(
         dir,
-        site_packages=False,
+        # This should be true to pick up global binaries like psycopg:
+        site_packages=True,
         unzip_setuptools=True,
         use_distribute=True)
     init_copy('README.txt', os.path.join(dir, 'README.txt'), config.logger, vars)
