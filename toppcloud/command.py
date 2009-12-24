@@ -58,6 +58,16 @@ parser_create.add_argument(
     metavar='HOSTNAME',
     help="The hostname of the node to create")
 
+parser_create.add_argument(
+    '--image-id',
+    metavar="ID",
+    help="Image ID to use")
+
+parser_create.add_argument(
+    '--size-id',
+    metavar="ID",
+    help="Size ID to use")
+
 parser_default = subcommands.add_parser(
     'default-node', help="Set a node as the default node")
 
@@ -174,12 +184,13 @@ class Config(UserDict):
         raise CommandError(
             "You must give a --ndoe option or set default-node")
 
-    def select_image(self, images=None):
+    def select_image(self, images=None, image_id=None):
         if images is None:
             images = self.driver.list_images()
-        if self.get('image_id'):
+        if image_id or self.get('image_id'):
+            image_id = image_id or self['image_id']
             for image in images:
-                if image.id == self['image_id']:
+                if image.id == image_id:
                     return image
             else:
                 raise LookupError(
@@ -207,10 +218,10 @@ class Config(UserDict):
             raise LookupError(
                 "No config for image_id or image_name")
 
-    def select_size(self, sizes=None):
+    def select_size(self, sizes=None, size_id=None):
         if sizes is None:
             sizes = self.driver.list_sizes()
-        size_id = self.get('size_id', '').strip()
+        size_id = size_id or self.get('size_id', '').strip()
         for size in sizes:
             if size.id == size_id:
                 return size
@@ -311,7 +322,7 @@ def command_list_nodes(config):
                 node.name, ' '*(22-len(node.name)), node.state,
                 ', '.join(node.public_ip), default))
 
-def command_destroy(config):
+def command_destroy_node(config):
     node_hostname = config.node_hostname
     ## FIXME: should update /etc/hosts
     for node in config.driver.list_nodes():
@@ -323,14 +334,18 @@ def command_destroy(config):
         config.logger.warn('No node found with the name %s' %
                            node_hostname)
 
-def command_create(config):
+def command_create_node(config):
     config.logger.info('Getting image/size info')
-    image = config.select_image()
-    size = config.select_size()
+    image = config.select_image(image_id=config.args.image_id)
+    size = config.select_size(size_id=config.args.size_id)
     files = renderscripts.render_files(config=config)
     config.logger.notify('Creating node (image=%s; size=%s)' % (
         image.name, size.name))
     node_hostname = config.node_hostname
+    if not re.search(r'^[a-z0-9.-]+$', node_hostname):
+        raise CommandError(
+            "Invalid hostname (must contain only letters, numbers, ., and -): %r"
+            % node_hostname)
     assert node_hostname
     resp = config.driver.create_node(
         name=node_hostname,
@@ -367,7 +382,7 @@ def command_update(config):
     ssh_host = '%s@%s' % (config['remote_username'], config.node_hostname)
     proc = subprocess.Popen(
         ['ssh', ssh_host,
-         '/var/www/support/prepare-new-site.py %s %s' % (app.name, app.version)],
+         '/var/www/support/prepare-new-site.py %s %s' % (app.site_name, app.version)],
         stdout=subprocess.PIPE)
     stdout, stderr = proc.communicate()
     match = _instance_name_re.search(stdout)
@@ -376,11 +391,11 @@ def command_update(config):
         config.logger.fatal("Output: %s" % stdout)
         raise Exception("Bad instance_name output")
     instance_name = match.group(1)
-    assert instance_name.startswith(app.name)
+    assert instance_name.startswith(app.site_name)
     app.sync(ssh_host, instance_name)
     proc = subprocess.Popen(
         ['ssh', ssh_host,
-         '/var/www/support/update-hostmap.py %(instance_name)s %(serve_host)s %(version)s.%(host)s; '
+         '/var/www/support/update-hostmap.py %(instance_name)s %(host)s %(version)s.%(host)s; '
          '/var/www/support/update-service.py %(instance_name)s'
          % dict(instance_name=instance_name,
                 host=config.args.host,
