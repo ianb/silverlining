@@ -9,15 +9,16 @@ Author, license, etc
 --------------------
 
 This is written by `Ian Bicking <http://ianbicking.org>`_; `email him
-<mailto:ianb@colorstudy.com>`_ with feedback (maybe in the future a
-more complete infrastructure will exist).  It was written with support
-by `The Open Planning Project <http://openplans.org>`_.
+<mailto:ianb@colorstudy.com>`_ with feedback (maybe in the future more
+complete project infrastructure will exist).  It was written with
+support by `The Open Planning Project <http://openplans.org>`_.
 
 It's under the `GPL <license.html>`_, though that **does not** imply
-any licensing on applications that use this for deployment.  All files
-in ``toppcloud/server-files/support`` should be considered to be
-MIT-licensed (these files actually come close to coexisting with
-deployed files).
+anything with respect to the licensing on applications that use this
+for deployment.  All files in ``toppcloud/server-files/support``
+should be considered to be MIT-licensed (these files actually come
+close to coexisting with deployed files, though even those don't come
+very close).
 
 .. comment:
 
@@ -46,19 +47,22 @@ The server is setup thusly:
 
 * It uses Apache with mod_wsgi
 
-* But you don't directly interact with either
+* But you don't directly interact with either of these
 
 * For my own reasons and priorities I've only added support for
   PostgreSQL with the PostGIS extensions.  Right now the persistence
   handling is minimal; this is where the most additional support needs
-  to be added to the system.
+  to be added to the system (backups, migration, cloning, separating
+  servers, and eventually stuff like replication).
 
 * psycopg2, PIL, lxml, and a bunch of "hard-to-install" libraries are
-  pre-installed (via Ubuntu).
+  pre-installed (via Ubuntu).  (Ideally this would be a bit more
+  on-demand.)
 
 * Nothing cron-like has been implemented yet, though probably it will
-  be implemented similar to App Engine (with internal requests).  App
-  setup and migration also needs work.
+  be implemented very similar to App Engine (with internal requests).
+  App setup and migration also needs work, which as a first run will
+  just be internal requests as well.
 
 * Each app lives at its own domain; directory isolation is not
   currently implemented (but might be nice).  Multiple hostnames
@@ -73,13 +77,14 @@ This package currently has only been tested with `Rackspace Cloud
 <http://www.rackspacecloud.com/>`_.  The only specific Rackspace
 extension is the use of "files" on server creation (this is part of
 the node-creation API that uploads files on the newly created
-node/server).  This hasn't been tested elsewhere.  The use of the
-files extension is minimal at this point (just setting up
-``/root/.ssh/authorized_keys``), and it is usable without that.
+node/server).  The use of the files extension is minimal at this point
+(just setting up ``/root/.ssh/authorized_keys``), and it is usable
+without that.
 
 It uses `libcloud <http://incubator.apache.org/libcloud/>`_, which is
 a library abstracting several provider APIs.  I want to try this with
-EC2 soon.
+EC2 soon.  But since it's only been tried with Rackspace, expect bumps
+with other services.
 
 Language Support
 ----------------
@@ -96,14 +101,14 @@ configuration) but wouldn't involve rewriting much.  All of which is
 to say, this could be a useful basis for similar functionality for
 other languages.  Future PHP support in particular is quite possible.
 
-What's it like?
----------------
+How does it look?
+-----------------
 
 It's inspired somewhat by App Engine, specifically the idea that an
 "application" is just a set of files.  If there's anything you need
 for your application that requires more than a bunch of cross-platform
 Python files, then you should install that into the "base system"
-(like install it globally).  If it's in an Ubuntu (or
+(installing it globally).  If it's in an Ubuntu (or
 Debian/Ubuntu-universe) package, great!  Use that.  It *does not*
 support multiple versions of such libraries on a single server, or
 even try to support version-specificity in that case.
@@ -111,35 +116,51 @@ even try to support version-specificity in that case.
 Once you get rid of anything non-portable, an environment is just a
 bunch of files.  Deploying an app just means deploying those files.
 
-An interaction looks like this (after you've signed up for a Rackspace
-Cloud account)::
+To try this out, you first need to sign up for a Rackspace Cloud
+account.  There's no initial charge.  You want to sign up for "Cloud
+Servers" and add on "Cloud Files" (Cloud Files aren't used, but the
+API key comes from that service).  This takes a little while, they
+call to confirm the account.  Then once you are in go to "Your Account
+> API Access" to get your API key.  Use that and your username for
+authentication.
+
+An interaction then looks like this::
 
     $ toppcloud
     ... it will create your ~/.toppcloud.conf file ...
 
-That asks a few questions to get your account information.  Now you
-have to create the base server; we'll use Rackspace's Ubuntu Jaunty
-image (which happens to be image 8; you can check with ``toppcloud
-list-imamges``)::
+That asks a few questions to get your account information.  
+
+Now you have to create the base server; we'll use Rackspace's Ubuntu
+Jaunty image (which happens to be image 8; you can see available
+images with ``toppcloud list-imamges``)::
 
     $ toppcloud create-node baseimage --image-id=8
 
 Now you have to wait for the server to be built.  The best thing is to
-just wait for the email, which has the new root password.  Grab that
-password for the next step, which sets up the new server::
+just wait for the confirmation email, which should arrive in a couple
+minutes and which has the new root password.  Grab that password for
+the next step, which sets up the new server::
 
     $ toppcloud setup-node baseimage
 
 This will chug along for a while.  Once you've created this server
 image, you can back up the server and use it as an image for new
 servers.  Then you don't have to "build" anything, you can just clone
-this server.  Go into Rackspace's management interface and make a
-backup; name it, say, baseimage001, and then in ``~/.toppcloud.conf``
-(under ``[provider:default]``) put ``image_name=baseimage*``.
+this server.  Go into Rackspace's management interface (Hosting >
+Cloud Servers > click "baseimage" > Backups tab > New Backup Image
+button).  Name the backup, say, ``baseimage001``, and then in
+``~/.toppcloud.conf`` (under ``[provider:default]``) put ``image_name
+= baseimage*`` (``baseimage*`` selects the last matching image, so if
+you create ``baseimage002`` it'll automatically use that).
 
-Or, skip that stuff (you can do it later with a new fresh image --
-servers are cheap!) and just use the server.  But to do that you need
-an app::
+Note that Rackspace caches a bunch of stuff in their API (very
+frustratingly!) so sometimes things you do won't show up to the
+``toppcloud`` command (though it will show up on the web interface).
+
+Or you can skip that stuff (you can do it later with a new fresh image
+-- servers are cheap!) and just use this server.  But to do that you
+need an app::
 
     $ toppcloud init --main myapp/
 
@@ -171,18 +192,24 @@ While you are developing your app, you can do::
 
 This is like App Engine's ``dev_appserver.py``, though it doesn't do a
 lot to simulate the environment (there isn't as much that needs to be
-simulated).  And stuff like Postgres isn't configured for that case,
+simulated).  And stuff like Postgres isn't configured in development,
 so you need to handle that yourself (eventually it will be, though it
 will be up to you to install Postgres as appropriate for your system).
 
 Note your ``main.py`` file needs to define one global variable,
 ``application``, that points to the WSGI application.  An example of
 how to do this for Django is included in the default setup.  If you
-use ``config.ini`` then it's a standard Paste Deploy file, and
-``[app:main]`` (or ``[pipeline:main]``) loads up the file.
+use ``config.ini`` (``--config`` instead of ``--main``) then it's a
+standard Paste Deploy file, and ``[app:main]`` (or
+``[pipeline:main]``) loads up the file.
 
 There's also a bit of stuff in ``app.ini`` that defines the
 application, but not a lot.
+
+Static files should go in ``myapp/static/``, and they get priority
+over the application itself.  So if you have
+``myapp/static/blog/style.css`` then ``http://myapp.example.com/blog/style.css`` will serve
+this file and never query the application.
 
 So... lastly you need to actually deploy your software::
 
@@ -202,4 +229,109 @@ is your previously-deployed application.  (The tools to revert and
 clean up old instances aren't yet written, because there's too damn
 many details, but when I get to writing about them I see the missing
 parts.)
+
+Cloud Server Management
+-----------------------
+
+There's several commands just to manage servers (also called nodes).
+These are really just frontends to what libcloud provides.
+
+Each "node" has a hostname, which is the name of the node, and also
+the hostname setup in ``/etc/hosts``.
+
+``toppcloud list-images``: 
+    Lists all the images available (these are starter systems that can
+    be cloned).
+
+``toppcloud list-sizes``:
+    Lists all the sizes (plans) you can get for your server (a
+    combination of RAM/disk and sometimes bandwidth).
+
+``toppcloud create-node``:
+    Creates a new node (aka server).
+
+``toppcloud destroy-node``:
+    Deletes a node.
+
+``toppcloud default-node``:
+    This sets the default node, so you can do ``toppcloud update
+    myapp/`` without a ``--node=hostname`` option (instead using this
+    default).
+
+``toppcloud setup-node``:
+    This takes a bare Ubuntu Jaunty system and sets it up.
+
+Differences From App Engine
+---------------------------
+
+* This doesn't do security isolation between apps on a server.
+  Individual servers aren't that expensive, so untrusted applications
+  just shouldn't comingle.
+
+* This doesn't have a scalable backend.  It would be possible to set
+  up a scalable backend service, and do the associated configuration,
+  but I don't know much about those tools anyway.  Scalability isn't
+  really a goal; ease and reliability of deployment is more the goal.
+
+* You can write files, though really that should be another "service"
+  (managed like a database).
+
+* App Engine allocates server time dynamically, and this does not in
+  any way, though at least it makes your deployments scriptable.
+
+* There's no authentication built in, and there won't be; this can be
+  handled by per-application libraries.
+
+* There's no limits, and so support for skipping files is not such a
+  big deal.  Dynamic support for different scripts or static files
+  also isn't supported (like in ``app.yaml``), because it doesn't seem
+  very important.  If you don't want process isolation, something like
+  `Paste's urlmap <http://pythonpaste.org/modules/urlmap.html>`_ can
+  handle it.
+
+* Of course, you can run any library or service.  For me `lxml
+  <http://codespeak.net/lxml/>`_ and `PostGIS
+  <http://postgis.refractions.net/>`_ are important, and the lack of
+  those libraries really kept and keeps me from using App Engine.
+
+* No pure-Python libraries are included, because they aren't needed.
+
+Differences From Heroku
+-----------------------
+
+`Heroku <http://heroku.com/>`_ is an App Engine-like service for Ruby
+applications.  But it works different from App Engine, and has some
+different ideas:
+
+* Heroku uses git to deploy.  I don't see any particular reason to
+  integrate with a version control system.  This system uses rsync.
+
+* Configuration seems to be done somewhat magically with Heroku, and
+  just with environmental variables in this system.  Magic is
+  annoying.
+
+* Stuff like migration is built-in.  I want to do that stuff too.
+
+* Apps seem to be more chroot'd than in this system.  I'm not that
+  concerned about this, as I expect people to just do that isolation
+  at the server level.
+
+* There's a bunch of nice add-ons.  I want to do that stuff too (not
+  exactly the same way, but the same basic idea: if you want Solr, you
+  can just say so and get it).
+
+* Heroku uses Ruby.  I believe Ruby is very supportable by this
+  system, but it isn't supported now, and I'm unlikely to add it
+  myself (mostly because I don't know quite how it should work).
+
+Generally Heroku seems like a faster-moving target than App Engine,
+with lots of interesting ideas; I hope to get more ideas from it going
+forward.
+
+Differences From Media Temple
+-----------------------------
+
+`This
+<http://mediatemple.net/webhosting/gs/features/containers.php#django>`_
+looks similar, but I haven't looked at it yet.
 
