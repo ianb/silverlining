@@ -29,6 +29,11 @@ parser.add_argument(
     help="The [provider:NAME] section to use (default [provider:default])",
     default="default")
 
+parser.add_argument(
+    '-y', '--yes',
+    action='store_true',
+    help="Answer yes to any questions")
+
 add_verbose(parser, add_log=True)
 
 subcommands = parser.add_subparsers(dest="command")
@@ -46,9 +51,9 @@ parser_destroy = subcommands.add_parser(
     'destroy-node', help="Destroy the given node")
 
 parser_destroy.add_argument(
-    'node',
+    'nodes', nargs='+',
     metavar='HOSTNAME',
-    help="The hostname of the node to destroy")
+    help="The hostname(s) of the node to destroy")
 
 parser_create = subcommands.add_parser(
     'create-node', help="Create a new node")
@@ -75,6 +80,14 @@ parser_default.add_argument(
     'node',
     metavar='HOSTNAME',
     help="The hostname of the node to set as default")
+
+parser_setup = subcommands.add_parser(
+    'setup-node', help="Setup a new (fresh Ubuntu Jaunty install) server")
+
+parser_setup.add_argument(
+    'node',
+    metavar='HOSTNAME',
+    help="The hostname of then node to setup")
 
 parser_update = subcommands.add_parser(
     'update', help="Update an application")
@@ -240,6 +253,25 @@ class Config(UserDict):
                            % (createconf.toppcloud_conf,
                               node_name))
 
+    def ask(self, query):
+        if getattr(self.args, 'yes', False):
+            self.logger.warn(
+                "%s YES [auto]" % query)
+            return True
+        while 1:
+            response = raw_input(query+" [y/n] ")
+            response = response.strip().lower()
+            if not response:
+                continue
+            if 'all' in response and response[0] == 'y':
+                config.args.yes = True
+                return True
+            if response[0] == 'y':
+                return True
+            if response[0] == 'n':
+                return False
+            print 'I did not understand the response: %s' % response
+
 class App(object):
     """Represents an app to be uploaded/updated"""
     
@@ -323,16 +355,16 @@ def command_list_nodes(config):
                 ', '.join(node.public_ip), default))
 
 def command_destroy_node(config):
-    node_hostname = config.node_hostname
-    ## FIXME: should update /etc/hosts
-    for node in config.driver.list_nodes():
-        if node.name == node_hostname:
-            config.logger.notify('Destroying node %s' % node.name)
-            node.destroy()
-            break
-    else:
-        config.logger.warn('No node found with the name %s' %
-                           node_hostname)
+    for node_hostname in config.arg.nodes:
+        ## FIXME: should update /etc/hosts
+        for node in config.driver.list_nodes():
+            if node.name == node_hostname:
+                config.logger.notify('Destroying node %s' % node.name)
+                node.destroy()
+                break
+        else:
+            config.logger.warn('No node found with the name %s' %
+                               node_hostname)
 
 def command_create_node(config):
     config.logger.info('Getting image/size info')
@@ -356,12 +388,110 @@ def command_create_node(config):
     public_ip = resp.public_ip[0]
     config.logger.notify('Status %s at IP %s' % (
         resp.state, public_ip))
-    set_etc_hosts(config.logger, node_hostname, public_ip)
+    set_etc_hosts(config, [node_hostname], public_ip)
 
 def command_default_node(config):
     default_node = config.args.node
     assert default_node
     config.set_default_node(default_node)
+
+def command_setup_node(config):
+    os.environ['LANG'] = 'C'
+    node = config.args.node
+    config.logger.notify(
+        'Setting up authentication on server...')
+    ssh_host = 'root@%s' % node
+    proc = subprocess.Popen([
+        'ssh', ssh_host, '''
+if [ -e /root/.toppcloud-server-setup ] ; then
+    exit 50
+fi
+mkdir -p /root/.ssh
+cat >> /root/.ssh/authorized_keys
+''',
+        ], stdin=subprocess.PIPE)
+    key = open(os.path.join(os.environ['HOME'],
+                            '.ssh', 'id_dsa.pub'), 'rb').read()
+    proc.communicate(key)
+    if proc.returncode == 50:
+        config.logger.fatal(
+            "The server has already been setup (/root/.toppcloud-server-setup exists)")
+        return 2
+    config.logger.notify(
+        "Updating indexes and setting up rsync")
+    proc = subprocess.Popen([
+        'ssh', ssh_host, '''
+apt-get update
+apt-get install rsync
+''',
+        ])
+    proc.communicate()
+    if proc.returncode:
+        config.logger.fatal(
+            "An error occurred (code=%r)"
+            % proc.returncode)
+        response = config.ask(
+            "Continue?")
+        if not response:
+            return 3
+    setup_rsync(config, 'root', '/root/')
+    config.logger.notify(
+        "Running apt-get install on server")
+    lines = list(open(os.path.join(os.path.dirname(__file__),
+                                   'server-files',
+                                   'dpkg-query.txt')))
+    packages = ' '.join(line.strip().split()[0]
+                        for line in lines
+                        if line.strip())
+    proc = subprocess.Popen([
+        'ssh', ssh_host,
+        'apt-get install $(cat)'],
+                            stdin=subprocess.PIPE)
+    proc.communicate(packages)
+    if proc.returncode:
+        config.logger.fatal(
+            "An error occurred (code=%r)"
+            % proc.returncode)
+        response = config.ask(
+            "Continue?")
+        if not response:
+            return 5
+    setup_rsync(config, 'support/', '/var/www/support/')
+    setup_rsync(config, 'sites-enabled/', '/etc/apache2/sites-enabled/')
+    setup_rsync(config, 'www-README.txt', '/var/www/README.txt')
+    setup_rsync(config, 'topp-setup', '/etc/init.d/topp-setup')
+    setup_rsync(config, 'pg_hba.conf', '/etc/postgresql/8.3/main/pg_hba.conf')
+    setup_script = open(os.path.join(os.path.dirname(__file__),
+                                     'server-files',
+                                     'update-server-script.sh')).read()
+    
+    proc = subprocess.Popen(
+        ['ssh', ssh_host, setup_script])
+    proc.communicate()
+    if proc.returncode:
+        config.logger.fatal(
+            "An error occurred (code=%r)"
+            % proc.returncode)
+        # No need to ask because it's the last task anyway
+        return 6
+
+def setup_rsync(config, source, dest):
+    cwd = os.path.join(os.path.dirname(__file__), 'server-files')
+    proc = subprocess.Popen([
+        'rsync', '-rvC',
+        source, 'root@%s:%s' % (config.args.node, dest)],
+                            cwd=cwd)
+    config.logger.notify(
+        "rsyncing %s to %s" % (source, dest))
+    proc.communicate()
+    if proc.returncode:
+        config.logger.fatal(
+            "An error occurred in rsync (code=%s)" % proc.returncode)
+        response = config.ask(
+            "Continue?")
+        if not response:
+            raise CommandError(
+                "Aborting due to failure")
 
 _instance_name_re = re.compile(r'app_dir="(.*?)"')
 
@@ -403,12 +533,9 @@ def command_update(config):
          ])
     proc.communicate()
     ip = get_host_ip(config.node_hostname)
-    set_etc_hosts(config.logger, config.args.host,
-                  ip)
-    set_etc_hosts(config.logger, '%s.%s' % (app.version, config.args.host),
-                  ip)
-    set_etc_hosts(config.logger, 'prev.' + config.args.host,
-                  ip)
+    set_etc_hosts(config, [config.args.host,
+                           '%s.%s' % (app.version, config.args.host),
+                           'prev.' + config.args.host], ip)
 
 def command_init(config):
     dir = config.args.dir

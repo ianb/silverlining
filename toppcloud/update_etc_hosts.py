@@ -34,5 +34,9 @@ def update_hosts(filename, ip, hostname):
 
 if __name__ == '__main__':
     import sys
-    update_hosts(sys.argv[1], sys.argv[2], sys.argv[3])
+    filename = sys.argv[1]
+    ip = sys.argv[2]
+    hostnames = sys.argv[3:]
+    for hostname in hostnames:
+        update_hosts(filename, ip, hostname)
     

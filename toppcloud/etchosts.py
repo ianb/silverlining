@@ -22,13 +22,15 @@ def get_host_ip(hostname):
     finally:
         fp.close()
 
-def set_etc_hosts(logger, hostname, ip):
+def set_etc_hosts(config, hostnames, ip):
     """Sets a line in /etc/hosts to assign the hostname to the ip
 
     This may add or edit to the file, or do nothing if is already set.
     It will call a subcommand with sudo if necessary to edit.
     """
+    assert not isinstance(hostnames, basestring)
     fp = open('/etc/hosts')
+    hostnames = set(hostnames)
     try:
         for line in fp.read().splitlines():
             line = line.strip()
@@ -38,10 +40,17 @@ def set_etc_hosts(logger, hostname, ip):
             line_ip = parts[0]
             line_hosts = parts[1:]
             if line_ip == ip:
+                for hostname in list(hostnames):
+                    if hostname in line_hosts:
+                        config.logger.info('Found working ip %s' % line)
+                        hostnames.remove(hostname)
+                        return
+            force_update = False
+            for hostname in hostnames:
                 if hostname in line_hosts:
-                    logger.info('Found working ip %s' % line)
-                    return
-            if hostname in line_hosts:
+                    force_update = True
+                    break
+            if force_update:
                 break
     finally:
         fp.close()
@@ -49,11 +58,11 @@ def set_etc_hosts(logger, hostname, ip):
     cmd = ["sudo", "python",
            os.path.join(os.path.dirname(__file__), 'update_etc_hosts.py'),
            "/etc/hosts",
-           ip, hostname]
-    logger.notify('The hostname/ip is not setup in /etc/hosts')
+           ip] + list(hostnames)
+    config.logger.notify('The hostname/ip is not setup in /etc/hosts')
     resp = raw_input('Would you like me to set it up? ')
     resp = resp.strip().lower()
     if resp and resp[0] == 'y':
-        logger.notify('Executing %s' % ' '.join(cmd))
+        config.logger.notify('Executing %s' % ' '.join(cmd))
         proc = subprocess.Popen(cmd)
         proc.communicate()
