@@ -208,8 +208,9 @@ application, but not a lot.
 
 Static files should go in ``myapp/static/``, and they get priority
 over the application itself.  So if you have
-``myapp/static/blog/style.css`` then ``http://myapp.example.com/blog/style.css`` will serve
-this file and never query the application.
+``myapp/static/blog/style.css`` then
+``http://myapp.example.com/blog/style.css`` will serve this file and
+never query the application.
 
 So... lastly you need to actually deploy your software::
 
