@@ -1,0 +1,205 @@
+TOPP Cloud
+==========
+
+.. contents::
+
+This is a script and server layout to manage Python-based web applications.
+
+Author, license, etc
+--------------------
+
+This is written by `Ian Bicking <http://ianbicking.org>`_; `email him
+<mailto:ianb@colorstudy.com>`_ with feedback (maybe in the future a
+more complete infrastructure will exist).  It was written with support
+by `The Open Planning Project <http://openplans.org>`_.
+
+It's under the `GPL <license.html>`_, though that **does not** imply
+any licensing on applications that use this for deployment.  All files
+in ``toppcloud/server-files/support`` should be considered to be
+MIT-licensed (these files actually come close to coexisting with
+deployed files).
+
+.. comment:
+
+   Maybe this is predicting pushback unnecessarily... so consider this
+   a possible but not necessary bit of documentation.  But if you give
+   me grief about the GPL, consider this the response...
+
+   If you have a problem with the GPL for this application you need to
+   get over yourself.  The GPL isn't viral to your application, and
+   that's the only reasonable interpretation of the GPL.  I don't care
+   about what stupid lawyers say about the GPL; if a lawyer is telling
+   you or your employer scary stories about what the GPL does, your
+   lawyer is a bad lawyer and I'm not going to work around your
+   organizational bug.  If you really have a valid problem with *this*
+   program being under the GPL, then I guess you want to make
+   proprietary extensions to it, then eh, I'm not really interested.
+
+The Server
+----------
+
+The server is setup thusly:
+
+* Ubuntu Jaunty
+
+* Python 2.6
+
+* It uses Apache with mod_wsgi
+
+* But you don't directly interact with either
+
+* For my own reasons and priorities I've only added support for
+  PostgreSQL with the PostGIS extensions.  Right now the persistence
+  handling is minimal; this is where the most additional support needs
+  to be added to the system.
+
+* psycopg2, PIL, lxml, and a bunch of "hard-to-install" libraries are
+  pre-installed (via Ubuntu).
+
+* Nothing cron-like has been implemented yet, though probably it will
+  be implemented similar to App Engine (with internal requests).  App
+  setup and migration also needs work.
+
+* Each app lives at its own domain; directory isolation is not
+  currently implemented (but might be nice).  Multiple hostnames
+  pointing to a single application is not implemented, but would be
+  easy.  Wildcards require some more thought (simple in terms of
+  Apache configuration).
+
+Provider support
+----------------
+
+This package currently has only been tested with `Rackspace Cloud
+<http://www.rackspacecloud.com/>`_.  The only specific Rackspace
+extension is the use of "files" on server creation (this is part of
+the node-creation API that uploads files on the newly created
+node/server).  This hasn't been tested elsewhere.  The use of the
+files extension is minimal at this point (just setting up
+``/root/.ssh/authorized_keys``), and it is usable without that.
+
+It uses `libcloud <http://incubator.apache.org/libcloud/>`_, which is
+a library abstracting several provider APIs.  I want to try this with
+EC2 soon.
+
+Language Support
+----------------
+
+None of the basic techniques are particularly tied to Python, but the
+Apache and mod_wsgi configuration is small but important, and support
+for other languages would require some parallel configuration for that
+other language.  PHP would be easy (of course!) and I'm sure Ruby
+would be possible (maybe even simple, using mod_passenger), and while
+I don't know much about how Perl works with these things I'm sure it
+would be possible too.  Support would require a bit of abstracting of
+the script (mostly to look for language-specific application
+configuration) but wouldn't involve rewriting much.  All of which is
+to say, this could be a useful basis for similar functionality for
+other languages.  Future PHP support in particular is quite possible.
+
+What's it like?
+---------------
+
+It's inspired somewhat by App Engine, specifically the idea that an
+"application" is just a set of files.  If there's anything you need
+for your application that requires more than a bunch of cross-platform
+Python files, then you should install that into the "base system"
+(like install it globally).  If it's in an Ubuntu (or
+Debian/Ubuntu-universe) package, great!  Use that.  It *does not*
+support multiple versions of such libraries on a single server, or
+even try to support version-specificity in that case.
+
+Once you get rid of anything non-portable, an environment is just a
+bunch of files.  Deploying an app just means deploying those files.
+
+An interaction looks like this (after you've signed up for a Rackspace
+Cloud account)::
+
+    $ toppcloud
+    ... it will create your ~/.toppcloud.conf file ...
+
+That asks a few questions to get your account information.  Now you
+have to create the base server; we'll use Rackspace's Ubuntu Jaunty
+image (which happens to be image 8; you can check with ``toppcloud
+list-imamges``)::
+
+    $ toppcloud create-node baseimage --image-id=8
+
+Now you have to wait for the server to be built.  The best thing is to
+just wait for the email, which has the new root password.  Grab that
+password for the next step, which sets up the new server::
+
+    $ toppcloud setup-node baseimage
+
+This will chug along for a while.  Once you've created this server
+image, you can back up the server and use it as an image for new
+servers.  Then you don't have to "build" anything, you can just clone
+this server.  Go into Rackspace's management interface and make a
+backup; name it, say, baseimage001, and then in ``~/.toppcloud.conf``
+(under ``[provider:default]``) put ``image_name=baseimage*``.
+
+Or, skip that stuff (you can do it later with a new fresh image --
+servers are cheap!) and just use the server.  But to do that you need
+an app::
+
+    $ toppcloud init --main myapp/
+
+Now you have a `virtualenv <http://virtualenv.openplans.org>`_
+environment where you can setup your app.  Unlike App Engine this
+system knows about virtualenv and treats it nicely, so you don't need
+``site.addsitedir()`` or anything.  If you install libraries in this
+environment, they will work generally.
+
+In terms of "configuration" there isn't much.  But in particular, you
+should use environmental variables to fill in your configuration.
+Specifically the postgis service (the only service so far implemented)
+sets:
+
+``PG_DBNAME``:
+    the database name to connect to.
+``PG_USER``: 
+    the database user to connect as.
+``PG_PASSWORD``:
+    the password to use (if blank, no password needed).  Right now
+    this is always blank.
+``PG_HOST``:
+    the host to connect to (if blank, localhost/no host).  Right now
+    this is always blank.
+
+While you are developing your app, you can do::
+
+    $ toppcloud serve myapp/
+
+This is like App Engine's ``dev_appserver.py``, though it doesn't do a
+lot to simulate the environment (there isn't as much that needs to be
+simulated).  And stuff like Postgres isn't configured for that case,
+so you need to handle that yourself (eventually it will be, though it
+will be up to you to install Postgres as appropriate for your system).
+
+Note your ``main.py`` file needs to define one global variable,
+``application``, that points to the WSGI application.  An example of
+how to do this for Django is included in the default setup.  If you
+use ``config.ini`` then it's a standard Paste Deploy file, and
+``[app:main]`` (or ``[pipeline:main]``) loads up the file.
+
+There's also a bit of stuff in ``app.ini`` that defines the
+application, but not a lot.
+
+So... lastly you need to actually deploy your software::
+
+    $ toppcloud update myapp/ --host=test.example.com
+
+Now you can go to ``http://test.example.com``.  You can literally put
+in that hostname, as the DNS is done entirely through ``/etc/hosts``
+so "invalid" domains work fine.  If you want a valid domain you have
+to set it up yourself (good DNS service that has an API? I'd like to
+hear about it).
+
+You can also go to ``http://1.test.example.com``, which like App
+Engine is tied to the version of the application (set in ``app.ini``),
+and allows multiple versions of an application to run at once (though
+all sharing the same persistence).  ``http://prev.test.example.com``
+is your previously-deployed application.  (The tools to revert and
+clean up old instances aren't yet written, because there's too damn
+many details, but when I get to writing about them I see the missing
+parts.)
+
