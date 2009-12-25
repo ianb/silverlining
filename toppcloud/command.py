@@ -538,16 +538,30 @@ def command_update(config):
                            'prev.' + config.args.host], ip)
 
 def command_init(config):
+    import sys
     dir = config.args.dir
     app_name = os.path.basename(os.path.abspath(dir))
     vars = dict(app_name=app_name)
-    virtualenv.logger = config.logger
-    virtualenv.create_environment(
-        dir,
-        # This should be true to pick up global binaries like psycopg:
-        site_packages=True,
-        unzip_setuptools=True,
-        use_distribute=True)
+    if sys.version[:3] == '2.6':
+        virtualenv.logger = config.logger
+        virtualenv.create_environment(
+            dir,
+            # This should be true to pick up global binaries like psycopg:
+            site_packages=True,
+            unzip_setuptools=True,
+            use_distribute=True)
+    else:
+        # This is the crude way we need to do this when we're not in Python 2.6
+        config.logger.warn('Creating virtualenv environment in subprocess')
+        virtualenv_file = virtualenv.__file__
+        if virtualenv_file.endswith('.pyc'):
+            virtualenv_file = virtualenv_file[:-1]
+        cmd = [
+            'python2.6', virtualenv_file,
+            '--unzip-setuptools', '--distribute',
+            dir]
+        proc = subprocess.Popen(cmd)
+        proc.communicate()
     init_copy('README.txt', os.path.join(dir, 'README.txt'), config.logger, vars)
     init_copy('app.ini', os.path.join(dir, 'app.ini'), config.logger, vars)
     if config.args.config:
@@ -557,6 +571,46 @@ def command_init(config):
     src = os.path.join(dir, 'src')
     if not os.path.exists(src):
         os.mkdir(src)
+    lib_python = os.path.join(dir, 'lib', 'python')
+    if not os.path.exists(lib_python):
+        os.makedirs(lib_python)
+    fp = open(os.path.join(dir, 'lib', 'python2.6', 'sitecustomize.py'), 'w')
+    fp.write(_sitecustomize_py)
+    fp.close()
+    fp = open(os.path.join(dir, 'lib', 'python2.6', 'distutils', 'distutils.cfg'), 'a')
+    fp.write(_distutils_cfg)
+    fp.close()
+    fp = open(os.path.join(dir, 'lib', 'python2.6', 'distutils', '__init__.py'), 'a')
+    fp.write(_distutils_init)
+    fp.close()
+
+## FIXME: this should setup and configure services as well:
+_sitecustomize_py = """\
+import os, site
+site.addsitedir(os.path.abspath(os.path.join(__file__, '../../python')))
+"""
+
+_distutils_cfg = """\
+# This is what makes things install into lib/python instead of lib/python2.6:
+[install]
+home = <sys.prefix>
+"""
+
+_distutils_init = """\
+
+# Patch by toppcloud:
+old_parse_config_files = dist.Distribution.parse_config_files
+def parse_config_files(self, filenames=None):
+    old_parse_config_files(self, filenames)
+    opt_dict = self.get_option_dict('install')
+    if 'home' in opt_dict:
+        location, value = opt_dict['home']
+        if value.lower().strip() == 'default':
+            del opt_dict['home']
+        else:
+            opt_dict['home'] = (location, value.replace('<sys.prefix>', sys.prefix))
+dist.Distribution.parse_config_files = parse_config_files
+"""
 
 def init_copy(source, dest, logger, vars):
     import tempita
