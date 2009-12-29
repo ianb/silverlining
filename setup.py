@@ -19,7 +19,7 @@ setup(name='toppcloud',
       zip_safe=False,
       install_requires=[
           'CmdUtils',
-          'libcloud',
+          'apache-libcloud',
           'Tempita',
           'argparse',
           'virtualenv',
