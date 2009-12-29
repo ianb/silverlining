@@ -24,6 +24,7 @@ setup(name='toppcloud',
           'argparse',
           'virtualenv',
           'INITools',
+          'zope.interface',
       ],
       entry_points="""
       [console_scripts]
