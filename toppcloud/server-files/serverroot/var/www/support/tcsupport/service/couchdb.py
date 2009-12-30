@@ -9,17 +9,12 @@ def install(app_dir, config):
     app_name = app_dir.split('.')[0].lower()
     
     # Ensure that couchdb is installed
-    proc = subprocess.Popen([
-'''\
-if [ -e /usr/bin/couchdb ] ; then
-    exit 50
-fi
-apt-get -y install couchdb python-couchdb
-    ''',])
+    proc = subprocess.Popen(['apt-get', '-y', 'install', 'couchdb', 'python-couchdb'])
     proc.communicate()
     
     # Check to see if the database is present
-    proc = subprocess.Popen(['curl','http://localhost:5984/_all_dbs'], stdout=subprocess.PIPE)
+    proc = subprocess.Popen(['curl', '-s', '-N', 'http://localhost:5984/_all_dbs'],
+                            stdout=subprocess.PIPE, env=env)
     stdout, stderr = proc.communicate()
     dbs = eval(stdout)
     
@@ -28,7 +23,7 @@ apt-get -y install couchdb python-couchdb
     else:
         print 'Database %s does not exist; created.' % app_name
         subprocess.Popen([
-            'curl', '-X PUT', 'http://localhost:5984/%s' % app_name])
+            'curl', '-N', '-s', '-X', 'PUT', 'http://localhost:5984/%s' % app_name], env=env)
     
 
 def app_setup(app_dir, config, environ):
