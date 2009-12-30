@@ -248,6 +248,7 @@ upstart	0.3.9-8
 upstart-compat-sysv	0.3.9-8
 upstart-logd	0.3.9-8
 util-linux	2.14.2-1ubuntu4
+varnish 2.0.5-1
 vim	2:7.2.079-1ubuntu5
 vim-common	2:7.2.079-1ubuntu5
 vim-runtime	2:7.2.079-1ubuntu5
