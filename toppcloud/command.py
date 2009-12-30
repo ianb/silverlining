@@ -457,8 +457,10 @@ apt-get -y install rsync
             "Continue?")
         if not response:
             return 5
+    
     setup_rsync(config, 'support/', '/var/www/support/')
     setup_rsync(config, 'sites-enabled/', '/etc/apache2/sites-enabled/')
+    setup_rsync(config, 'ports.conf', '/etc/apache2/ports.conf')
     setup_rsync(config, 'www-README.txt', '/var/www/README.txt')
     setup_rsync(config, 'topp-setup', '/etc/init.d/topp-setup')
     setup_rsync(config, 'pg_hba.conf', '/etc/postgresql/8.3/main/pg_hba.conf')

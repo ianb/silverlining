@@ -16,6 +16,7 @@ fi
 rm /etc/apache2/sites-enabled/000-default
 /etc/init.d/apache2 restart
 /etc/init.d/postgresql-8.3 restart
+/etc/init.d/varnish restart
 mkdir -p /var/topp/build-files
 mkdir -p /var/log/topp-setup
 mkdir -p /var/www
