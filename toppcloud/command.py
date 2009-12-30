@@ -120,6 +120,11 @@ parser_init.add_argument(
     help="A directory to initialize")
 
 parser_init.add_argument(
+    '--setuptools',
+    action='store_true',
+    help="Use Setuptools (instead of Distribute)")
+
+parser_init.add_argument(
     '--config',
     action='store_true',
     help="Use config.ini (not main.py)")
@@ -554,17 +559,22 @@ def command_init(config):
             # This should be true to pick up global binaries like psycopg:
             site_packages=True,
             unzip_setuptools=True,
-            use_distribute=True)
+            use_distribute=not config.args.setuptools)
     else:
         # This is the crude way we need to do this when we're not in Python 2.6
         config.logger.warn('Creating virtualenv environment in subprocess')
         virtualenv_file = virtualenv.__file__
         if virtualenv_file.endswith('.pyc'):
             virtualenv_file = virtualenv_file[:-1]
-        cmd = [
-            'python2.6', virtualenv_file,
-            '--unzip-setuptools', '--distribute',
-            dir]
+        if config.args.setuptools:
+            cmd = [
+                'python2.6', virtualenv_file,
+                '--unzip-setuptools', dir]
+        else:
+            cmd = [
+                'python2.6', virtualenv_file,
+                '--unzip-setuptools', '--distribute',
+                dir]
         proc = subprocess.Popen(cmd)
         proc.communicate()
     init_copy('README.txt', os.path.join(dir, 'README.txt'), config.logger, vars)
