@@ -104,47 +104,25 @@ other languages.  Future PHP support in particular is quite possible.
 Installing
 ----------
 
-So, the first tricky bit, is getting toppcloud installed. toppcloud
-needs to be in its own virtualenv sandbox, separate from the apps you
-plan on actually deploying. So first, create a new virtualenv for
-toppcloud::
+To install toppcloud, first get `virtualenv
+<http://virtualenv.openplans.org>`_, which also gives you `pip
+<http://pip.openplans.org>`_.  Also be sure you have Mercurial
+(``hg``) and Subversion (``svn``) installed.  Then run::
 
-    $ virtualenv topp
+    $ virtualenv -p python2.6 topp
+    $ topp/bin/pip install -r http://bitbucket.org/ianb/toppcloud/raw/tip/requirements.txt
 
-Now, we need to install a few packages into the virtualenv used by
-toppcloud. To do this, we'll first activate the topp virtualenv::
-
-    $ source topp/bin/activate
-
-The first package to install for toppcloud is libcloud, this is kind
-of a hassle since libcloud isn't officially released, so you have to
-install it from source-code::
-    
-    $ easy_install -U https://svn.apache.org/repos/asf/incubator/libcloud/trunk/
-
-The next package that needs to be installed from VCS is CmdUtils, which
-toppcloud uses::
-    
-    $ easy_install -U http://bitbucket.org/ianb/cmdutils/get/014b8c355eec.gz
-
-Now, toppcloud can finally be installed, it should be installed from source
-since its under active development::
-    
-    $ hg clone hg clone http://bitbucket.org/ianb/toppcloud
-
-Then just activate it in the virtualenv:
-    
-    $ cd toppcloud
-    $ python setup.py develop
-
-You should now deactivate the virtualenv used by toppcloud::
-    
-    $ deactivate
+This installs a bunch of stuff, most importantly
+``topp/bin/toppcloud``.
 
 To follow along in the remaining examples, symlink the toppcloud script from
 this virtualenv to somewhere on your path, ie::
     
     $ ln -s topp/bin/toppcloud ~/bin/toppcloud
+
+Or do::
+
+    $ alias toppcloud="$(pwd)/topp/bin/toppcloud"
     
 
 How does it look?
