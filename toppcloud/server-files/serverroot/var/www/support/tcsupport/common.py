@@ -18,6 +18,9 @@ def site_dir(site_name):
 
 def services_config(app_dir):
     app_ini = os.path.join(site_dir(app_dir), 'app.ini')
+    if not os.path.exists(app_ini):
+        return {}
+    
     parser = ConfigParser()
     parser.read([app_ini])
     services = {}
