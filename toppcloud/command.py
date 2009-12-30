@@ -414,10 +414,10 @@ cat >> /root/.ssh/authorized_keys
     key = open(os.path.join(os.environ['HOME'],
                             '.ssh', 'id_dsa.pub'), 'rb').read()
     proc.communicate(key)
-    if proc.returncode == 50:
-        config.logger.fatal(
-            "The server has already been setup (/root/.toppcloud-server-setup exists)")
-        return 2
+    # if proc.returncode == 50:
+    #     config.logger.fatal(
+    #         "The server has already been setup (/root/.toppcloud-server-setup exists)")
+    #     return 2
     config.logger.notify(
         "Updating indexes and setting up rsync")
     proc = subprocess.Popen([
@@ -458,14 +458,7 @@ apt-get -y install rsync
         if not response:
             return 5
     
-    setup_rsync(config, 'support/', '/var/www/support/')
-    setup_rsync(config, 'sites-enabled/', '/etc/apache2/sites-enabled/')
-    setup_rsync(config, 'ports.conf', '/etc/apache2/ports.conf')
-    setup_rsync(config, 'www-README.txt', '/var/www/README.txt')
-    setup_rsync(config, 'topp-setup', '/etc/init.d/topp-setup')
-    setup_rsync(config, 'pg_hba.conf', '/etc/postgresql/8.3/main/pg_hba.conf')
-    setup_rsync(config, 'default.vcl', '/etc/varnish/default.vcl')
-    setup_rsync(config, 'varnish', '/etc/default/varnish')
+    setup_rsync(config, 'serverroot/', '/')
     setup_script = open(os.path.join(os.path.dirname(__file__),
                                      'server-files',
                                      'update-server-script.sh')).read()
