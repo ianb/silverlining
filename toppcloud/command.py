@@ -508,6 +508,7 @@ def command_update(config):
     virtualenv.fixup_pth_and_egg_link(config.args.dir)
     app = App(config.args.dir, config.args.name, config.args.host)
     ssh_host = '%s@%s' % (config['remote_username'], config.node_hostname)
+    ssh_root_host = 'root@%s' % config.node_hostname
     proc = subprocess.Popen(
         ['ssh', ssh_host,
          '/var/www/support/prepare-new-site.py %s %s' % (app.site_name, app.version)],
@@ -522,9 +523,15 @@ def command_update(config):
     assert instance_name.startswith(app.site_name)
     app.sync(ssh_host, instance_name)
     proc = subprocess.Popen(
+        ['ssh', ssh_root_host,
+         '/var/www/support/update-service.py %(instance_name)s'
+         % dict(instance_name=instance_name),
+         ])
+    proc.communicate()
+
+    proc = subprocess.Popen(
         ['ssh', ssh_host,
          '/var/www/support/update-hostmap.py %(instance_name)s %(host)s %(version)s.%(host)s; '
-         '/var/www/support/update-service.py %(instance_name)s'
          % dict(instance_name=instance_name,
                 host=config.args.host,
                 version=app.version),
