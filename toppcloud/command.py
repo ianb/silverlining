@@ -423,7 +423,7 @@ cat >> /root/.ssh/authorized_keys
     proc = subprocess.Popen([
         'ssh', ssh_host, '''
 apt-get update
-apt-get install rsync
+apt-get -y install rsync
 ''',
         ])
     proc.communicate()
@@ -446,7 +446,7 @@ apt-get install rsync
                         if line.strip())
     proc = subprocess.Popen([
         'ssh', ssh_host,
-        'apt-get install $(cat)'],
+        'apt-get -y install $(cat)'],
                             stdin=subprocess.PIPE)
     proc.communicate(packages)
     if proc.returncode:
