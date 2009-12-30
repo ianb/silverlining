@@ -50,7 +50,14 @@ def application(environ, start_response):
         else:
             raise NameError('No application() defined in %s' % main_py)
     else:
-        raise OSError("No config.ini or main.py in %s" % base_path)
+        found_app = NoAppFound(base_path)
     found_app_site = site
     return found_app(environ, start_response)
 
+class NoAppFound(object):
+    def __init__(self, base_path):
+        self.base_path = base_path
+    
+    def __call__(self, environ, start_response):
+        start_response('500 Error', [('Content-type', 'text/plain')])
+        return ['No config.ini or main.py in %s' % self.base_path]
