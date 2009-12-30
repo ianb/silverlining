@@ -200,7 +200,7 @@ class Config(UserDict):
         if self.get('default_node'):
             return self['default_node']
         raise CommandError(
-            "You must give a --ndoe option or set default-node")
+            "You must give a --node option or set default-node")
 
     def select_image(self, images=None, image_id=None):
         if images is None:
