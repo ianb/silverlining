@@ -355,6 +355,7 @@ def command_list_nodes(config):
                 ', '.join(node.public_ip), default))
 
 def command_destroy_node(config):
+    ## FIXME: This doesn't work at all, wtf?
     for node_hostname in config.arg.nodes:
         ## FIXME: should update /etc/hosts
         for node in config.driver.list_nodes():
@@ -461,6 +462,8 @@ apt-get install rsync
     setup_rsync(config, 'www-README.txt', '/var/www/README.txt')
     setup_rsync(config, 'topp-setup', '/etc/init.d/topp-setup')
     setup_rsync(config, 'pg_hba.conf', '/etc/postgresql/8.3/main/pg_hba.conf')
+    setup_rsync(config, 'default.vcl', '/etc/varnish/default.vcl')
+    setup_rsync(config, 'varnish', '/etc/default/varnish')
     setup_script = open(os.path.join(os.path.dirname(__file__),
                                      'server-files',
                                      'update-server-script.sh')).read()
