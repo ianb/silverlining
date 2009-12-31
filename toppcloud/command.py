@@ -551,7 +551,10 @@ def command_init(config):
     import sys
     dir = config.args.dir
     app_name = os.path.basename(os.path.abspath(dir))
-    vars = dict(app_name=app_name)
+    vars = dict(
+        app_name=app_name,
+        main=config.args.main,
+        config=config.args.config)
     if sys.version[:3] == '2.6':
         virtualenv.logger = config.logger
         virtualenv.create_environment(
