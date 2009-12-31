@@ -17,6 +17,8 @@ if [ ! -e /var/www/hostmap.txt ] ; then
     touch /var/www/hostmap.txt
     chown www-mgr:www-mgr /var/www/hostmap.txt
 fi
+a2enmod headers
+a2enmod deflate
 if [ -e /etc/apache2/sites-enabled/000-default ] ; then
     rm /etc/apache2/sites-enabled/000-default
     NEED_RESTART=T
