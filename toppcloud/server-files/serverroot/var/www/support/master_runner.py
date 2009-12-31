@@ -14,9 +14,12 @@ def application(environ, start_response):
     
     # Fixup port and ipaddress
     environ['SERVER_PORT'] = '80'
-    environ['REMOTE_ADDR'] = environ.pop('HTTP_X_FORWARDED_FOR')
-    environ['SERVER_ADDR'] = environ.pop('HTTP_X_VARNISH_IP')
-    environ['SCRIPT_URI'] = environ['SCRIPT_URI'].replace(':8080', '')
+    if 'HTTP_X_FORWARDED_FOR' in environ:
+        environ['REMOTE_ADDR'] = environ.pop('HTTP_X_FORWARDED_FOR')
+    if 'HTTP_X_VARNISH_IP' in environ:
+        environ['SERVER_ADDR'] = environ.pop('HTTP_X_VARNISH_IP')
+    if 'SCRIPT_URI' in environ:
+        environ['SCRIPT_URI'] = environ['SCRIPT_URI'].replace(':8080', '')
     
     if found_app:
         assert found_app_site == site, (
