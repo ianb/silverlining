@@ -556,6 +556,7 @@ def command_update(config):
     app.sync(ssh_host, instance_name)
     proc = subprocess.Popen(
         ['ssh', ssh_root_host,
+         'python -m compileall -q /var/www/%(instance_name)s; '
          '/var/www/support/update-service.py %(instance_name)s'
          % dict(instance_name=instance_name),
          ])
