@@ -13,10 +13,11 @@ def application(environ, start_response):
     os.environ['SITE'] = site
     
     # Fixup port and ipaddress
-    if environ['SERVER_PORT'] == '8080':
-        environ['SERVER_PORT'] = '80'
-    if 'X-Forwarded-For' in environ:
-        environ['REMOTE_ADDR'] = environ['X-Forwarded-For']
+    environ['SERVER_PORT'] = '80'
+    environ['REMOTE_ADDR'] = environ['HTTP_X_FORWARDED_FOR']
+    environ['SERVER_ADDR'] = environ['HTTP_X_VARNISH_IP']
+    environ['SCRIPT_URI'].replace(':8080', '')
+    
     if found_app:
         assert found_app_site == site, (
             "second request with unexpected site (first request had site=%r; "

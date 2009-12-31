@@ -13,3 +13,15 @@ sub vcl_pipe {
     return (pipe);
 }
 
+sub vcl_recv {
+    set req.http.X-Varnish-IP = server.ip;
+    # Add a unique header containing the client address
+    remove req.http.X-Forwarded-For;
+    set req.http.X-Forwarded-For = client.ip;
+}
+
+sub vcl_fetch {
+    if (obj.http.cache-control == "no-cache") {
+        return (pass);
+    }
+}
