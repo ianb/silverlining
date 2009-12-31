@@ -15,16 +15,16 @@ parser.add_option(
 
 def unused_sites():
     all_sites = set(sites())
-    used_sites = set()
+    used_sites = {}
     fp = open(HOSTMAP)
     for line in fp:
         line = line.strip()
         if not line or line.startswith('#'):
             continue
         hostname, sitename = line.split(None, 1)
-        used_sites.add(sitename)
+        used_sites.setdefault(sitename, []).append(hostname)
     fp.close()
-    return all_sites - used_sites
+    return used_sites, all_sites - set(used_sites)
    
 def remove_site(site):
     print 'Removing unused site %s' % site_dir(site)
@@ -33,11 +33,18 @@ def remove_site(site):
 def remove_unused_sites():
     options, args = parser.parse_args()
     simulate = options.simulate
-    for site in unused_sites():
+    used, unused = unused_sites()
+    for site in sorted(unused):
         if simulate:
             print 'Would remove site %s' % site
         else:
             remove_site(site)
+    for site, hostnames in sorted(used.items()):
+        hostnames = [h for h in hostnames
+                     if ':' not in h
+                     and not h.startswith('www.')]
+        print 'Keeping site %s (host: %s)' % (
+            site, ', '.join(sorted(hostnames)))
 
 if __name__ == '__main__':
     remove_unused_sites()
