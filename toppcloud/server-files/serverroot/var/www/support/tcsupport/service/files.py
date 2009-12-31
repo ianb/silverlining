@@ -13,8 +13,8 @@ def install(app_dir, config):
     dir = dir_for_instance_name(app_dir)
     if not os.path.exists(dir):
         os.makedirs(dir)
-        uid = pwd.getpwnam('www-mgr').pw_uid
-        gid = grp.getgrnam('www-mgr').gr_gid
+        uid = pwd.getpwnam('www-data').pw_uid
+        gid = grp.getgrnam('www-data').gr_gid
         os.chown(dir, uid, gid)
 
 def app_setup(app_dir, config, environ):

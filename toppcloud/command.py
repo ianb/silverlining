@@ -505,13 +505,15 @@ def command_update(config):
     if not config.args.name:
         config.args.name = os.path.basename(os.path.abspath(config.args.dir))
         config.logger.info('Using app name=%r' % config.args.name)
-    if not config.args.host:
-        ## FIXME: not sure if this is a good default?
-        config.args.host = config.node_hostname
     config.logger.info('Fixing up .pth and .egg-info files')
     virtualenv.logger = config.logger
     virtualenv.fixup_pth_and_egg_link(config.args.dir)
     app = App(config.args.dir, config.args.name, config.args.host)
+    if not config.args.host:
+        if app.config['production'].get('default_host'):
+            config.args.host = app.config['production']['default_host']
+        else:
+            config.args.host = config.node_hostname
     ssh_host = '%s@%s' % (config['remote_username'], config.node_hostname)
     ssh_root_host = 'root@%s' % config.node_hostname
     proc = subprocess.Popen(
@@ -537,12 +539,13 @@ def command_update(config):
     proc = subprocess.Popen(
         ['ssh', ssh_host,
          '/var/www/support/update-hostmap.py %(instance_name)s %(host)s %(version)s.%(host)s; '
-         '/var/www/support/internal-request.py update %(instance_name)s %(host)s; '
+         'sudo -u www-data /var/www/support/internal-request.py update %(instance_name)s %(host)s; '
          % dict(instance_name=instance_name,
                 host=config.args.host,
                 version=app.version),
          ])
     proc.communicate()
+
     ip = get_host_ip(config.node_hostname)
     set_etc_hosts(config, [config.args.host,
                            '%s.%s' % (app.version, config.args.host),
@@ -590,6 +593,9 @@ def command_init(config):
     src = os.path.join(dir, 'src')
     if not os.path.exists(src):
         os.mkdir(src)
+    static = os.path.join(dir, 'static')
+    if not os.path.exists(static):
+        os.mkdir(static)
     lib_python = os.path.join(dir, 'lib', 'python')
     if not os.path.exists(lib_python):
         os.makedirs(lib_python)
