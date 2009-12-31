@@ -99,7 +99,7 @@ def run_update(instance_name, hostname):
                 sys.stdout.flush()
             if body:
                 sys.stdout.write(body)
-                if not body.endswith('\n'):
+                if body and not body.endswith('\n'):
                     sys.stdout.write('\n')
                 sys.stdout.flush()
 
