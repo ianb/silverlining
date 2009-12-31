@@ -26,7 +26,7 @@ parser = argparse.ArgumentParser(
 parser.add_argument(
     '-p', '--provider',
     metavar='NAME',
-    help="The [provider:NAME] section to use (default [provider:default])",
+    help="The [provider:NAME] section from ~/.toppcloud.conf to use (default [provider:default])",
     default="default")
 
 parser.add_argument(
@@ -48,7 +48,7 @@ parser_list_nodes = subcommands.add_parser(
     'list-nodes', help="List all active nodes")
 
 parser_destroy = subcommands.add_parser(
-    'destroy-node', help="Destroy the given node")
+    'destroy-node', help="Destroy a node")
 
 parser_destroy.add_argument(
     'nodes', nargs='+',
@@ -89,8 +89,21 @@ parser_setup.add_argument(
     metavar='HOSTNAME',
     help="The hostname of then node to setup")
 
+parser_clean = subcommands.add_parser(
+    'clean-node', help="Clean unused application instances on a node")
+
+parser_clean.add_argument(
+    'node', nargs='?',
+    metavar='HOSTNAME',
+    help="Node to clean instances from")
+
+parser_clean.add_argument(
+    '-n', '--simulate',
+    action='store_true',
+    help="Don't actually clean anything, just show what would be done")
+
 parser_update = subcommands.add_parser(
-    'update', help="Update an application")
+    'update', help="Update/deploy an application")
 
 parser_update.add_argument(
     'dir',
@@ -112,7 +125,7 @@ parser_update.add_argument(
     help="The hostname of the node to upload to")
 
 parser_init = subcommands.add_parser(
-    'init', help="Create a new application structure")
+    'init', help="Create a new application file layout")
 
 parser_init.add_argument(
     'dir',
@@ -141,19 +154,6 @@ parser_serve.add_argument(
     'dir',
     metavar='APP_DIR',
     help='Directory holding app')
-
-parser_clean = subcommands.add_parser(
-    'clean-node', help="Clean unused application instances on a node")
-
-parser_clean.add_argument(
-    'node', nargs='?',
-    metavar='HOSTNAME',
-    help="Node to clean instances from")
-
-parser_clean.add_argument(
-    '-n', '--simulate',
-    action='store_true',
-    help="Don't actually clean anything, just show what would be done")
 
 parser_query = subcommands.add_parser(
     'query', help="See what apps and versions are on a node")
