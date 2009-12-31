@@ -55,11 +55,11 @@ def application(environ, start_response):
             spec = None
     else:
         return ErrorApp(
-            "app.ini did not define a runner setting")
+            "app.ini did not define a runner setting")(environ, start_response)
     
     if not os.path.exists(runner):
         return ErrorApp(
-            "The setting ([production] runner) %s does not exist")
+            "The setting ([production] runner) %s does not exist")(environ, start_response)
 
     if runner.endswith('.ini'):
         from paste.deploy import loadapp
@@ -74,7 +74,7 @@ def application(environ, start_response):
         else:
             return ErrorApp(
                 "No application %s defined in %s"
-                % (runner, spec))
+                % (runner, spec))(environ, start_response)
     found_app_site = site
     return found_app(environ, start_response)
 
