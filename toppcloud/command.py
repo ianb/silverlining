@@ -97,7 +97,7 @@ parser_update.add_argument(
     help="The directory to upload to the server")
 
 parser_update.add_argument(
-    '--host',
+    '--host', '-H',
     metavar="HOST",
     help="Hostname to server off of")
 
