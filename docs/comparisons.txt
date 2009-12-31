@@ -1,0 +1,139 @@
+Comparisons To Other Cloud Tools
+--------------------------------
+
+There are a bunch of tools or hosted applications for managing cloud
+applications.  As I come upon these, I'm trying to add at least a
+casual comparison...
+
+.. contents::
+
+Differences From App Engine
+===========================
+
+* This doesn't do security isolation between apps on a server.
+  Individual servers aren't that expensive, so untrusted applications
+  just shouldn't comingle.
+
+* This doesn't have a scalable backend.  It would be possible to set
+  up a scalable backend service, and do the associated configuration,
+  but I don't know much about those tools anyway.  Scalability isn't
+  really a goal; ease and reliability of deployment is more the goal.
+
+* You can write files, though really that should be another "service"
+  (managed like a database).
+
+* App Engine allocates server time dynamically, and this does not in
+  any way, though at least it makes your deployments scriptable.
+
+* There's no authentication built in, and there won't be; this can be
+  handled by per-application libraries.
+
+* There's no limits, and so support for skipping files is not such a
+  big deal.  Dynamic support for different scripts or static files
+  also isn't supported (like in ``app.yaml``), because it doesn't seem
+  very important.  If you don't want process isolation, something like
+  `Paste's urlmap <http://pythonpaste.org/modules/urlmap.html>`_ can
+  handle it.
+
+* Of course, you can run any library or service.  For me `lxml
+  <http://codespeak.net/lxml/>`_ and `PostGIS
+  <http://postgis.refractions.net/>`_ are important, and the lack of
+  those libraries really kept and keeps me from using App Engine.
+
+* No pure-Python libraries are included, because they aren't needed.
+
+Differences From Heroku
+=======================
+
+`Heroku <http://heroku.com/>`_ is an App Engine-like service for Ruby
+applications.  But it works different from App Engine, and has some
+different ideas:
+
+* Heroku uses git to deploy.  I don't see any particular reason to
+  integrate with a version control system.  This system uses rsync.
+
+* Configuration seems to be done somewhat magically with Heroku, and
+  just with environmental variables in this system.  Magic is
+  annoying.
+
+* Stuff like migration is built-in.  I want to do that stuff too.
+
+* Apps seem to be more chroot'd than in this system.  I'm not that
+  concerned about this, as I expect people to just do that isolation
+  at the server level.
+
+* There's a bunch of nice add-ons.  I want to do that stuff too (not
+  exactly the same way, but the same basic idea: if you want Solr, you
+  can just say so and get it).
+
+* Heroku uses Ruby.  I believe Ruby is very supportable by this
+  system, but it isn't supported now, and I'm unlikely to add it
+  myself (mostly because I don't know quite how it should work).
+
+* Heroku has more support for dynamically scaling up your
+  application.  You can give toppcloud apps a bigger server (up to the
+  limits of your service provider), and if you deploy an application
+  on multiple servers/nodes you can be reasonably assured they are
+  identical, but scaling of the persistence is not handled.
+
+Generally Heroku seems like a faster-moving target than App Engine,
+with lots of interesting ideas; I hope to get more ideas from it going
+forward.
+
+Of course, the primary difference of toppcloud is: it's open source,
+you can adapt the system as you find necessary, and it's a **lot**
+cheaper (since you are paying only for the actual cloud service, which
+is 
+
+Differences From Media Temple
+=============================
+
+`This
+<http://mediatemple.net/webhosting/gs/features/containers.php#django>`_
+looks similar, but I haven't looked at it yet.
+
+Differences from App Scale
+==========================
+
+`AppScale <http://appscale.cs.ucsb.edu/>`_ is an open source
+implementation of the Google App Engine API.  It features a bunch of
+database backends, and can do a lot of the management of scaling
+nodes.
+
+While toppcloud takes ideas from App Engine, the priorities are really
+quite different.  toppcloud is focused on simple, reliable, repeatable
+deployment of applications.  The deployments really aren't that
+different from how software might traditionally be deployed, it just
+formalizes those pieces and factors the problem in a way that makes
+the actual deployment as simple and reliable as possible.
+
+AppScale (at least from what I can tell) is more focused on scaling,
+and App Engine-like infrastructure.  It provides the App Engine API;
+toppcloud was written because I liked *parts* of the App Engine
+toolset, but I couldn't embrace the constraints of the platform.
+
+toppcloud also I believe scales *down* further than AppScale.  You can
+run as many sites on one server/node as you care to.  It uses
+mod_wsgi's features that allow processes to be spun up on demand and
+shut down when demand is lacking (not unlike App Engine, really).  So
+it is quite suitable for deploying several small applications
+cheaply.  I believe toppcloud will make the life of the average web
+developer easier and simpler very quickly.
+
+toppcloud is meant to be usable with existing applications.  You can
+use pretty much any database (some support code needs to be written to
+manage each kind of database, but it's quite simple).  You can write
+files.  Traditional "configuration" is actually kind of pushed *into*
+the application, but it just means you should do things like (in
+Django)::
+
+    DATABASE_ENGINE = 'postgresql_psycopg2'
+    DATABASE_NAME = os.environ['PG_DBNAME']
+    DATABASE_USER = os.environ['PG_DBUSER']
+    DATABASE_PASSWORD = os.environ['PG_DBPASSWORD']
+    DATABASE_HOST = os.environ['PG_DBHOST']
+    DATABASE_PORT = os.environ['PG_DBPORT']
+
+Everything you can do in a traditional deployment system, you can do
+with toppcloud (at least, potentially; extra support code may be
+necessary).

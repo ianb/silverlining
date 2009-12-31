@@ -1,0 +1,122 @@
+Design Decisions
+----------------
+
+This document describes some of the design decisions made for
+toppcloud.  It should help you understand some of "why", and if you
+don't see something in this document, it may be "unintentional
+design"; that is, not something deliberate but just expedient or not a
+committed decision.
+
+VCS integration
+===============
+
+Several systems, most notably `Heroku <http://heroku.com/>`_,
+integrate directly with a VCS system, such as git or Mercurial.  In
+these systems you push to a particular destination, and that triggers
+a deployment.
+
+toppcloud doesn't do this, and the more I think about it the more I
+think about this it's a bad idea to do VCS integration.  Some reasons:
+
+1. It's simply not necessary.  What's the real advantage of ``git
+   push`` over ``toppcloud update``?  You need an explicit command in
+   all cases, because commits don't map one-to-one to deployments.
+
+2. You need a separate tool regardless.  ``toppcloud update`` does
+   stuff like updating ``/etc/hosts``, and actually a bunch of other
+   things, all of which is easy enough in that context.  It's not the
+   kind of thing that is reasonable to do in a post-commit hook; I
+   think it is advantageous to handle deployment synchronously.
+
+3. You have to choose a VCS.  I like Mercurial.  Other people like
+   git.  Some people even like bzr and svn.  None of this relates to
+   what toppcloud does.
+
+4. Applications are *assemblies* of code.  This is a big one;
+   applications are generally made up of stuff from several
+   repositories.  I actually like putting library files into a
+   repository, even when that means copying the files from an upstream
+   repository.  I like this *sometimes*.  If you are writing the
+   library, then this isn't a good idea; you should be dealing
+   directly with the appropriate repository, without combining code
+   from multiple repositories into one repository.
+
+   A typical application will have at least two repositories: one for
+   the "application" (i.e., the code you are developing) and another
+   for the "libraries" (everything in ``lib/python``).  You can edit
+   code in your application, commit, etc.  Stuff in ``lib/python``
+   should not be edited, you should only install or upgrade/downgrade
+   those libraries (probably using ``pip``) and commit the results.
+
+Declarative Application Setup
+=============================
+
+The application's deployment needs are generally defined in
+``app.ini``.  It's small, but it covers all the details so far.
+
+It's come up that people have wanted hooks to do things like configure
+a database.  I don't want that to happen in applications; applications
+say what they need, and the toppcloud services give them what they
+need.  Applications in this way are declarative.
+
+One of the primary things I want to do with toppcloud is to separate
+"application" from "environment", and have toppcloud manage the
+environment and applications exist as more of a Platonic ideal.
+
+If you have needs that arent met by toppcloud, the best way is to
+modify toppcloud itself.  It's a good chance you want to put something
+in ``tcsupport.services.*``.  This isn't perfect, but it has a
+side-effect that there's a collective benefit to these new features
+(since it's something reusable), and applications stay a bit simpler.
+
+No Build Process On The Server
+==============================
+
+Tools like `Buildout <http://www.buildout.org/>`_ and `fassembler
+<http://blog.ianbicking.org/2008/06/19/my-experience-writing-a-build-system/>`_
+target the idea of repeatable and isolated build systems.  With
+deployment using these tools, you would run the build process
+(probably from scratch) for each deployment.
+
+It's kind of nice for development, because it works nicely for
+development machines just like production, you just have to run the
+build tool and you have a nice local copy.  One of the problems though
+is you, as the developer setting up the Buildout, become responsible
+for getting *everything* to build.  If you are doing things like
+compiling a database this becomes rather burdensome.  If you are using
+a database but you aren't compiling it, you then have to figure out
+integration with people's systems.  It gives you the power to solve
+people's problems -- a genuine benefit -- but it also gives you the
+*responsibility* to solve people's problems.  You can't just say
+"install X however is appropriate on your system".
+
+Another big problem I have with doing builds on deployment is that you
+have to go onto the server, run a bunch of stuff, handle any failures
+(which are both possible and fairly common), confirm the result, and
+then activate the new build.  This is incredibly un-fun.
+
+There is *absolutely no building* when you deploy an application with
+toppcloud.  Files are copied over.  Maybe your app gets a little
+chance to set itself up.  In the future toppcloud will probably handle
+backups, simple testing (to see if the app runs at all) and reverting
+the application when there's a failure.  But there are no compiler
+errors.  New hard-coded paths aren't introduced.  It's simple.
+
+In my experience this *greatly* increases the ease and reliability of
+deployments.  If you have a small problem with your application, you
+can fix it and deploy it and feel pretty confident your small fix will
+have small effects.
+
+Non-.py libraries are handled separately
+========================================
+
+You'll notice if you need to use some library that isn't pure-Python,
+you need to have the Ubuntu package for that library installed.
+
+The system for this isn't great yet (services handle some of this, but
+probably not quite the right way for simple libraries, e.g., `lxml
+<http://codespeak.net/lxml/>`_).  But generally I've found that Ubuntu
+packaging of such libraries (a) works well, (b) is stable and updates
+are appropriately conservative (c) is new enough.  Pure-Python
+libraries generally get updated much more frequently, but everyone
+treats these C libraries more conservatively.
