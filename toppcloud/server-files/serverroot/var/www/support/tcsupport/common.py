@@ -16,13 +16,16 @@ def sites():
 def site_dir(site_name):
     return os.path.join(SITE_DIR, site_name)
 
-def services_config(app_dir):
-    app_ini = os.path.join(site_dir(app_dir), 'app.ini')
+def site_config(instance_name):
+    app_ini = os.path.join(site_dir(instance_name), 'app.ini')
     if not os.path.exists(app_ini):
         return {}
-    
     parser = ConfigParser()
     parser.read([app_ini])
+    return parser
+
+def services_config(instance_name):
+    parser = site_config(instance_name)
     services = {}
     for name in parser.options('production'):
         if name.startswith('service.'):

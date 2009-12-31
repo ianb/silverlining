@@ -14,9 +14,9 @@ def application(environ, start_response):
     
     # Fixup port and ipaddress
     environ['SERVER_PORT'] = '80'
-    environ['REMOTE_ADDR'] = environ['HTTP_X_FORWARDED_FOR']
-    environ['SERVER_ADDR'] = environ['HTTP_X_VARNISH_IP']
-    environ['SCRIPT_URI'].replace(':8080', '')
+    environ['REMOTE_ADDR'] = environ.pop('HTTP_X_FORWARDED_FOR')
+    environ['SERVER_ADDR'] = environ.pop('HTTP_X_VARNISH_IP')
+    environ['SCRIPT_URI'] = environ['SCRIPT_URI'].replace(':8080', '')
     
     if found_app:
         assert found_app_site == site, (
@@ -33,32 +33,52 @@ def application(environ, start_response):
                             'site-packages')
     if lib_path not in sys.path:
         addsitedir(lib_path)
+    sitecustomize = os.path.join(base_path, 'lib', 'python%s' % sys.version[:3],
+                                 'sitecustomize.py')
+    if os.path.exists(sitecustomize):
+        ns = {'__file__': sitecustomize, '__name__': 'sitecustomize'}
+        execfile(sitecustomize, ns)
 
     for service, config in sorted(common.services_config(site).items()):
         common.load_service_module(service).app_setup(site, config, os.environ)
 
-    config_ini = os.path.join(base_path, 'config.ini')
-    main_py = os.path.join(base_path, 'main.py')
-    if os.path.exists(config_ini):
+    ## FIXME: should these defaults just be deprecated?
+    parser = common.site_config(site)
+    if parser.has_option('production', 'runner'):
+        runner = os.path.join(common.site_dir(site), parser.get('production', 'runner'))
+        if '#' in runner:
+            runner, spec = runner.split('#', 1)
+        else:
+            spec = None
+    else:
+        return ErrorApp(
+            "app.ini did not define a runner setting")
+    
+    if not os.path.exists(runner):
+        return ErrorApp(
+            "The setting ([production] runner) %s does not exist")
+
+    if runner.endswith('.ini'):
         from paste.deploy import loadapp
-        found_app = loadapp(config_ini)
-    elif os.path.exists(main_py):
+        found_app = loadapp(runner, name=spec)
+    elif runner.endswith('.py'):
         ## FIXME: not sure what name to give it
-        ns = {'__file__': main_py, '__name__': 'main_py'}
-        execfile(main_py, ns)
-        if 'application' in ns:
+        ns = {'__file__': runner, '__name__': 'main_py'}
+        execfile(runner, ns)
+        spec = spec or 'application'
+        if spec in ns:
             found_app = ns['application']
         else:
-            raise NameError('No application() defined in %s' % main_py)
-    else:
-        found_app = NoAppFound(base_path)
+            return ErrorApp(
+                "No application %s defined in %s"
+                % (runner, spec))
     found_app_site = site
     return found_app(environ, start_response)
 
-class NoAppFound(object):
-    def __init__(self, base_path):
-        self.base_path = base_path
+class ErrorApp(object):
+    def __init__(self, message):
+        self.message = message
     
     def __call__(self, environ, start_response):
         start_response('500 Error', [('Content-type', 'text/plain')])
-        return ['No config.ini or main.py in %s' % self.base_path]
+        return [self.message]
