@@ -1,9 +1,17 @@
 #!/usr/bin/env python
 import sys, os
+import optparse
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from tcsupport.common import site_dir, HOSTMAP, sites
 
 import shutil
+
+parser = optparse.OptionParser(
+    usage='%prog [-n]')
+parser.add_option(
+    '-n', '--simulate',
+    action='store_true',
+    help="Show what would be removed, but don't remove it")
 
 def unused_sites():
     all_sites = set(sites())
@@ -23,8 +31,13 @@ def remove_site(site):
     shutil.rmtree(os.path.join(site_dir(site)))
 
 def remove_unused_sites():
+    options, args = parser.parse_args()
+    simulate = options.simulate
     for site in unused_sites():
-        remove_site(site)
+        if simulate:
+            print 'Would remove site %s' % site
+        else:
+            remove_site(site)
 
 if __name__ == '__main__':
     remove_unused_sites()

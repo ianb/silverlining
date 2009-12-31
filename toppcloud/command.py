@@ -142,6 +142,19 @@ parser_serve.add_argument(
     metavar='APP_DIR',
     help='Directory holding app')
 
+parser_clean = subcommands.add_parser(
+    'clean-node', help="Clean unused application instances on a node")
+
+parser_clean.add_argument(
+    'node', nargs='?',
+    metavar='HOSTNAME',
+    help="Node to clean instances from")
+
+parser_clean.add_argument(
+    '-n', '--simulate',
+    action='store_true',
+    help="Don't actually clean anything, just show what would be done")
+
 def main():
     if not os.path.exists(createconf.toppcloud_conf):
         print "%s doesn't exists; let's create it" % createconf.toppcloud_conf
@@ -672,6 +685,18 @@ def init_copy(source, dest, logger, vars):
 def command_serve(config):
     from toppcloud import server
     server.serve(config)
+
+def command_clean_node(config):
+    ssh_host = '%s@%s' % (config['remote_username'],
+                          config.node_hostname)
+    if config.args.simulate:
+        simulate = '-n'
+    else:
+        simulate = ''
+    proc = subprocess.Popen(
+        ['ssh', ssh_host,
+         '/var/www/support/cleanup-apps.py %s' % simulate])
+    proc.communicate()
         
 if __name__ == '__main__':
     main()
