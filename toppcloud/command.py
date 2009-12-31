@@ -330,6 +330,7 @@ class App(object):
                #'--skip-compress=.zip,.egg', # Skip some already-compressed files
                '--exclude-from=%s' % exclude_from,
                '--progress',
+               '--quiet',
                self.dir,
                os.path.join('%s:%s' % (host, dest_dir)),
                ]
