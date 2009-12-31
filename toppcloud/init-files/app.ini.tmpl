@@ -1,7 +1,10 @@
 [production]
 app_name = {{app_name}}
 version = 1
-service.postgis = true
+## Uncomment these to make them available:
+#service.postgis =
+#service.files =
+#service.couchdb =
 {{if main}}
 runner = main.py
 {{elif config}}
@@ -9,3 +12,5 @@ runner = config.ini
 {{else}}
 runner = <insert your runner here>
 {{endif}}
+## Uncomment to have /url called each time the app is updated:
+# update_fetch = /url

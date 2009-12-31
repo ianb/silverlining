@@ -537,6 +537,7 @@ def command_update(config):
     proc = subprocess.Popen(
         ['ssh', ssh_host,
          '/var/www/support/update-hostmap.py %(instance_name)s %(host)s %(version)s.%(host)s; '
+         '/var/www/support/internal-request.py update %(instance_name)s %(host)s; '
          % dict(instance_name=instance_name,
                 host=config.args.host,
                 version=app.version),
