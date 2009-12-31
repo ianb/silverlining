@@ -6,15 +6,24 @@ if [ ! -e /home/www-mgr ] ; then
     chown -R www-mgr:www-mgr /home/www-mgr/.ssh/
 fi
 chown postgres:postgres /etc/postgresql/8.3/main/pg_hba.conf
-pushd /etc/apache2/mods-enabled
-ln -s ../mods-available/rewrite.load
-popd
+NEED_RESTART=F
+if [ ! -e /etc/apache2/mods-enabled/rewrite.load ] ; then
+    pushd /etc/apache2/mods-enabled
+    ln -s ../mods-available/rewrite.load
+    popd
+    NEED_RESTART=T
+fi
 if [ ! -e /var/www/hostmap.txt ] ; then
     touch /var/www/hostmap.txt
     chown www-mgr:www-mgr /var/www/hostmap.txt
 fi
-rm /etc/apache2/sites-enabled/000-default
-/etc/init.d/apache2 restart
+if [ -e /etc/apache2/sites-enabled/000-default ] ; then
+    rm /etc/apache2/sites-enabled/000-default
+    NEED_RESTART=T
+fi
+if [ "$NEED_RESTART" = T ] ; then
+    /etc/init.d/apache2 restart
+fi
 /etc/init.d/postgresql-8.3 restart
 /etc/init.d/varnish restart
 mkdir -p /var/topp/build-files
