@@ -1,9 +1,32 @@
 import os
 import subprocess
 
+packages = [
+    'postgis',
+    'postgresql-8.3',
+    'postgresql-8.3-postgis',
+    'postgresql-client',
+    'postgresql-client-8.3',
+    'postgresql-client-common',
+    'postgresql-common',
+    'python-psycopg2',
+    'python-egenix-mxdatetime',
+    'python-egenix-mxtools',
+    'python-gdal',
+    'proj',
+    'python-pyproj',
+    'python-pyproj-data',
+    ]
+
 def install(app_dir, config):
     env = os.environ.copy()
     env['LANG'] = 'C'
+
+    proc = subprocess.Popen(
+        ['apt-get', '-y', 'install'] + packages,
+        env=env)
+    proc.communicate()
+    
     app_name = app_dir.split('.')[0]
     proc = subprocess.Popen([
         '/usr/bin/psql', '-U', 'postgres', '-l', '-t', '-A'], 
