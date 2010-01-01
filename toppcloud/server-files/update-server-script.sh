@@ -6,28 +6,26 @@ if [ ! -e /home/www-mgr ] ; then
     chown -R www-mgr:www-mgr /home/www-mgr/.ssh/
 fi
 chown postgres:postgres /etc/postgresql/8.3/main/pg_hba.conf
-NEED_RESTART=F
 if [ ! -e /etc/apache2/mods-enabled/rewrite.load ] ; then
     pushd /etc/apache2/mods-enabled
     ln -s ../mods-available/rewrite.load
     popd
-    NEED_RESTART=T
 fi
 if [ ! -e /var/www/hostmap.txt ] ; then
-    touch /var/www/hostmap.txt
+    echo "notfound default-notfound
+disabled default-disabled" > /var/www/hostmap.txt
     chown www-mgr:www-mgr /var/www/hostmap.txt
 fi
 a2enmod headers
 a2enmod deflate
 if [ -e /etc/apache2/sites-enabled/000-default ] ; then
     rm /etc/apache2/sites-enabled/000-default
-    NEED_RESTART=T
 fi
-if [ "$NEED_RESTART" = T ] ; then
-    /etc/init.d/apache2 restart
-fi
+# These are restarted in the background, to make it faster:
+/etc/init.d/apache2 restart &
+/etc/init.d/varnish restart &
+# This must be synchronous, because it has to come up before we can continue:
 /etc/init.d/postgresql-8.3 restart
-/etc/init.d/varnish restart
 mkdir -p /var/topp/build-files
 mkdir -p /var/log/topp-setup
 mkdir -p /var/www
