@@ -9,7 +9,8 @@ def install(app_dir, config):
     app_name = app_dir.split('.')[0].lower()
     
     # Ensure that couchdb is installed
-    proc = subprocess.Popen(['apt-get', '-y', 'install', 'couchdb', 'python-couchdb'])
+    proc = subprocess.Popen(['apt-get', '-y', 'install', 'couchdb', 'python-couchdb'],
+                            env=env)
     proc.communicate()
     
     # Check to see if the database is present
