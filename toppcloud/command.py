@@ -735,13 +735,18 @@ def command_query(config):
         hostname, sitename = line.split(None, 1)
         hosts[hostname] = sitename
     for line in lines:
-        match = re.match(r'^([a-z0-9_.-]+)\.(\d+)\.(.*)$',
+        match = re.match(r'^(?:([a-z0-9_.-]+)\.(\d+)\.(.*)|default-[a-z]+)$',
                          line)
         if not match:
             continue
-        site_name = match.group(1)
-        version = match.group(2)
-        release = match.group(3)
+        if not match.group(1):
+            site_name = line
+            version = ''
+            release = ''
+        else:
+            site_name = match.group(1)
+            version = match.group(2)
+            release = match.group(3)
         site_instances.setdefault(site_name, {})[(version, release)] = line
         sites.add(site_name)
         instance_site[line] = site_name
@@ -772,7 +777,7 @@ def command_query(config):
         sites = new_sites
     info = config.logger.info
     notify = config.logger.notify
-    for site in sites:
+    for site in sorted(sites):
         if len(sites) > 1:
             notify('Site: %s' % site)
             config.logger.indent += 2

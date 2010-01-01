@@ -14,7 +14,8 @@ parser.add_option(
     help="Show what would be removed, but don't remove it")
 
 def unused_sites():
-    all_sites = set(sites())
+    all_sites = set(sites(True))
+    all_sites -= IGNORE_SITES
     used_sites = {}
     fp = open(HOSTMAP)
     for line in fp:

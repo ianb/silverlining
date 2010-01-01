@@ -49,8 +49,10 @@
 
 	CustomLog /var/log/apache2/access.log combined
 
-# TOPP customizations:
+# TOPPCloud customizations:
 RewriteEngine on
+RewriteLog /var/log/apache2/rewrite.log
+RewriteLogLevel 5
 
 # Strip www. from all (non-https) domains:
 RewriteCond %{SERVER_PORT} ^8080$
@@ -59,8 +61,16 @@ RewriteRule (.*) http://%1$1
 
 # Figure out what "site" to map this request to:
 RewriteMap hostmap txt:/var/www/hostmap.txt 
+
+RewriteCond ${hostmap:%{HTTP_HOST}|__default__} ^__default__$
+RewriteRule . - [PT,E=SITE:${hostmap:notfound|default-notfound}]
+
+# If a hostmap resulted in "disabled" then map that again as a domain
+RewriteCond ${hostmap:%{HTTP_HOST}} ^disabled$
+RewriteRule . - [PT,E=SITE:${hostmap:disabled|default-disabled}]
+
 RewriteCond %{HTTP_HOST} (.*)
-RewriteRule . - [E=SITE:${hostmap:%1|default}]
+RewriteRule . - [E=SITE:${hostmap:%1}]
 
 # Serve up any static files:
 ## FIXME: REQUEST_URI, SCRIPT_NAME, ...?

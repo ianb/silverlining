@@ -42,8 +42,11 @@ def application(environ, start_response):
         ns = {'__file__': sitecustomize, '__name__': 'sitecustomize'}
         execfile(sitecustomize, ns)
 
-    for service, config in sorted(common.services_config(site).items()):
-        common.load_service_module(service).app_setup(site, config, os.environ)
+    try:
+        for service, config in sorted(common.services_config(site).items()):
+            common.load_service_module(service).app_setup(site, config, os.environ)
+    except common.BadSite, e:
+        return ErrorApp('Error loading services: %s' % e)(environ, start_response)
 
     ## FIXME: should these defaults just be deprecated?
     parser = common.site_config(site)
@@ -75,6 +78,11 @@ def application(environ, start_response):
             return ErrorApp(
                 "No application %s defined in %s"
                 % (runner, spec))(environ, start_response)
+    elif runner.startswith('static'):
+        found_app = NullApplication()
+    else:
+        return ErrorApp(
+            "Unknown kind of runner (%s)" % runner)(environ, start_response)
     found_app_site = site
     return found_app(environ, start_response)
 
@@ -85,3 +93,10 @@ class ErrorApp(object):
     def __call__(self, environ, start_response):
         start_response('500 Error', [('Content-type', 'text/plain')])
         return [self.message]
+
+class NullApplication(object):
+    """Used with runner=null"""
+    def __call__(self, environ, start_response):
+        start_response('404 Not Found', [('Content-Type', 'text/plain')])
+        return ['Not Found']
+

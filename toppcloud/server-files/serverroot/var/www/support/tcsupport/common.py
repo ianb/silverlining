@@ -5,9 +5,16 @@ from ConfigParser import ConfigParser
 SITE_DIR = '/var/www'
 HOSTMAP = '/var/www/hostmap.txt'
 
-def sites():
+IGNORE_SITES = set(['default-notfound', 'default-disabled'])
+
+class BadSite(Exception):
+    pass
+
+def sites(exclude_ignored=False):
     sites = []
     for name in os.listdir(SITE_DIR):
+        if exclude_ignored and name in IGNORE_SITES:
+            continue
         if (name != 'support' 
             and os.path.isdir(os.path.join(SITE_DIR, name))):
             sites.append(name)
@@ -18,10 +25,9 @@ def site_dir(site_name):
 
 def site_config(instance_name):
     app_ini = os.path.join(site_dir(instance_name), 'app.ini')
-    if not os.path.exists(app_ini):
-        return {}
     parser = ConfigParser()
-    parser.read([app_ini])
+    if not parser.read([app_ini]):
+        raise BadSite('No app.ini in %s' % app_ini)
     return parser
 
 def services_config(instance_name):
