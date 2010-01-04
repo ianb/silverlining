@@ -5,7 +5,9 @@ if [ ! -e /home/www-mgr ] ; then
     cp /root/.ssh/authorized_keys /home/www-mgr/.ssh/authorized_keys
     chown -R www-mgr:www-mgr /home/www-mgr/.ssh/
 fi
-chown postgres:postgres /etc/postgresql/8.3/main/pg_hba.conf
+if [ -e /etc/init.d/postgresql-8.3 ] ; then
+    chown postgres:postgres /etc/postgresql/8.3/main/pg_hba.conf
+fi
 if [ ! -e /etc/apache2/mods-enabled/rewrite.load ] ; then
     pushd /etc/apache2/mods-enabled
     ln -s ../mods-available/rewrite.load
@@ -25,7 +27,9 @@ fi
 /etc/init.d/apache2 restart &
 /etc/init.d/varnish restart &
 # This must be synchronous, because it has to come up before we can continue:
-/etc/init.d/postgresql-8.3 restart
+if [ -e /etc/init.d/postgresql-8.3 ] ; then
+    /etc/init.d/postgresql-8.3 restart
+fi
 mkdir -p /var/topp/build-files
 mkdir -p /var/log/topp-setup
 mkdir -p /var/www
@@ -35,11 +39,13 @@ chown -R root:root /var/www/support
 sed -i "s/ -backup/-backup/" /etc/joe/jmacsrc
 chmod +x /etc/init.d/topp-setup
 rcconf --on=topp-setup
-if ! psql -l | grep template_postgis ; then
-    createdb template_postgis
-    echo 'CREATE LANGUAGE plpgsql' | psql template_postgis
-    for N in lwpostgis.sql lwpostgis_upgrade.sql spatial_ref_sys.sql ; do
-        psql template_postgis < /usr/share/postgresql-8.3-postgis/$N
-    done
+if [ -e /etc/init.d/postgresql-8.3 ] ; then    
+    if ! psql -l | grep template_postgis ; then
+        createdb template_postgis
+        echo 'CREATE LANGUAGE plpgsql' | psql template_postgis
+        for N in lwpostgis.sql lwpostgis_upgrade.sql spatial_ref_sys.sql ; do
+            psql template_postgis < /usr/share/postgresql-8.3-postgis/$N
+        done
+    fi
 fi
 touch /root/.toppcloud-server-setup

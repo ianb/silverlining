@@ -59,7 +59,9 @@ if [ ! -e /home/www-mgr ] ; then
     cp /root/.ssh/authorized_keys /home/www-mgr/.ssh/authorized_keys
     chown -R www-mgr:www-mgr /home/www-mgr/.ssh/
 fi
-chown postgres:postgres /etc/postgresql/8.3/main/pg_hba.conf
+if [ -e /etc/init.d/postgresql-8.3 ] ; then
+    chown postgres:postgres /etc/postgresql/8.3/main/pg_hba.conf
+fi
 pushd /etc/apache2/mods-enabled
 ln -s ../mods-available/rewrite.load
 popd
@@ -69,7 +71,9 @@ if [ ! -e /var/www/hostmap.txt ] ; then
 fi
 rm /etc/apache2/sites-enabled/000-default
 /etc/init.d/apache2 restart
-/etc/init.d/postgresql-8.3 restart
+if [ -e /etc/init.d/postgresql-8.3 ] ; then
+    /etc/init.d/postgresql-8.3 restart
+fi
 /etc/init.d/varnish restart
 mkdir -p /var/topp/build-files
 mkdir -p /var/log/topp-setup
