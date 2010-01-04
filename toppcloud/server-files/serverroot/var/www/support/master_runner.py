@@ -11,6 +11,8 @@ def application(environ, start_response):
     global found_app, found_app_site
     site = environ['SITE']
     os.environ['SITE'] = site
+    ## FIXME: give a real version here...
+    environ['TOPPCLOUD'] = os.environ['TOPPCLOUD'] = 'toppcloud/0.0'
     
     # Fixup port and ipaddress
     environ['SERVER_PORT'] = '80'
