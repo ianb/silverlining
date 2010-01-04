@@ -60,3 +60,11 @@ rcconf --on=topp-setup
 touch /root/.toppcloud-server-setup
 ## This is just a piece of configuration I (Ian) like:
 sed -i "s/ -backup/-backup/" /etc/joe/jmacsrc
+
+## Make sure there's a secret:
+if [ ! -e /var/lib/toppcloud/secret.txt ] ; then
+    python -c '
+import os, base64, sys
+secret = base64.b64encode(os.urandom(24), "_-").strip("=")
+sys.stdout.write(secret)' > /var/lib/toppcloud/secret.txt
+fi
