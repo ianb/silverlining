@@ -68,7 +68,8 @@ def application(environ, start_response):
 
     if runner.endswith('.ini'):
         from paste.deploy import loadapp
-        found_app = loadapp(runner, name=spec)
+        found_app = loadapp(runner, name=spec,
+                            global_conf=os.environ)
     elif runner.endswith('.py'):
         ## FIXME: not sure what name to give it
         ns = {'__file__': runner, '__name__': 'main_py'}
