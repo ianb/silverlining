@@ -21,11 +21,41 @@ packages = [
 def install(app_dir, config):
     env = os.environ.copy()
     env['LANG'] = 'C'
+    env['PGUSER'] = 'postgres'
 
+    if not os.path.exists('/usr/bin/psql'):
+        proc = subprocess.Popen(
+            ['chown', 'postgres:postgres',
+             '/etc/postgresql/8.3/main/pg_hba.conf'],
+            env=env)
+        proc.communicate()
+        proc = subprocess.Popen(
+            ['apt-get', '-y', 'install'] + packages,
+            env=env)
+        proc.communicate()
+        
     proc = subprocess.Popen(
-        ['apt-get', '-y', 'install'] + packages,
+        ['psql', '-l'], stdout=subprocess.PIPE,
         env=env)
-    proc.communicate()
+    stdout, stderr = proc.communicate()
+    if 'template_postgis' not in stdout:
+        proc = subprocess.Popen(
+            ['createdb', 'template_postgis'],
+            env=env)
+        proc.communicate()
+        proc = subprocess.Popen(
+            ['psql', 'template_postgis'],
+            env=env, stdin=subprocess.PIPE)
+        parts = ['CREATE LANGUAGE plpgsql;\n']
+        for filename in ['lwpostgis.sql', 'lwpostgis_upgrade.sql',
+                         'spatial_ref_sys.sql']:
+            filename = os.path.join(
+                '/usr/share/postgresql-8.3-postgis', filename)
+            fp = open(filename)
+            parts.append(fp.read())
+            parts.append('\n;\n')
+            fp.close()
+        proc.communicate(''.join(parts))
     
     app_name = app_dir.split('.')[0]
     proc = subprocess.Popen([
