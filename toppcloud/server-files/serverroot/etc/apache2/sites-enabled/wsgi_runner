@@ -51,8 +51,6 @@
 
 # TOPPCloud customizations:
 RewriteEngine on
-RewriteLog /var/log/apache2/rewrite.log
-RewriteLogLevel 5
 
 # Strip www. from all (non-https) domains:
 RewriteCond %{SERVER_PORT} ^8080$
