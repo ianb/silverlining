@@ -1,0 +1,93 @@
+toppcloud Services
+------------------
+
+This document answers the question: what does toppcloud do, and what
+does my app do?
+
+The items listed here are things toppcloud does *for* you, and so you
+shouldn't do them for yourself.
+
+TOPPCLOUD environmental variable
+================================
+
+To see if you are running in a toppcloud production environment, check
+``os.environ.get('TOPPCLOUD')``.
+
+Secrets
+=======
+
+If you need a "secret", get it like::
+
+    from tcsupport.secret import get_secret
+    secret = get_secret()
+
+This is a stable, ASCII secret.
+
+Temporary files
+===============
+
+Just kidding; there is no support for temporary files!  This is just a
+reminder to use the ``tempfile`` module like usual; it works fine.
+
+Persistence
+===========
+
+All persistence gets handled in some fashion by toppcloud.  This is
+just so toppcloud knows about it, and so that your app handles what it
+should.
+
+Files
+~~~~~
+
+*Persistent* files need to be handled by toppcloud.  In your
+``app.ini`` put::
+
+    service.files =
+
+That line enables the service.  Then put all your files in
+``os.environ['FILES']``.
+
+You only get *one* location for files for your entire app, so it's
+recommended you use additional directories under this location for
+different kinds of files (even if to start you can only think of one
+kind of file).
+
+PostGIS
+~~~~~~~
+
+For PostGIS (PostgreSQL with the PostGIS extensions) do::
+
+    service.postgis =
+
+Then look for these environmental variables:
+
+``PG_DBNAME``: 
+    The database name.
+
+``PG_USERNAME``: 
+    The username to connect as.
+
+``PG_PASSWORD``: 
+    The password to use (an empty string means no password is required).
+
+``PG_HOST``: 
+    The host (or host:port) to connect to; an empty string means
+    localhost.
+
+Right now it's all local, and there won't be any password or host, but
+in the future that might change.
+
+CouchDB
+~~~~~~~
+
+For CouchDB do::
+
+    service.couchdb =
+
+Then look for::
+
+``COUCHDB_DB``:
+    The name of the database to connect to.
+
+``COUCHDB_HOST``:
+    The host:port to connect to.
