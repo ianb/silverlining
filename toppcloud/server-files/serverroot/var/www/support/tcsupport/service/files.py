@@ -6,7 +6,7 @@ import grp
 
 def dir_for_instance_name(instance_name):
     base = instance_name.split('.')[0]
-    dir = os.path.join('/var/lib/toppcloud', base)
+    dir = os.path.join('/var/lib/toppcloud/apps', base)
     return dir
 
 def install(app_dir, config):
