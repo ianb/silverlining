@@ -533,7 +533,11 @@ def command_update(config):
         config.logger.info('Using app name=%r' % config.args.name)
     config.logger.info('Fixing up .pth and .egg-info files')
     virtualenv.logger = config.logger
-    virtualenv.fixup_pth_and_egg_link(config.args.dir)
+    virtualenv.fixup_pth_and_egg_link(
+        config.args.dir,
+        [os.path.join(config.args.dir, 'lib', 'python2.6'),
+         os.path.join(config.args.dir, 'lib', 'python2.6', 'site-packages'),
+         os.path.join(config.args.dir, 'lib', 'python')])
     app = App(config.args.dir, config.args.name, config.args.host)
     if not config.args.host:
         if app.config['production'].get('default_host'):
