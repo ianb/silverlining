@@ -71,9 +71,8 @@ RewriteCond %{HTTP_HOST} (.*)
 RewriteRule . - [E=SITE:${hostmap:%1}]
 
 # Serve up any static files:
-## FIXME: REQUEST_URI, SCRIPT_NAME, ...?
-RewriteCond -f /var/www/%{SITE}/static/%{REQUEST_URI}
-RewriteRule (.*) /var/www/%{SITE}/static/%{REQUEST_URI} [L]
+RewriteCond /var/www/%{ENV:SITE}/static%{REQUEST_URI} -f 
+RewriteRule . /var/www/%{ENV:SITE}/static%{REQUEST_URI} [L]
 
 # Lastly, setup the WSGI application:
 WSGIApplicationGroup %{ENV:SITE}
