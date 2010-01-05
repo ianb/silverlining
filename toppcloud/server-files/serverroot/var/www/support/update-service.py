@@ -20,7 +20,7 @@ def update_service(app_dir):
             env = os.environ.copy()
             env['LANG'] = 'C'
             proc = subprocess.Popen(
-                ['apt-get', '-y', 'install'] + packages,
+                ['apt-get', '-y', '-q', 'install'] + packages,
                 env=env)
             proc.communicate()
 
