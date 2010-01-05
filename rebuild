@@ -1,7 +1,8 @@
 #!/bin/sh
 
-F="$(tempfile)"
+F="$(tempfile -p bbdocs)"
 
+rm $F
 mkdir -p $F
 
 virtualenv $F/env
