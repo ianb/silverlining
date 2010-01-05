@@ -69,6 +69,7 @@ def application(environ, start_response):
     if runner.endswith('.ini'):
         from paste.deploy import loadapp
         from tcsupport.secret import get_secret
+        runner = 'config:%s' % runner
         global_conf = os.environ.copy()
         global_conf['SECRET'] = get_secret()
         found_app = loadapp(runner, name=spec,
