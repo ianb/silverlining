@@ -571,6 +571,7 @@ def command_update(config):
         ['ssh', ssh_host,
          '/var/www/support/update-hostmap.py %(instance_name)s %(host)s %(version)s.%(host)s; '
          'sudo -u www-data /var/www/support/internal-request.py update %(instance_name)s %(host)s; '
+         'pkill -INT -f -u www-data wsgi; '
          % dict(instance_name=instance_name,
                 host=config.args.host,
                 version=app.version),
