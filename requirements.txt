@@ -3,3 +3,5 @@ https://svn.apache.org/repos/asf/incubator/libcloud/trunk/#egg=libcloud
 -e hg+http://bitbucket.org/ianb/toppcloud#egg=toppcloud
 # libcloud doesn't specify this, but causes problems when its not installed:
 simplejson
+# I made a small update to virtualenv, so we need tip:
+http://bitbucket.org/ianb/virtualenv/get/tip.gz#egg=virtualenv
