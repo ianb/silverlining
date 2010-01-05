@@ -94,3 +94,17 @@ Then look for::
 
 ``CONFIG_COUCHDB_HOST``:
     The host:port to connect to.
+
+Installing Packages
+~~~~~~~~~~~~~~~~~~~
+
+All your packages should be installed by toppcloud.  You can ask for a
+new (Ubuntu) package to be installed by putting this into your
+``app.ini``::
+
+    packages = package1
+               package2
+
+This makes toppcloud run ``apt-get install package1 package2``
+everytime your application is update (conveniently if the packages are
+already installed then ``apt-get`` is fast and does nothing).
