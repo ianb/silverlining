@@ -33,6 +33,18 @@ def install(app_dir, config):
             ['apt-get', '-y', 'install'] + packages,
             env=env)
         proc.communicate()
+    proc = subprocess.Popen(
+        ['psql', '--tuples-only'],
+        stdout=subprocess.PIPE, stdin=subprocess.PIPE,
+        env=env)
+    stdout, stderr = proc.communicate("""
+    select r.rolname from pg_catalog.pg_roles as r;
+    """)
+    if 'www-mgr' not in stdout:
+        proc = subprocess.Popen(
+            ['createuser', '--no-superuser', '--no-createdb',
+             '--no-createrole', 'www-mgr'], env=env)
+        proc.communicate()
         
     proc = subprocess.Popen(
         ['psql', '-l'], stdout=subprocess.PIPE,
@@ -67,9 +79,10 @@ def install(app_dir, config):
         print 'Database %s already exists' % app_name
     else:
         print 'Database %s does not exist; creating.' % app_name
-        subprocess.Popen([
-            'createdb', '-U', 'www-mgr', '-T', 'template_postgis',
-            app_name], env=env)
+        proc = subprocess.Popen(
+            ['createdb', '-O', 'www-mgr', '-T', 'template_postgis',
+             app_name], env=env)
+        proc.communicate()
 
 def app_setup(app_dir, config, environ):
     app_name = app_dir.split('.')[0]

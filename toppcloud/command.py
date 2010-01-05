@@ -453,8 +453,8 @@ cat >> /root/.ssh/authorized_keys
         "Updating indexes and setting up rsync")
     proc = subprocess.Popen([
         'ssh', ssh_host, '''
-apt-get update
-apt-get -y install rsync
+apt-get update -qq
+apt-get -y -q install rsync
 ''',
         ])
     proc.communicate()
@@ -477,7 +477,7 @@ apt-get -y install rsync
                         if line.strip())
     proc = subprocess.Popen([
         'ssh', ssh_host,
-        'apt-get -y install $(cat)'],
+        'apt-get -y -q install $(cat)'],
                             stdin=subprocess.PIPE)
     proc.communicate(packages)
     if proc.returncode:
@@ -507,7 +507,7 @@ apt-get -y install rsync
 def setup_rsync(config, source, dest):
     cwd = os.path.join(os.path.dirname(__file__), 'server-files')
     proc = subprocess.Popen([
-        'rsync', '-rvC',
+        'rsync', '--quiet', '-rvC',
         source, 'root@%s:%s' % (config.args.node, dest)],
                             cwd=cwd)
     config.logger.notify(
