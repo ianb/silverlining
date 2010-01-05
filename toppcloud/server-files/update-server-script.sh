@@ -37,12 +37,12 @@ if [ -e /etc/apache2/sites-enabled/000-default ] ; then
 fi
 
 ## These are restarted in the background, to make it faster:
-/etc/init.d/apache2 restart &
-/etc/init.d/varnish restart &
+/etc/init.d/apache2 restart 2>&1 >/dev/null &
+/etc/init.d/varnish restart 2>&1 >/dev/null &
 
 ## This is probably unnecessary...
 if [ -e /etc/init.d/postgresql-8.3 ] ; then
-    /etc/init.d/postgresql-8.3 restart &
+    /etc/init.d/postgresql-8.3 restart 2>&1 >/dev/null &
 fi
 
 ## Make sure some standard directories are in place, ownership is
@@ -56,7 +56,8 @@ chown www-mgr:www-mgr /var/www
 chown -R root:root /var/www/support
 chmod +x /etc/init.d/topp-setup
 chown www-mgr:www-mgr /var/lib/toppcloud
-rcconf --on=topp-setup
+# This gives unnecessary error-like output, so we're ignore the output
+rcconf --on=topp-setup > /dev/null 2>&1
 
 # (this should give a date or something)
 touch /root/.toppcloud-server-setup
