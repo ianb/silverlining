@@ -5,7 +5,8 @@ F="$(tempfile -p bbdocs)"
 rm $F
 mkdir -p $F
 
-virtualenv $F/env
+wget http://svn.colorstudy.com/virtualenv/trunk/virtualenv.py $F/virtualenv.py
+python $F/virtualenv.py $F/env
 $F/env/bin/pip install Sphinx
 $F/env/bin/sphinx-build -E -b html docs/ docs/_build || exit 1
 
