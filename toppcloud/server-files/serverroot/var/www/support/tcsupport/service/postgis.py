@@ -86,7 +86,7 @@ def install(app_dir, config):
 
 def app_setup(app_dir, config, environ):
     app_name = app_dir.split('.')[0]
-    environ['PG_DBNAME'] = app_name
-    environ['PG_USER'] = 'www-mgr'
-    environ['PG_PASSWORD'] = ''
-    environ['PG_HOST'] = ''
+    environ['CONFIG_PG_DBNAME'] = app_name
+    environ['CONFIG_PG_USER'] = 'www-mgr'
+    environ['CONFIG_PG_PASSWORD'] = ''
+    environ['CONFIG_PG_HOST'] = ''

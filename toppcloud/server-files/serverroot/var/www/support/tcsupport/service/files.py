@@ -19,5 +19,5 @@ def install(app_dir, config):
 
 def app_setup(app_dir, config, environ):
     dir = dir_for_instance_name(app_dir)
-    environ['FILES'] = dir
+    environ['CONFIG_FILES'] = dir
 

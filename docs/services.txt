@@ -44,8 +44,11 @@ Files
 
     service.files =
 
-That line enables the service.  Then put all your files in
-``os.environ['FILES']``.
+That line enables the service.  Your application then gets the
+environmental variable:
+
+``CONFIG_FILES``:
+    Path to where you can write files.
 
 You only get *one* location for files for your entire app, so it's
 recommended you use additional directories under this location for
@@ -61,16 +64,16 @@ For PostGIS (PostgreSQL with the PostGIS extensions) do::
 
 Then look for these environmental variables:
 
-``PG_DBNAME``: 
+``CONFIG_PG_DBNAME``: 
     The database name.
 
-``PG_USERNAME``: 
+``CONFIG_PG_USERNAME``: 
     The username to connect as.
 
-``PG_PASSWORD``: 
+``CONFIG_PG_PASSWORD``: 
     The password to use (an empty string means no password is required).
 
-``PG_HOST``: 
+``CONFIG_PG_HOST``: 
     The host (or host:port) to connect to; an empty string means
     localhost.
 
@@ -86,8 +89,8 @@ For CouchDB do::
 
 Then look for::
 
-``COUCHDB_DB``:
+``CONFIG_COUCHDB_DB``:
     The name of the database to connect to.
 
-``COUCHDB_HOST``:
+``CONFIG_COUCHDB_HOST``:
     The host:port to connect to.

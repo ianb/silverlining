@@ -29,5 +29,5 @@ def install(app_dir, config):
 
 def app_setup(app_dir, config, environ):
     app_name = app_dir.split('.')[0].lower()
-    environ['COUCHDB_DB'] = app_name
-    environ['COUCHDB_HOST'] = '127.0.0.1:5984'
+    environ['CONFIG_COUCHDB_DB'] = app_name
+    environ['CONFIG_COUCHDB_HOST'] = '127.0.0.1:5984'
