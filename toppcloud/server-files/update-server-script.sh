@@ -50,10 +50,12 @@ fi
 mkdir -p /var/topp/build-files
 mkdir -p /var/log/topp-setup
 mkdir -p /var/www
+mkdir -p /var/lib/toppcloud
 rm -f /var/www/index.html
 chown www-mgr:www-mgr /var/www
 chown -R root:root /var/www/support
 chmod +x /etc/init.d/topp-setup
+chown www-mgr:www-mgr /var/lib/toppcloud
 rcconf --on=topp-setup
 
 # (this should give a date or something)
@@ -67,4 +69,5 @@ if [ ! -e /var/lib/toppcloud/secret.txt ] ; then
 import os, base64, sys
 secret = base64.b64encode(os.urandom(24), "_-").strip("=")
 sys.stdout.write(secret)' > /var/lib/toppcloud/secret.txt
+    chown root /var/lib/toppcloud/secret.txt
 fi
