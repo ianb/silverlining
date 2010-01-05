@@ -15,7 +15,6 @@ parser.add_option(
 
 def unused_sites():
     all_sites = set(sites(True))
-    all_sites -= IGNORE_SITES
     used_sites = {}
     fp = open(HOSTMAP)
     for line in fp:
