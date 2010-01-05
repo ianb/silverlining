@@ -1,0 +1,10 @@
+#!/bin/sh
+
+F="$(tempfile)"
+
+mkdir -p $F
+
+virtualenv $F/env
+$F/env/bin/pip install Sphinx
+$F/env/bin/sphinx-build -E -b html docs/ docs/_build || exit 1
+
