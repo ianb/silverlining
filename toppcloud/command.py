@@ -477,7 +477,7 @@ apt-get -y -q install rsync
                         if line.strip())
     proc = subprocess.Popen([
         'ssh', ssh_host,
-        'apt-get -y -q install $(cat)'],
+        'apt-get -y -q=2 install $(cat)'],
                             stdin=subprocess.PIPE)
     proc.communicate(packages)
     if proc.returncode:
