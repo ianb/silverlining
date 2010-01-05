@@ -68,8 +68,11 @@ def application(environ, start_response):
 
     if runner.endswith('.ini'):
         from paste.deploy import loadapp
+        from tcsupport.secret import get_secret
+        global_conf = os.environ.copy()
+        global_conf['SECRET'] = get_secret()
         found_app = loadapp(runner, name=spec,
-                            global_conf=os.environ)
+                            global_conf=global_conf)
     elif runner.endswith('.py'):
         ## FIXME: not sure what name to give it
         ns = {'__file__': runner, '__name__': 'main_py'}
