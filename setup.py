@@ -118,7 +118,6 @@ setup(name='toppcloud',
           'virtualenv>=1.4.3',
           'INITools',
           'zope.interface',
-          'Paste',
       ],
       entry_points="""
       [console_scripts]

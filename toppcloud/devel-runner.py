@@ -9,6 +9,7 @@ path = os.path.join(
 sys.path.insert(0, path)
 from tcsupport import common
 from tcsupport.requests import make_internal_request
+import mimetypes
 
 toppcloud_conf = os.path.join(os.environ['HOME'], '.toppcloud.conf')
 
@@ -104,19 +105,44 @@ def get_app(base_path):
     
     return found_app
 
-def compound_app(base_path):
-    app = get_app(base_path)
-    ## FIXME: should not import these!
-    from paste.cascade import Cascade
-    from paste.urlparser import StaticURLParser
-    static_app = StaticURLParser(os.path.join(base_path, 'static'))
-    compound_app = Cascade([static_app, app])
-    return compound_app
+class CompoundApp(object):
+
+    def __init__(self, base_path):
+        self.base_path = base_path
+        self.app = get_app(base_path)
+
+    def __call__(self, environ, start_response):
+        environ['toppcloud.devel'] = True
+        path_info = environ.get('PATH_INFO', '')
+        path_info = os.path.normpath(path_info)
+        path_info = path_info.replace('\\', '/').lstrip('/')
+        path = os.path.join(self.base_path, path_info)
+        if os.path.exists(path) and not os.path.isdir(path):
+            return self.serve_file(path, environ, start_response)
+        return self.app(environ, start_response)
+
+    def serve_file(self, path, environ, start_response):
+        length = os.path.getsize(path)
+        type, encoding = mimetypes.guess_type(path)
+        if not type:
+            type = 'application/octet-stream'
+        def iterator():
+            fp = open(path, 'rb')
+            while 1:
+                chunk = fp.read(4096)
+                if not chunk:
+                    break
+                yield chunk
+            fp.close()
+        start_response('200 OK', [
+            ('Content-type', type),
+            ('Content-length', length)])
+        return iterator()
 
 ## FIXME: should do something about reloading
 
 def main(base_path):
-    app = compound_app(base_path)
+    app = CompoundApp(base_path)
     import wsgiref.simple_server
     server = wsgiref.simple_server.make_server(
         '127.0.0.1', 8080, app)
