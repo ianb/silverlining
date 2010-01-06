@@ -1,0 +1,39 @@
+PHP Support
+-----------
+
+PHP support in toppcloud is a bit experimental.  Meaning, I'm not sure
+exactly *how* it should work, or if it is working well.  It also adds
+a slightly Pythonesque flare to the dispatch.
+
+Enabling PHP
+============
+
+To enable PHP, in your ``app.ini`` file, place::
+
+    service.php =
+    php_root = site/
+    runner = site/runner.php
+
+``service.php`` indicates that this is a PHP app.  PHP will be
+installed on the server if necessary.  No PHP libraries will be
+installed!  If you use, for example, ``service.postgis``, then the
+PostgreSQL drivers for PHP won't be installed.  You'll have to arrange
+that yourself, like::
+
+    packages = php5-pgsql
+
+Requests that point to a file in ``static/`` will (like with Python)
+serve that file directly.  Files that point to something in
+``php_root`` (in this example ``site/``) will also be served directly,
+so long as they are not ``.php`` files (as it is the norm to mix code
+with static files in PHP applications).
+
+*All* PHP requests will go through the runner (``site/runner.php`` in
+our example).  This PHP file may direct the request wherever it sees
+fit.  If you wish to simply pass it on, you may do so, like::
+
+    include("{$topp_base}/site/{$SCRIPT_NAME}");
+
+Note that ``.htaccess`` files will not work, so if you need that kind
+of functionality you'll need to implement it directly in your runner.
+
