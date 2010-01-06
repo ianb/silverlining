@@ -1,0 +1,33 @@
+Processes
+---------
+
+This document explains the process model of toppcloud.
+
+toppcloud runs under `mod_wsgi <http://code.google.com/p/modwsgi/>`_,
+but mod_wsgi itself is configurable, and toppcloud configures it a
+specific way.  The result works like this:
+
+* Each application instance runs in its own processes.  So if you
+  upload multiple applications (that are all live simultaneously) then
+  those will never be in the same process.  This is necessary because
+  there's no way besides separate processes to keep paths and
+  libraries straight.
+
+* An application gets 5 concurrent processes.  That is, there is a
+  pool of 5 processes that wait for a request to come in.
+
+* There are no threads, each process is single-threaded.
+
+* Processes live for a limited number of requests (200 requests).
+  After that the process is killed and another started in its place.
+  This avoids some possible memory leaks or other problems associated
+  with long-running processes.
+
+* All processes run as the user ``www-data``.
+
+* "Internal" requests are run in their own short-lived processes.
+  This includes requests like the ``update_fetch`` request.  They
+  otherwise run very similarly to normal requests (as ``www-data``,
+  similar environment, etc).  However, because it is not actually
+  under mod_wsgi, it is very possible that there will be differences
+  in the environ.
