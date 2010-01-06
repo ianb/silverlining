@@ -39,12 +39,12 @@ if [ -e /etc/apache2/sites-enabled/000-default ] ; then
 fi
 
 ## These are restarted in the background, to make it faster:
-/etc/init.d/apache2 restart 2>&1 >/dev/null &
-/etc/init.d/varnish restart 2>&1 >/dev/null &
+/etc/init.d/apache2 restart &>/dev/null &
+/etc/init.d/varnish restart &>/dev/null &
 
 ## This is probably unnecessary...
 if [ -e /etc/init.d/postgresql-8.3 ] ; then
-    /etc/init.d/postgresql-8.3 restart 2>&1 >/dev/null &
+    /etc/init.d/postgresql-8.3 restart &>/dev/null &
 fi
 
 ## Make sure some standard directories are in place, ownership is
@@ -60,7 +60,7 @@ chown -R root:root /var/www/support
 chmod +x /etc/init.d/topp-setup
 chown www-mgr:www-mgr /var/lib/toppcloud
 # This gives unnecessary error-like output, so we're ignore the output
-rcconf --on=topp-setup > /dev/null 2>&1
+rcconf --on=topp-setup &> /dev/null
 
 ## This is just a piece of configuration I (Ian) like:
 sed -i "s/ -backup/-backup/" /etc/joe/jmacsrc
