@@ -84,9 +84,22 @@ def install(app_dir, config):
              app_name], env=env)
         proc.communicate()
 
-def app_setup(app_dir, config, environ):
+def app_setup(app_dir, config, environ,
+              devel=False, devel_config=None):
     app_name = app_dir.split('.')[0]
-    environ['CONFIG_PG_DBNAME'] = app_name
-    environ['CONFIG_PG_USER'] = 'www-mgr'
-    environ['CONFIG_PG_PASSWORD'] = ''
-    environ['CONFIG_PG_HOST'] = ''
+    if not devel:
+        environ['CONFIG_PG_DBNAME'] = app_name
+        environ['CONFIG_PG_USER'] = 'www-mgr'
+        environ['CONFIG_PG_PASSWORD'] = ''
+        environ['CONFIG_PG_HOST'] = ''
+    else:
+        import getpass
+        environ['CONFIG_PG_DBNAME'] = app_name
+        environ['CONFIG_PG_USER'] = getpass.getuser()
+        environ['CONFIG_PG_PASSWORD'] = ''
+        environ['CONFIG_PG_HOST'] = ''
+        for name, value in config.items():
+            if name.startswith('postgis.'):
+                name = name[len('postgis.'):]
+                environ['CONFIG_PG_%s' % name.upper()] = value
+                

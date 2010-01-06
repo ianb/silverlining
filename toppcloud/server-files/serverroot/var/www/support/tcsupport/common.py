@@ -30,8 +30,9 @@ def site_config(instance_name):
         raise BadSite('No app.ini in %s' % app_ini)
     return parser
 
-def services_config(instance_name):
-    parser = site_config(instance_name)
+def services_config(instance_name, parser=None):
+    if parser is None:
+        parser = site_config(instance_name)
     services = {}
     for name in parser.options('production'):
         if name.startswith('service.'):

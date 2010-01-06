@@ -50,7 +50,6 @@ def application(environ, start_response):
     except common.BadSite, e:
         return ErrorApp('Error loading services: %s' % e)(environ, start_response)
 
-    ## FIXME: should these defaults just be deprecated?
     parser = common.site_config(site)
     if parser.has_option('production', 'runner'):
         runner = os.path.join(common.site_dir(site), parser.get('production', 'runner'))
@@ -80,7 +79,7 @@ def application(environ, start_response):
         execfile(runner, ns)
         spec = spec or 'application'
         if spec in ns:
-            found_app = ns['application']
+            found_app = ns[spec]
         else:
             return ErrorApp(
                 "No application %s defined in %s"
