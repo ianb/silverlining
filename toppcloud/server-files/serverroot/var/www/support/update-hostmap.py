@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 import sys, os
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-from tcsupport.common import HOSTMAP
+from tcsupport.common import HOSTMAP, PLATFORM_MAP, PHP_ROOT_MAP
+from ConfigParser import ConfigParser
 
 import sys
 
@@ -39,6 +40,20 @@ def update_hostmap(hostname, appname):
     fp.writelines(new_lines)
     fp.close()
 
+def set_platforms(appname):
+    parser = ConfigParser()
+    if not parser.read([os.path.join('/var/www', appname, 'app.ini')]):
+        raise Exception('Could not find app.ini')
+    if parser.has_option('production', 'service.php'):
+        print 'Setting %s as a php service' % appname
+        fp = open(PLATFORM_MAP, 'a')
+        fp.write('%s php\n' % appname)
+        fp.close()
+        if parser.has_option('production', 'php_root'):
+            fp = open(PHP_ROOT_MAP, 'a')
+            fp.write('%s %s\n' % (appname, parser.get('production', 'php_root')))
+            fp.close()
+
 if __name__ == '__main__':
     import sys
     args = sys.argv[1:]
@@ -47,4 +62,5 @@ if __name__ == '__main__':
         ## FIXME: for multiple hostnames, it shouldn't rewrite the hostmap.txt
         ## each time.
         update_hostmap(hostname, appname)
-
+    set_platforms(appname)
+    

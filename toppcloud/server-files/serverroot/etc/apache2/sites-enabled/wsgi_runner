@@ -49,7 +49,7 @@
 
 	CustomLog /var/log/apache2/access.log combined
 
-# TOPPCloud customizations:
+## Python/WSGI setup:
 RewriteEngine on
 
 # Strip www. from all (non-https) domains:
@@ -57,15 +57,18 @@ RewriteCond %{SERVER_PORT} ^8080$
 RewriteCond %{HTTP_HOST} ^www\.(.*)$
 RewriteRule (.*) http://%1$1
 
+RewriteMap platforms txt:/var/www/platforms.txt
+RewriteMap php-roots txt:/var/www/php-roots.txt
+
 # Figure out what "site" to map this request to:
 RewriteMap hostmap txt:/var/www/hostmap.txt 
 
 RewriteCond ${hostmap:%{HTTP_HOST}|__default__} ^__default__$
-RewriteRule . - [PT,E=SITE:${hostmap:notfound|default-notfound}]
+RewriteRule . - [E=SITE:${hostmap:notfound|default-notfound}]
 
 # If a hostmap resulted in "disabled" then map that again as a domain
 RewriteCond ${hostmap:%{HTTP_HOST}} ^disabled$
-RewriteRule . - [PT,E=SITE:${hostmap:disabled|default-disabled}]
+RewriteRule . - [E=SITE:${hostmap:disabled|default-disabled}]
 
 RewriteCond %{HTTP_HOST} (.*)
 RewriteRule . - [E=SITE:${hostmap:%1}]
@@ -73,6 +76,22 @@ RewriteRule . - [E=SITE:${hostmap:%1}]
 # Serve up any static files:
 RewriteCond /var/www/%{ENV:SITE}/static%{REQUEST_URI} -f 
 RewriteRule . /var/www/%{ENV:SITE}/static%{REQUEST_URI} [L]
+
+# Some PHP setup; first allow for a site directory
+# First, we determine the "root" directory of the PHP app...
+RewriteCond ${platforms:%{ENV:SITE}} ^php$
+RewriteRule . - [E=PHP_ROOT:${php-roots:%{ENV:SITE}|site}]
+
+# Next, if the request points to something that is not a .php file,
+# then serve it up directly...
+RewriteCond ${platforms:%{ENV:SITE}} ^php$
+RewriteCond /var/www/%{ENV:SITE}/%{ENV:PHP_ROOT}%{REQUEST_URI} -f
+RewriteCond %{REQUEST_URI} !\.php$
+RewriteRule . /var/www/%{ENV:SITE}/%{ENV:PHP_ROOT}%{REQUEST_URI} [L]
+
+# Lastly, we run the actual PHP:
+RewriteCond ${platforms:%{ENV:SITE}} ^php$
+RewriteRule . /var/www/support/master-runner.php [L]
 
 # Lastly, setup the WSGI application:
 WSGIApplicationGroup %{ENV:SITE}

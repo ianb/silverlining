@@ -4,6 +4,8 @@ from ConfigParser import ConfigParser
 
 SITE_DIR = '/var/www'
 HOSTMAP = '/var/www/hostmap.txt'
+PLATFORM_MAP = '/var/www/platforms.txt'
+PHP_ROOT_MAP = '/var/www/php-roots.txt'
 
 IGNORE_SITES = set(['default-notfound', 'default-disabled'])
 
