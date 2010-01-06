@@ -49,6 +49,7 @@ fi
 ## correct, etc.:
 mkdir -p /var/topp/build-files
 mkdir -p /var/log/topp-setup
+mkdir -p /var/log/toppcloud
 mkdir -p /var/www
 mkdir -p /var/lib/toppcloud
 rm -f /var/www/index.html
@@ -59,8 +60,6 @@ chown www-mgr:www-mgr /var/lib/toppcloud
 # This gives unnecessary error-like output, so we're ignore the output
 rcconf --on=topp-setup > /dev/null 2>&1
 
-# (this should give a date or something)
-touch /root/.toppcloud-server-setup
 ## This is just a piece of configuration I (Ian) like:
 sed -i "s/ -backup/-backup/" /etc/joe/jmacsrc
 
@@ -72,3 +71,9 @@ secret = base64.b64encode(os.urandom(24), "_-").strip("=")
 sys.stdout.write(secret)' > /var/lib/toppcloud/secret.txt
     chown root /var/lib/toppcloud/secret.txt
 fi
+
+echo "Rerun setup-node on $(date)
+Run by: __REMOTE_USER__
+----------------------------------------
+
+" >> /var/log/toppcloud/setup-node.log

@@ -493,6 +493,9 @@ apt-get -y -q install rsync
     setup_script = open(os.path.join(os.path.dirname(__file__),
                                      'server-files',
                                      'update-server-script.sh')).read()
+    import getpass
+    username = getpass.getuser()
+    setup_script = setup_script.replace('__REMOTE_USER__', username)
     
     proc = subprocess.Popen(
         ['ssh', ssh_host, setup_script])
