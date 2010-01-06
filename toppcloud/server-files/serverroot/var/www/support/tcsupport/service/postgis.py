@@ -25,12 +25,12 @@ def install(app_dir, config):
 
     if not os.path.exists('/usr/bin/psql'):
         proc = subprocess.Popen(
-            ['chown', 'postgres:postgres',
-             '/etc/postgresql/8.3/main/pg_hba.conf'],
+            ['apt-get', '-y', 'install'] + packages,
             env=env)
         proc.communicate()
         proc = subprocess.Popen(
-            ['apt-get', '-y', 'install'] + packages,
+            ['chown', 'postgres:postgres',
+             '/etc/postgresql/8.3/main/pg_hba.conf'],
             env=env)
         proc.communicate()
     proc = subprocess.Popen(
