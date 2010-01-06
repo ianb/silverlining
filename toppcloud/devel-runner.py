@@ -8,6 +8,7 @@ path = os.path.join(
     'server-files/serverroot/var/www/support')
 sys.path.insert(0, path)
 from tcsupport import common
+from tcsupport.requests import make_internal_request
 
 toppcloud_conf = os.path.join(os.environ['HOME'], '.toppcloud.conf')
 
@@ -82,11 +83,30 @@ def get_app(base_path):
         common.load_service_module(service).app_setup(
             app_name, config, os.environ, devel=True,
             devel_config=config)
+
+    if parser.has_option('production', 'update_fetch'):
+        urls = parser.get('production', 'update_fetch')
+        urls = [url for url in urls.splitlines()
+                if url.strip() and not url.strip().startswith('#')]
+        for url in urls:
+            print 'Fetching update URL %s' % url
+            status, headers, body = make_internal_request(
+                found_app, app_name, 'localhost',
+                url, environ={'toppcloud.update': True})
+            if not status.startswith('200'):
+                sys.stdout.write(status+'\n')
+                sys.stdout.flush()
+            if body:
+                sys.stdout.write(body)
+                if not body.endswith('\n'):
+                    sys.stdout.write('\n')
+                sys.stdout.flush()
     
     return found_app
 
 def compound_app(base_path):
     app = get_app(base_path)
+    ## FIXME: should not import these!
     from paste.cascade import Cascade
     from paste.urlparser import StaticURLParser
     static_app = StaticURLParser(os.path.join(base_path, 'static'))

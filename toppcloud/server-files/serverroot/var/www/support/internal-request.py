@@ -1,57 +1,9 @@
 #!/usr/bin/env python
-import urllib
 import sys
 import os
-from cStringIO import StringIO
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+from tcsupport.requests import make_internal_request, create_app
 from ConfigParser import ConfigParser
-
-def make_internal_request(instance_name, hostname,
-                          path, body=None, environ=None):
-    basic_environ = {
-        'PATH_INFO': urllib.unquote(str(path)),
-        'SCRIPT_NAME': '',
-        'SERVER_NAME': hostname,
-        'SERVER_PORT': '80',
-        'REQUEST_METHOD': 'GET',
-        'HTTP_HOST': '%s:80' % hostname,
-        'CONTENT_LENGTH': '0',
-        'REMOTE_ADDR': '127.0.0.1',
-        'wsgi.input': StringIO(''),
-        'wsgi.errors': sys.stderr,
-        'wsgi.version': (1, 0),
-        'wsgi.multithread': False,
-        'wsgi.multiprocess': False,
-        'wsgi.run_once': True,
-        'wsgi.url_scheme': 'http',
-        'toppcloud.internal': True,
-        }
-    if body:
-        basic_environ['wsgi.input'] = StringIO(body)
-        basic_environ['CONTENT_LENGTH'] = len(body)
-        basic_environ['REQUEST_METHOD'] = 'POST'
-    if environ:
-        basic_environ.update(environ)
-    basic_environ['SITE'] = instance_name
-    ns = {'__file__': 'master_runner.py',
-          '__name__': '__main__'}
-    execfile('/var/www/support/master_runner.py', ns)
-    app = ns['application']
-    out = StringIO()
-    info = []
-    def start_response(status, headers, exc_info=None):
-        if exc_info is not None:
-            raise exc_info[0], exc_info[1], exc_info[2]
-        info[:] = [status, headers]
-        return out.write
-    app_iter = app(basic_environ, start_response)
-    try:
-        for item in app_iter:
-            out.write(item)
-    finally:
-        if hasattr(app_iter, 'close'):
-            app_iter.close()
-    status, headers = info
-    return status, headers, out.getvalue()
 
 def run(args=None):
     if args is None:
@@ -68,6 +20,7 @@ def run(args=None):
         for arg in args[4:]:
             name, value = arg.split('=', 1)
             environ[name] = value
+    app = create_app(instance_name)
     status, headers, body = make_internal_request(
         instance_name, hostname,
         path, body=body, environ=environ)
@@ -91,15 +44,16 @@ def run_update(instance_name, hostname):
                 if url.strip() and not url.strip().startswith('#')]
         for url in urls:
             print 'Fetching update URL %s' % url
+            app = create_app(instance_name)
             status, headers, body = make_internal_request(
-                instance_name, hostname,
+                app, instance_name, hostname,
                 url, environ={'toppcloud.update': True})
             if not status.startswith('200'):
-                sys.stdout.write(status)
+                sys.stdout.write(status+'\n')
                 sys.stdout.flush()
             if body:
                 sys.stdout.write(body)
-                if body and not body.endswith('\n'):
+                if not body.endswith('\n'):
                     sys.stdout.write('\n')
                 sys.stdout.flush()
 
