@@ -23,6 +23,12 @@ def get_app(base_path):
 
     parser = ConfigParser()
     parser.read([os.path.join(base_path, 'app.ini')])
+
+    for service, config in sorted(common.services_config(None, parser=parser).items()):
+        common.load_service_module(service).app_setup(
+            app_name, config, os.environ, devel=True,
+            devel_config=config)
+
     if not parser.has_option('production', 'runner'):
         raise Exception(
             "No option 'runner' in [production]")
@@ -79,11 +85,6 @@ def get_app(base_path):
         for name in global_parser.options(section):
             value = global_parser.get(section, name)
             config[name] = value.replace('APP_NAME', app_name)
-
-    for service, config in sorted(common.services_config(None, parser=parser).items()):
-        common.load_service_module(service).app_setup(
-            app_name, config, os.environ, devel=True,
-            devel_config=config)
 
     if parser.has_option('production', 'update_fetch'):
         urls = parser.get('production', 'update_fetch')

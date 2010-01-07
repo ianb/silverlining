@@ -648,6 +648,11 @@ def command_init(config):
 _sitecustomize_py = """\
 import os, site
 site.addsitedir(os.path.abspath(os.path.join(__file__, '../../python')))
+
+try:
+    import toppcustomize
+except ImportError:
+    pass
 """
 
 _distutils_cfg = """\
