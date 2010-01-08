@@ -25,12 +25,12 @@ def install(app_dir, config):
 
     if not os.path.exists('/usr/bin/psql'):
         proc = subprocess.Popen(
-            ['apt-get', '-y', 'install'] + packages,
+            ['chown', 'postgres:postgres',
+             '/etc/postgresql/8.3/main/pg_hba.conf'],
             env=env)
         proc.communicate()
         proc = subprocess.Popen(
-            ['chown', 'postgres:postgres',
-             '/etc/postgresql/8.3/main/pg_hba.conf'],
+            ['apt-get', '-y', 'install'] + packages,
             env=env)
         proc.communicate()
     proc = subprocess.Popen(
@@ -98,7 +98,7 @@ def app_setup(app_dir, config, environ,
         environ['CONFIG_PG_USER'] = getpass.getuser()
         environ['CONFIG_PG_PASSWORD'] = ''
         environ['CONFIG_PG_HOST'] = ''
-        for name, value in config.items():
+        for name, value in devel_config.items():
             if name.startswith('postgis.'):
                 name = name[len('postgis.'):]
                 environ['CONFIG_PG_%s' % name.upper()] = value
