@@ -1,5 +1,41 @@
 """Get a secret key"""
+import os
+from ConfigParser import ConfigParser
+
+if os.environ.get('TOPPCLOUD', '').startswith('toppcloud/'):
+    secret_file = '/var/lib/toppcloud/secret.txt'
+    key_file = '/var/lib/toppcloud/keys.ini'
+else:
+    secret_file = os.path.join(
+        os.environ['HOME'], '.toppcloud-secret')
+    if not os.path.exists(secret_file):
+        import base64
+        fp = open(secret_file, 'wb')
+        secret = base64.b64encode(os.urandom(24), "_-").strip("=")
+        fp.write(secret)
+        fp.close()
+    key_file = os.path.join(
+        os.environ['HOME'], '.toppcloud.conf')
 
 def get_secret():
-    fp = open('/var/lib/toppcloud/secret.txt', 'rb')
+    fp = open(secret_file, 'rb')
     return fp.read().strip()
+
+def get_key(name):
+    keys = load_keys()
+    return keys.get(name)
+
+def load_keys():
+    parser = ConfigParser()
+    parser.read([key_file])
+    keys = {}
+    if parser.has_section('keys'):
+        for option in parser.options('keys'):
+            keys[option] = parser.get('keys', option)
+    for section in parser.sections():
+        if section.startswith('keys:'):
+            name = section[len('keys:'):]
+            keys[name] = {}
+            for option in parser.options(section):
+                keys[name][option] = parser.get(section, option)
+    return keys

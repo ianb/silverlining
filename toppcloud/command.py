@@ -133,9 +133,14 @@ parser_init.add_argument(
     help="A directory to initialize")
 
 parser_init.add_argument(
-    '--setuptools',
+    '-f', '--force',
     action='store_true',
-    help="Use Setuptools (instead of Distribute)")
+    help="Overwrite files even if they already exist")
+
+parser_init.add_argument(
+    '--distribute',
+    action='store_true',
+    help="Use Distribute (instead of Setuptools)")
 
 parser_init.add_argument(
     '--config',
@@ -145,7 +150,7 @@ parser_init.add_argument(
 parser_init.add_argument(
     '--main',
     action='store_true',
-    help="Use main.py (not config.ini)")
+    help="Use main.py (not config.ini)")    
 
 parser_serve = subcommands.add_parser(
     'serve', help="Serve up an application for development")
@@ -594,6 +599,7 @@ def command_init(config):
         app_name=app_name,
         main=config.args.main,
         config=config.args.config)
+    vars['force'] = config.args.force
     if sys.version[:3] == '2.6':
         virtualenv.logger = config.logger
         virtualenv.create_environment(
@@ -601,26 +607,28 @@ def command_init(config):
             # This should be true to pick up global binaries like psycopg:
             site_packages=True,
             unzip_setuptools=True,
-            use_distribute=not config.args.setuptools)
+            use_distribute=config.args.distribute)
     else:
         # This is the crude way we need to do this when we're not in Python 2.6
         config.logger.warn('Creating virtualenv environment in subprocess')
         virtualenv_file = virtualenv.__file__
         if virtualenv_file.endswith('.pyc'):
             virtualenv_file = virtualenv_file[:-1]
-        if config.args.setuptools:
-            cmd = [
-                'python2.6', virtualenv_file,
-                '--unzip-setuptools', dir]
-        else:
+        if config.args.distribute:
             cmd = [
                 'python2.6', virtualenv_file,
                 '--unzip-setuptools', '--distribute',
                 dir]
+        else:
+            cmd = [
+                'python2.6', virtualenv_file,
+                '--unzip-setuptools', dir]
         proc = subprocess.Popen(cmd)
         proc.communicate()
-    init_copy('README.txt', os.path.join(dir, 'README.txt'), config.logger, vars)
-    init_copy('app.ini', os.path.join(dir, 'app.ini'), config.logger, vars)
+    noforce_vars = vars.copy()
+    noforce_vars['force'] = False
+    init_copy('README.txt', os.path.join(dir, 'README.txt'), config.logger, noforce_vars)
+    init_copy('app.ini', os.path.join(dir, 'app.ini'), config.logger, noforce_vars)
     if config.args.config:
         init_copy('config.ini', os.path.join(dir, 'config.ini'), config.logger, vars)
     if config.args.main:
@@ -634,26 +642,18 @@ def command_init(config):
     lib_python = os.path.join(dir, 'lib', 'python')
     if not os.path.exists(lib_python):
         os.makedirs(lib_python)
-    fp = open(os.path.join(dir, 'lib', 'python2.6', 'sitecustomize.py'), 'w')
-    fp.write(_sitecustomize_py)
-    fp.close()
-    fp = open(os.path.join(dir, 'lib', 'python2.6', 'distutils', 'distutils.cfg'), 'a')
-    fp.write(_distutils_cfg)
-    fp.close()
-    fp = open(os.path.join(dir, 'lib', 'python2.6', 'distutils', '__init__.py'), 'a')
-    fp.write(_distutils_init)
-    fp.close()
-
-## FIXME: this should setup and configure services as well:
-_sitecustomize_py = """\
-import os, site
-site.addsitedir(os.path.abspath(os.path.join(__file__, '../../python')))
-
-try:
-    import toppcustomize
-except ImportError:
-    pass
-"""
+    init_copy(
+        'sitecustomize.py',
+        os.path.join(dir, 'lib', 'python2.6', 'sitecustomize.py'),
+        config.logger, vars)
+    init_copystring(
+        _distutils_cfg,
+        os.path.join(dir, 'lib', 'python2.6', 'distutils', 'distutils.cfg'),
+        config.logger, vars, append=True)
+    init_copystring(
+        _distutils_init,
+        os.path.join(dir, 'lib', 'python2.6', 'distutils', '__init__.py'),
+        config.logger, vars, append=True)
 
 _distutils_cfg = """\
 # This is what makes things install into lib/python instead of lib/python2.6:
@@ -677,7 +677,7 @@ def parse_config_files(self, filenames=None):
 dist.Distribution.parse_config_files = parse_config_files
 """
 
-def init_copy(source, dest, logger, vars):
+def init_copy(source, dest, logger, vars, append=False):
     import tempita
     source = os.path.join(
         os.path.dirname(__file__),
@@ -691,23 +691,38 @@ def init_copy(source, dest, logger, vars):
         fp = open(source, 'rb')
         source_content = fp.read()
         fp.close()
+    init_copystring(source_content, dest, logger, vars,
+                    append=append)
+
+def init_copystring(source_content, dest, logger, vars,
+                    append=False):
     if os.path.exists(dest):
         fp = open(dest, 'rb')
         content = fp.read()
         fp.close()
-        fp = open(source, 'rb')
-        source_content = fp.read()
-        fp.close()
-        if content == source_content:
-            logger.info(
-                'Not overwriting %s (same content)' % dest)
+        if append:
+            if content in source_content:
+                logger.info(
+                    'Not adding to %s (already has content)' % dest)
+                return
         else:
-            logger.notify(
-                'Not overwriting %s (content differs)' % dest)
+            if content == source_content:
+                logger.info(
+                    'Not overwriting %s (same content)' % dest)
+                return
+            elif vars['force']:
+                logger.notify(
+                    'Overwriting %s' % dest)
+            else:
+                logger.notify(
+                    'Not overwriting %s (content differs)' % dest)
+                return
+    if append:
+        fp = open(dest, 'ab')
     else:
         fp = open(dest, 'wb')
-        fp.write(source_content)
-        fp.close()
+    fp.write(source_content)
+    fp.close()
 
 def command_serve(config):
     from toppcloud import server

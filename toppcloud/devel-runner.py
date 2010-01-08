@@ -9,6 +9,7 @@ path = os.path.join(
 sys.path.insert(0, path)
 from tcsupport import common
 from tcsupport.requests import make_internal_request
+from tcsupport.develconfig import load_devel_config
 import mimetypes
 
 toppcloud_conf = os.path.join(os.environ['HOME'], '.toppcloud.conf')
@@ -20,14 +21,22 @@ def get_app(base_path):
                             'site-packages')
     if lib_path not in sys.path:
         addsitedir(lib_path)
+    sitecustomize = os.path.join(base_path, 'lib', 'python%s' % sys.version[:3],
+                                 'sitecustomize.py')
+    if os.path.exists(sitecustomize):
+        ns = {'__file__': sitecustomize, '__name__': 'sitecustomize'}
+        execfile(sitecustomize, ns)
 
     parser = ConfigParser()
     parser.read([os.path.join(base_path, 'app.ini')])
+    app_name = parser.get('production', 'app_name')
+
+    devel_config = load_devel_config(app_name)
 
     for service, config in sorted(common.services_config(None, parser=parser).items()):
         common.load_service_module(service).app_setup(
             app_name, config, os.environ, devel=True,
-            devel_config=config)
+            devel_config=devel_config)
 
     if not parser.has_option('production', 'runner'):
         raise Exception(
@@ -67,24 +76,6 @@ def get_app(base_path):
     else:
         raise Exception(
             "Unknown kind of runner (%s)" % runner)(environ, start_response)
-    app_name = parser.get('production', 'app_name')
-
-    global_parser = ConfigParser()
-    global_parser.read([toppcloud_conf])
-    if global_parser.has_section('devel:%s' % app_name):
-        section = 'devel:%s' % app_name
-    elif global_parser.has_section('devel'):
-        section = 'devel'
-    else:
-        section = None
-    config = {}
-    if not section:
-        print 'Warning: %s has no [devel] section to configure your services' % (
-            toppcloud_conf)
-    else:
-        for name in global_parser.options(section):
-            value = global_parser.get(section, name)
-            config[name] = value.replace('APP_NAME', app_name)
 
     if parser.has_option('production', 'update_fetch'):
         urls = parser.get('production', 'update_fetch')
@@ -140,15 +131,36 @@ class CompoundApp(object):
             ('Content-length', length)])
         return iterator()
 
-## FIXME: should do something about reloading
+def load_paste_reloader():
+    try:
+        from paste import reloader
+    except ImportError:
+        import new
+        ## FIXME: not sure if this'll work well if sys.path is fixed
+        ## up later with a Paste:
+        init_mod = new.module('paste')
+        init_mod.__path__ = []
+        sys.modules['paste'] = init_mod
+        mod = new.module('paste.reloader')
+        init_mod.reloader = mod
+        execfile(os.path.join(os.path.dirname(__file__),
+                              'paste-reloader.py'),
+                 mod.__dict__)
+        sys.modules['paste.reloader'] = mod
+        return mod
 
 def main(base_path):
     app = CompoundApp(base_path)
+    reloader = load_paste_reloader()
+    reloader.install()
     import wsgiref.simple_server
     server = wsgiref.simple_server.make_server(
         '127.0.0.1', 8080, app)
     print 'Serving on http://127.0.0.1:8080'
-    server.serve_forever()
+    try:
+        server.serve_forever()
+    except KeyboardInterrupt:
+        pass
 
 if __name__ == '__main__':
     base_path = sys.argv[1]

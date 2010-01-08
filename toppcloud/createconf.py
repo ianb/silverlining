@@ -20,7 +20,10 @@ def create_conf():
         print "%s doesn't exist" % dsa_filename
         print "  you won't automatically be able to login to new servers"
         id_dsa = None
-    content = template.substitute(username=username, api_key=api_key, id_dsa=id_dsa)
+    content = template.substitute(
+        username=username, api_key=api_key, id_dsa=id_dsa,
+        toppcloud_location=os.path.dirname(__file__),
+        )
     fp = open(toppcloud_conf, 'w')
     fp.write(content)
     fp.close()
