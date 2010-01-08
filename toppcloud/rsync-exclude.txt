@@ -1,8 +1,3 @@
-RCS
-SCCS
-CVS
-CVS.adm
-RCSLOG
 cvslog.*
 pip-log.txt
 .make.state
@@ -21,7 +16,6 @@ _$*
 .del-*
 *.elc
 *.pyc
-core
 .svn/
 .git/
 .bzr/
