@@ -134,6 +134,7 @@ class CompoundApp(object):
 def load_paste_reloader():
     try:
         from paste import reloader
+        return reloader
     except ImportError:
         import new
         ## FIXME: not sure if this'll work well if sys.path is fixed
