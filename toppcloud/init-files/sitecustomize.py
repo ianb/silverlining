@@ -6,7 +6,6 @@ import warnings
 from ConfigParser import ConfigParser
 
 def add_tcsupport():
-    from ConfigParser import ConfigParser
     toppcloud_conf = os.path.join(os.environ['HOME'], '.toppcloud.conf')
     parser = ConfigParser()
     parser.read([toppcloud_conf])

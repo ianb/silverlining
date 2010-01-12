@@ -48,5 +48,4 @@ def load_service_module(service_name):
 
 
 if __name__ == '__main__':
-    import sys
     app_dir = sys.argv[1]

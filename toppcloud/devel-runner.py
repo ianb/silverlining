@@ -2,7 +2,6 @@ from site import addsitedir
 import sys
 import os
 from ConfigParser import ConfigParser
-import posixpath
 path = os.path.join(
     os.path.dirname(__file__),
     'server-files/serverroot/var/www/support')
@@ -75,7 +74,7 @@ def get_app(base_path):
         raise Exception("not supported with toppcloud serve")
     else:
         raise Exception(
-            "Unknown kind of runner (%s)" % runner)(environ, start_response)
+            "Unknown kind of runner (%s)" % runner)
 
     if parser.has_option('production', 'update_fetch'):
         urls = parser.get('production', 'update_fetch')

@@ -55,7 +55,6 @@ def set_platforms(appname):
             fp.close()
 
 if __name__ == '__main__':
-    import sys
     args = sys.argv[1:]
     appname = args[0]
     for hostname in args[1:]:

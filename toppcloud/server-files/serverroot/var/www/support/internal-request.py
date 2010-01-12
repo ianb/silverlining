@@ -22,7 +22,7 @@ def run(args=None):
             environ[name] = value
     app = create_app(instance_name)
     status, headers, body = make_internal_request(
-        instance_name, hostname,
+        app, instance_name, hostname,
         path, body=body, environ=environ)
     write_output(status, headers, body)
 

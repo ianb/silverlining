@@ -27,7 +27,7 @@ def app_setup(app_dir, config, environ,
         environ['CONFIG_FILES'] = os.path.join(
             os.environ['HOME'],
             'toppcloud-app-data',
-            app_dir)
+            app_name)
         if 'files' in devel_config:
             environ['CONFIG_FILES'] = os.path.expanduser(
                 devel_config['files'])

@@ -2,7 +2,7 @@ import os
 import sys
 import subprocess
 
-def serve(config):
+def command_serve(config):
     dir = os.path.abspath(config.args.dir)
     if os.path.exists(os.path.join(dir, 'bin', 'python')):
         # We are in a virtualenv situation...
