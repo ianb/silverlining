@@ -1,0 +1,18 @@
+DNS Services
+------------
+
+toppcloud currently does not handle DNS at all.  But it might be nice
+if it did, no?  With this in mind I've asked around a bit about DNS
+services that include APIs.  So far:
+
+* Slicehost offers something, not sure if you need to sign up for an
+  account.
+
+* Rackspace Cloud has something, but I haven't seen an API for it.
+
+* `DNS Made Easy <http://www.dnsmadeeasy.com/s0306/res/ddnsc.html>`_
+
+* `Nettica <http://www.nettica.com/Support/Developers.aspx>`_
+
+* `Zerigo <http://www.zerigo.com/managed-dns>`_ (they have a slick Web
+  2.1-looking website)
