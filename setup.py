@@ -121,7 +121,7 @@ setup(name='toppcloud',
       ],
       entry_points="""
       [console_scripts]
-      toppcloud = toppcloud.command:main
+      toppcloud = toppcloud.runner:main
       """,
       package_data=find_package_data(
           where=os.path.join(os.path.dirname(__file__), 'toppcloud'),
