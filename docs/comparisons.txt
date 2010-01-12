@@ -137,3 +137,24 @@ Django)::
 Everything you can do in a traditional deployment system, you can do
 with toppcloud (at least, potentially; extra support code may be
 necessary).
+
+Moonshine
+=========
+
+So far, `Moonshine <http://github.com/railsmachine/moonshine>`_ sounds
+like the closest thing to toppcloud in functionality, with even many
+of the same choices, except Ruby instead of Python.  It uses Ubuntu,
+Apache, and Passenger (where Passenger is the closest thing to a Ruby
+equivalent of mod_wsgi).  It also uses Ruby Enterprise Edition (?) and
+MySQL, where toppcloud does not have a single persistence backend.
+
+``config/moonshine.yml`` is a lot like ``app.ini``, ``cap
+deploy:setup`` is like ``toppcloud setup-node`` and ``cap deploy`` is
+like ``toppcloud update``.
+
+It's built on Capistrano, not using its own native constructs.  In
+this sense it is glue.
+
+It has a notion of "shared config", which is configuration not in your
+source tree, but which is needed for deployment.  toppcloud needs
+something like this.
