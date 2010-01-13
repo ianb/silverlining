@@ -17,7 +17,7 @@ TOPP Cloud
     dns
     license
     Repository <http://bitbucket.org/ianb/toppcloud>
-    Pre-built zip files </zip/>
+    Pre-built zip files <http://toppcloud.openplans.org/zip/>
 
 This is a script and server layout to manage Python-based web
 applications.  And PHP.
