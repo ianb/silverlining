@@ -11,8 +11,8 @@ if [ ! -e "$ENV_PATH/bin" ] ; then
     $VIRTUALENV $ENV_PATH
 fi
 
-$ENV_PATH/env/bin/pip install Sphinx
-$ENV_PATH/env/bin/sphinx-build -E -b html docs/ docs/_build || exit 1
+$ENV_PATH/bin/pip install Sphinx
+$ENV_PATH/bin/sphinx-build -E -b html docs/ docs/_build || exit 1
 
 export BUILD_DIR="$BBDOCS_SCRATCH/zip-build"
 export ZIP_DIR="$(pwd)/docs/_build/zip"
