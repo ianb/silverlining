@@ -114,6 +114,14 @@ the configuration ``packages = lxml``.
 
 A lot of this is covered in `application configuration <appconfig>`_.
 
+And what kind of frameworks can you use with toppcloud?  Anything
+really.  The only real exception is Zope 2, which has strict Python
+version requirements, lots of C extensions, and all sorts of other
+complexities.  `Repoze <http://repoze.org/>`_ will work fine though,
+and a `ZEO
+<http://wiki.zope.org/ZODB/guide/node2.html#SECTION000230000000000000000>`_
+service is easy to imagine (though not yet implemented).
+
 The Server
 ----------
 
