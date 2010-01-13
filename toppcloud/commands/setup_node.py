@@ -3,7 +3,7 @@ import subprocess
 from cmdutils import CommandError
 
 def setup_rsync(config, source, dest):
-    cwd = os.path.join(os.path.dirname(__file__), 'server-files')
+    cwd = os.path.abspath(os.path.join(__file__, '../../server-files'))
     proc = subprocess.Popen([
         'rsync', '--quiet', '-rvC',
         source, 'root@%s:%s' % (config.args.node, dest)],
@@ -62,9 +62,8 @@ apt-get -y -q install rsync
     setup_rsync(config, 'root', '/root/')
     config.logger.notify(
         "Running apt-get install on server")
-    lines = list(open(os.path.join(os.path.dirname(__file__),
-                                   'server-files',
-                                   'dpkg-query.txt')))
+    lines = list(open(os.path.abspath(
+        os.path.join(__file__, '../../server-files/dpkg-query.txt'))))
     packages = ' '.join(line.strip().split()[0]
                         for line in lines
                         if line.strip())
@@ -83,19 +82,17 @@ apt-get -y -q install rsync
             return 5
     
     setup_rsync(config, 'serverroot/', '/')
-    setup_script = open(os.path.join(os.path.dirname(__file__),
-                                     'server-files',
-                                     'update-server-script.sh')).read()
+    setup_script = open(os.path.abspath(os.path.join(
+        __file__, '../../server-files/update-server-script.sh'))).read()
     import getpass
     username = getpass.getuser()
     setup_script = setup_script.replace('__REMOTE_USER__', username)
     
-    proc = subprocess.Popen(
+    stdout, returncode = config.run(
         ['ssh', ssh_host, setup_script])
-    proc.communicate()
-    if proc.returncode:
+    if returncode:
         config.logger.fatal(
             "An error occurred (code=%r)"
-            % proc.returncode)
+            % returncode)
         # No need to ask because it's the last task anyway
         return 6

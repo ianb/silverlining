@@ -90,7 +90,7 @@ dist.Distribution.parse_config_files = parse_config_files
 def init_copy(source, dest, logger, vars, append=False):
     import tempita
     source = os.path.join(
-        os.path.dirname(__file__),
+        os.path.dirname(os.path.dirname(__file__)),
         'init-files',
         source)
     if os.path.exists(source+'.tmpl'):
