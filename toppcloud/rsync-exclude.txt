@@ -16,6 +16,7 @@ _$*
 .del-*
 *.elc
 *.pyc
+*.pyo
 .svn/
 .git/
 .bzr/
