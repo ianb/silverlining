@@ -308,6 +308,34 @@ class Config(UserDict):
                 return False
             print 'I did not understand the response: %s' % response
 
+    def run(self, command, stdin=None, return_stdout=False,
+            set_env=None, cwd=None):
+        env = os.environ.copy()
+        env['LANG'] = 'C'
+        if set_env:
+            env.update(set_env)
+        def _quote(arg):
+            if ' ' in arg:
+                return "%s" % arg.replace('"', '\\"')
+            return arg
+        command_text = ' '.join(
+            _quote(arg) for arg in command)
+        self.logger.debug("Calling: %s" % command_text)
+        kw = {}
+        if stdin:
+            kw['stdin'] = subprocess.PIPE
+        if return_stdout:
+            kw['stdout'] = subprocess.PIPE
+        if cwd:
+            kw['cwd'] = cwd
+        proc = subprocess.Popen(
+            command, env=env, **kw)
+        stdout, stderr = proc.communicate(stdin)
+        if proc.returncode:
+            self.logger.info('Error calling %s' % command_text)
+            self.logger.info('Return code: %s' % proc.returncode)
+        return stdout, proc.returncode
+
 class App(object):
     """Represents an app to be uploaded/updated"""
     
