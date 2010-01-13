@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 
 pushd "$(dirname $BASH_SOURCE)/../"
-VERSION="$(python setup.py --version)"
+if [ -z "$VERSION" ] ; then
+    VERSION="$(python setup.py --version)"
+fi
 
 if [ -z "$BUILD_DIR" ] ; then
     BUILD_DIR="zip-build"
