@@ -26,7 +26,7 @@ if [ ! -e $ZIP_DIR ] ; then
     mkdir -p $ZIP_DIR
 fi
 
-export VERSION="0.1"
+export VERSION="0.1-$(date +%Y-%m-%d)"
 
 #$ENV_PATH/bin/python setup.py develop
 source $ENV_PATH/bin/activate

@@ -34,7 +34,7 @@ chmod +x $BUILD/toppcloud.py
 mv $BUILD/lib/python2.6/site-packages $BUILD/lib.tmp
 rm -r $BUILD/lib
 mv $BUILD/lib.tmp $BUILD/lib
-rm -r $BUILD/bin $BUILD/include $BUILD/build
+rm -rf $BUILD/bin $BUILD/include $BUILD/build
 rm -r $BUILD/lib/pip-*.egg/ $BUILD/lib/setuptools.pth $BUILD/lib/setuptools-*.egg $BUILD/lib/easy-install.pth
 find $BUILD -name '*.pyc' -exec rm {} \;
 pushd $BUILD_DIR
