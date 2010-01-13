@@ -87,7 +87,7 @@ For CouchDB do::
 
     service.couchdb =
 
-Then look for::
+Then look for:
 
 ``CONFIG_COUCHDB_DB``:
     The name of the database to connect to.
