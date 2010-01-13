@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if [ "$1" = "-f" ] ; then
+    ssh flow.openplans.org 'ssh acura "~/bin/rsync-topppcloud"'
+    exit
+fi
+
 if [ -z "$BBDOCS_SCRATCH" ] ; then
     # Not the normal environment
     DEVEL=t
