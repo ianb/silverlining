@@ -92,6 +92,7 @@ def app_setup(app_dir, config, environ,
         environ['CONFIG_PG_USER'] = 'www-mgr'
         environ['CONFIG_PG_PASSWORD'] = ''
         environ['CONFIG_PG_HOST'] = ''
+        environ['CONFIG_PG_SQLALCHEMY'] = 'postgres://postgres@/%s' % app_name
     else:
         import getpass
         environ['CONFIG_PG_DBNAME'] = app_name
@@ -102,4 +103,15 @@ def app_setup(app_dir, config, environ,
             if name.startswith('postgis.'):
                 name = name[len('postgis.'):]
                 environ['CONFIG_PG_%s' % name.upper()] = value
+        sa = 'postgres://'
+        if environ.get('CONFIG_PG_USER'):
+            sa += environ['CONFIG_PG_USER']
+            if environ.get('CONFIG_PG_PASSWORD'):
+                sa += ':' + environ['CONFIG_PG_PASSWORD']
+            sa += '@'
+        if environ.get('CONFIG_PG_HOST'):
+            ## FIXME: should this check for 'localhost', which SA actually doesn't like?
+            sa += environ['CONFIG_PG_HOST']
+        sa += '/' + environ['CONFIG_PG_DBNAME']
+        environ['CONFIG_PG_SQLALCHEMY'] = sa
                 
