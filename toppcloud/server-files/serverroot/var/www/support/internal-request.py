@@ -28,7 +28,7 @@ def run():
     """Run the command, making an internal request"""
     options, args = parser.parse_args()
     if options.update:
-        return run_update(args[1], args[2])
+        return run_update(args[0], args[1])
     instance_name = args[0]
     hostname = args[1]
     path = args[2]
