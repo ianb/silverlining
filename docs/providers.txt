@@ -25,6 +25,17 @@ Once you have logged in go to **Your Account > API Access** to view or
 create your API key.  toppcloud needs to know your username and API
 key, which it will ask you for when you first start the command.
 
+Host It Yourself
+----------------
+
+You don't *need* to use commands like ``toppcloud create-node`` to
+make use of toppcloud.  If you have a machine with a fresh install of
+Ubuntu Jaunty (or Karmic) then you can use ``toppcloud setup-node`` to
+configure the machine and ``toppcloud update`` to deploy
+applications.  It's harder to test things without the ability to
+create and destroy servers on demand, but the basic infrastructure is
+not really dependent on that.
+
 Other Providers
 ---------------
 
