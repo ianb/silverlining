@@ -12,6 +12,7 @@ TOPP Cloud
     devpatterns
     php
     processes
+    providers
     comparisons
     dns
     license

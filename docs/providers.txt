@@ -1,0 +1,48 @@
+Cloud Provider Support
+======================
+
+This lists the cloud providers and the support available:
+
+Rackspace Cloud
+---------------
+
+`Rackspace Cloud <http://rackspacecloud.com>`_ is the first (and
+currently only) provider supported by toppcloud.
+
+To use toppcloud you must sign up for an account through their
+website.  You should sign up for "Cloud Servers" and "Cloud Files".
+There's no initial fee, and the cost for experimenting with toppcloud
+will be less than a dollar as long as you don't forget to take down
+the servers you create to experiment.  You'll have to have a credit
+card, and Rackspace Cloud will call you to confirm your account before
+you can use it.
+
+If you sign up for Rackspace Cloud to try toppcloud, please use our
+reference code **REF-TOPP** -- this throws a couple bucks to `The Open
+Planning Project <http://openplans.org>`_ for each signup.
+
+Once you have logged in go to **Your Account > API Access** to view or
+create your API key.  toppcloud needs to know your username and API
+key, which it will ask you for when you first start the command.
+
+Other Providers
+---------------
+
+toppcloud is built on `libcloud <http://libcloud.org>`_.  libcloud
+abstracts over the API of quite a few cloud providers.  Any of these
+providers should be a possible platform for toppcloud; the basic
+abstractions already exist, it just needs some testing.  The only
+thing that's currently really Rackspace-specific is that on node
+creation some files are uploaded -- not a complete set, mostly just
+``/root/.ssh/authorized_keys2``.  This is built in to some other APIs
+(e.g., I believe EC2 node creation automatically sets up
+authorized_keys).  It would require a bit of abstraction as a result.
+
+The best way to try a new provider is to fork the toppcloud
+repository, try it out, and make what patches are necessary --
+probably to the routine that creates ``~/.toppcloud.conf``
+(:mod:`toppcloud.createconf`), ``toppcloud create-node``
+(:mod:`toppcloud.commands.create_node`), and *maybe* ``toppcloud
+setup-node`` (:mod:`toppcloud.commands.setup_node`) -- though I expect
+setup-node will be fine.
+
