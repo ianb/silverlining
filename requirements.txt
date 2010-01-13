@@ -1,5 +1,5 @@
 http://bitbucket.org/ianb/cmdutils/get/tip.gz#egg=cmdutils
-https://svn.apache.org/repos/asf/incubator/libcloud/trunk/#egg=libcloud
+http://svn.apache.org/repos/asf/incubator/libcloud/trunk/#egg=libcloud
 -e hg+http://bitbucket.org/ianb/toppcloud#egg=toppcloud
 # libcloud doesn't specify this, but causes problems when its not installed:
 simplejson
