@@ -1,36 +1,33 @@
-Provider:
+toppcloud Terminology
+==============================
 
+Provider:
     This is a provider like Rackspace, EC2, etc.  This is generally
     defined in ~/.toppcloud.conf
 
 Node:
-
     This is a virtual server that has been setup.  It has a name,
     which is also the domain name it can be accessed by.  The name
     doesn't have to be in DNS (/etc/hosts is setup for this).
 
 Application:
-
     This is a codebase that can be run.  It has an app.ini file, and a
     main.py or config.ini file for actually running the application.
     It also has a major version (each major version can be deployed as
     a separate site running concurrently, similarly to App Engine).
 
 Site:
-
     This is a deployment of an application.  It has a name (used
     internally) and one or more hostnames.  Any persistence is shared
     over all deployments of a site.
 
 Deployment:
-
     This is a site when it is deployed.  It typically has a name that
     starts with the site name, and looks like
     "site_name.application_version.date" (maybe with numbers appended
     to make the deployment name unique).
 
 Services:
-
     These are persistent services that the application will use.  The
     only one written so far is postgis, which sets up a postgis
     database.

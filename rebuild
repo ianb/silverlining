@@ -26,5 +26,8 @@ if [ ! -e $ZIP_DIR ] ; then
     mkdir -p $ZIP_DIR
 fi
 
+$ENV_PATH/bin/python setup.py develop
+source $ENV_PATH/bin/activate
+
 ./toppcloud/create-zip.sh
 
