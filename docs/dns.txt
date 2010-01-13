@@ -15,4 +15,8 @@ services that include APIs.  So far:
 * `Nettica <http://www.nettica.com/Support/Developers.aspx>`_
 
 * `Zerigo <http://www.zerigo.com/managed-dns>`_ (they have a slick Web
-  2.1-looking website)
+  2.1-looking website).  There's also a `Python interface
+  <https://bitbucket.org/dotcloud/pyzerigo/overview/>`_ in the works.
+
+* `DynDNS <http://dyn.com/dynect>`_ has a SOAP interface (yuck!) but
+  should have a REST interface soon.

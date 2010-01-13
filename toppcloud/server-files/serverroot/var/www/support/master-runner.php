@@ -1,4 +1,8 @@
 <?php
+  /*
+  This command is like master_runner.py, and runs at the beginning of
+  every PHP request.
+   */
 $topp_base = "/var/www/{$_SERVER[SITE]}";
 $topp_app_ini = "$topp_base/app.ini";
 $topp_app_config = parse_ini_file($topp_app_ini);

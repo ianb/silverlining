@@ -3,10 +3,23 @@ import sys, os
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from tcsupport.common import HOSTMAP, PLATFORM_MAP, PHP_ROOT_MAP
 from ConfigParser import ConfigParser
+from optparse import OptionParser
 
-import sys
+parser = OptionParser(
+    usage="%prog APPNAME HOSTNAME1 HOSTNAME2 ...",
+    description="""\
+Updates /var/www/hostmap.txt and /var/www/platforms.txt
+This sets the new hostname(s) (HOSTNAME1 etc) to point to APPNAME.
+Also the app.ini is read and if services.php is set then that is noted in platforms.txt
+""")
 
 def update_hostmap(hostname, appname):
+    """Updates /var/www/hostmap.txt with the new hostname to appname
+    association
+
+    This is called multiple times to update the hostmap.  It also
+    creates the prev.hostname association (pointing to the old app).
+    """
     fp = open(HOSTMAP)
     lines = list(fp)
     fp.close()
@@ -41,6 +54,10 @@ def update_hostmap(hostname, appname):
     fp.close()
 
 def set_platforms(appname):
+    """Sets the platforms.txt value for the given app
+
+    this basically marks php apps separately from Python apps
+    """
     parser = ConfigParser()
     if not parser.read([os.path.join('/var/www', appname, 'app.ini')]):
         raise Exception('Could not find app.ini')
@@ -55,7 +72,7 @@ def set_platforms(appname):
             fp.close()
 
 if __name__ == '__main__':
-    args = sys.argv[1:]
+    options, args = parser.parse_args()
     appname = args[0]
     for hostname in args[1:]:
         ## FIXME: for multiple hostnames, it shouldn't rewrite the hostmap.txt

@@ -2,11 +2,22 @@
 import sys, os
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from tcsupport.common import site_dir, sites
+from optparse import OptionParser
 
 import time
 import os
 
+parser = OptionParser(
+    usage="%prog APP_NAME VERSION",
+    description="""\
+Prepares a new directory for a new instance to be uploaded.  This
+creates a new unique name, creates a directory, and hardlink/copies
+the directory over to be rsync'd over by the new app.  Finally it
+prints the new app name for the caller to use.
+""")
+
 def prepare_new_site(site_name, version):
+    """Creates the new directory and copies it over"""
     n = 0
     date = time.strftime('%Y-%m-%d')
     app_dir = '%s.%s.%s' % (site_name, version, date)
@@ -37,8 +48,8 @@ def hardlink_copy(source, dest):
             os.link(path, new_path)
 
 if __name__ == '__main__':
-    import sys
-    site_name = sys.argv[1]
-    version = sys.argv[2]
+    options, args = parser.parse_args()
+    site_name = args[0]
+    version = args[1]
     prepare_new_site(site_name, version)
     

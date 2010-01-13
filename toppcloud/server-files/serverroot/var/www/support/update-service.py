@@ -2,6 +2,14 @@
 import sys, os
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from tcsupport.common import services_config, load_service_module, site_config
+from optparse import OptionParser
+
+parser = OptionParser(
+    usage="%prog INSTANCE_NAME",
+    description="""\
+Runs any setup necessary for the new instance's services.  Also
+apt-get installs any packages listed in app.ini.
+""")
 
 def update_service(app_dir):
     import subprocess
@@ -25,6 +33,6 @@ def update_service(app_dir):
             proc.communicate()
 
 if __name__ == '__main__':
-    import sys
-    app_dir = sys.argv[1]
+    options, args = parser.parse_args()
+    app_dir = args[0]
     update_service(app_dir)

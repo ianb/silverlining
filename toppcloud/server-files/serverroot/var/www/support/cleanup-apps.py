@@ -3,7 +3,6 @@ import sys, os
 import optparse
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from tcsupport.common import site_dir, HOSTMAP, sites
-
 import shutil
 
 parser = optparse.OptionParser(
@@ -14,6 +13,7 @@ parser.add_option(
     help="Show what would be removed, but don't remove it")
 
 def unused_sites():
+    """Returns a tuple of sets: (used_sites, unused_sites)"""
     all_sites = set(sites(True))
     used_sites = {}
     fp = open(HOSTMAP)
@@ -27,10 +27,12 @@ def unused_sites():
     return used_sites, all_sites - set(used_sites)
    
 def remove_site(site):
+    """Removes the site"""
     print 'Removing unused site %s' % site_dir(site)
     shutil.rmtree(os.path.join(site_dir(site)))
 
 def remove_unused_sites():
+    """Call the script; remove all unused sites"""
     options, args = parser.parse_args()
     simulate = options.simulate
     used, unused = unused_sites()

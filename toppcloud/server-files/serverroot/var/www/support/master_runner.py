@@ -1,3 +1,14 @@
+"""Called by mod_wsgi, this application finds and starts all requests
+
+This defines application(), which is a WSGI application that mod_wsgi looks for.
+
+It uses $SITE to figure out who to send the request to, then
+configures all services, and then passes the request on to the new
+application.  This loading process only happens once.
+
+Also for each request the environment is fixed up some to represent
+the request properly after having gone through Varnish.
+"""
 import os, sys
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from tcsupport import common
@@ -93,6 +104,7 @@ def application(environ, start_response):
     return found_app(environ, start_response)
 
 class ErrorApp(object):
+    """Application that simply displays the error message"""
     def __init__(self, message):
         self.message = message
     
