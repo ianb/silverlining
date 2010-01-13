@@ -1,5 +1,14 @@
 #!/bin/bash
 
+if [ -z "$BBDOCS_SCRATCH" ] ; then
+    # Not the normal environment
+    DEVEL=t
+    BBDOCS_SCRATCH="scratch-build"
+    if [ ! -e $BBDOCS_SCRATCH ] ; then
+        mkdir -p $BBDOCS_SCRATCH
+    fi
+fi
+
 ENV_PATH="$BBDOCS_SCRATCH/env"
 if [ ! -e "$BBDOCS_SCRATCH/virtualenv.py" ] ; then
     wget http://svn.colorstudy.com/virtualenv/trunk/virtualenv.py -O $BBDOCS_SCRATCH/virtualenv.py
@@ -16,20 +25,22 @@ mkdir -p docs/_static
 $ENV_PATH/bin/pip install Sphinx
 $ENV_PATH/bin/sphinx-build -E -b html docs/ docs/_build || exit 1
 
-export BUILD_DIR="$BBDOCS_SCRATCH/zip-build"
-if [ ! -e $BUILD_DIR ] ; then
-    mkdir -p $BUILD_DIR
+if [ -z "$DEVEL" ] ; then
+
+    export BUILD_DIR="$BBDOCS_SCRATCH/zip-build"
+    if [ ! -e $BUILD_DIR ] ; then
+        mkdir -p $BUILD_DIR
+    fi
+
+    export ZIP_DIR="$(pwd)/docs/_build/zip"
+    if [ ! -e $ZIP_DIR ] ; then
+        mkdir -p $ZIP_DIR
+    fi
+
+    export VERSION="0.1-$(date +%Y-%m-%d)"
+
+    source $ENV_PATH/bin/activate
+    
+    ./toppcloud/create-zip.sh
 fi
-
-export ZIP_DIR="$(pwd)/docs/_build/zip"
-if [ ! -e $ZIP_DIR ] ; then
-    mkdir -p $ZIP_DIR
-fi
-
-export VERSION="0.1-$(date +%Y-%m-%d)"
-
-#$ENV_PATH/bin/python setup.py develop
-source $ENV_PATH/bin/activate
-
-./toppcloud/create-zip.sh
 
