@@ -27,7 +27,7 @@ $BUILD/bin/pip install \
   https://svn.apache.org/repos/asf/incubator/libcloud/trunk/#egg=libcloud \
   simplejson \
   -e .
-$BUILD/bin/python setup.py install --single-version-externally-managed --record zip-build/record.txt
+$BUILD/bin/python setup.py install --single-version-externally-managed --record $BUILD_DIR/record.txt
 
 cp toppcloud/toppcloud-zip-command.py $BUILD/toppcloud.py
 chmod +x $BUILD/toppcloud.py
@@ -37,7 +37,7 @@ mv $BUILD/lib.tmp $BUILD/lib
 rm -r $BUILD/bin $BUILD/include $BUILD/build
 rm -r $BUILD/lib/pip-*.egg/ $BUILD/lib/setuptools.pth $BUILD/lib/setuptools-*.egg $BUILD/lib/easy-install.pth
 find $BUILD -name '*.pyc' -exec rm {} \;
-pushd zip-build
+pushd $BUILD_DIR
 if [ -z "$ZIP_DIR" ] ; then
     ZIP_DIR="."
 fi
