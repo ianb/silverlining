@@ -3,7 +3,7 @@ PHP Support
 
 PHP support in toppcloud is a bit experimental.  Meaning, I'm not sure
 exactly *how* it should work, or if it is working well.  It also adds
-a slightly Pythonesque flare to the dispatch.
+a slightly Pythonesque flare to the request dispatching.
 
 Enabling PHP
 ============
@@ -36,4 +36,8 @@ fit.  If you wish to simply pass it on, you may do so, like::
 
 Note that ``.htaccess`` files will not work, so if you need that kind
 of functionality you'll need to implement it directly in your runner.
-
+This is somewhat easier than it might otherwise be with a PHP
+application, because you can be sure that *all* (dynamic) requests
+will go through your runner.  But it means if your application has a
+sophisticated set of rewrite rules, for example, you'll have to
+replicate them in PHP.

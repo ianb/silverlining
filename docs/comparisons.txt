@@ -1,5 +1,5 @@
 Comparisons To Other Cloud Tools
---------------------------------
+================================
 
 There are a bunch of tools or hosted applications for managing cloud
 applications.  As I come upon these, I'm trying to add at least a
@@ -8,7 +8,7 @@ casual comparison...
 .. contents::
 
 Differences From App Engine
-===========================
+---------------------------
 
 * This doesn't do security isolation between apps on a server.
   Individual servers aren't that expensive, so untrusted applications
@@ -43,7 +43,7 @@ Differences From App Engine
 * No pure-Python libraries are included, because they aren't needed.
 
 Differences From Heroku
-=======================
+-----------------------
 
 `Heroku <http://heroku.com/>`_ is an App Engine-like service for Ruby
 applications.  But it works different from App Engine, and has some
@@ -86,14 +86,14 @@ cheaper (since you are paying only for the actual cloud service, which
 is 
 
 Differences From Media Temple
-=============================
+-----------------------------
 
 `This
 <http://mediatemple.net/webhosting/gs/features/containers.php#django>`_
 looks similar, but I haven't looked at it yet.
 
 Differences from App Scale
-==========================
+--------------------------
 
 `AppScale <http://appscale.cs.ucsb.edu/>`_ is an open source
 implementation of the Google App Engine API.  It features a bunch of
@@ -138,8 +138,8 @@ Everything you can do in a traditional deployment system, you can do
 with toppcloud (at least, potentially; extra support code may be
 necessary).
 
-Moonshine
-=========
+Differences from Moonshine
+--------------------------
 
 So far, `Moonshine <http://github.com/railsmachine/moonshine>`_ sounds
 like the closest thing to toppcloud in functionality, with even many
@@ -158,3 +158,36 @@ this sense it is glue.
 It has a notion of "shared config", which is configuration not in your
 source tree, but which is needed for deployment.  toppcloud needs
 something like this.
+
+Differences from Typhoonae
+--------------------------
+
+`Typhoonae <http://code.google.com/p/typhoonae/>`_, like AppScale, an
+open source adaptation of the App Engine API.
+
+Typhoonae uses `supervisord <http://supervisord.org/>`_ for monitoring
+the processes, while toppcloud uses mod_wsgi.  They both have a
+similar function, but because mod_wsgi is integrated with the web
+server it is not just aware of the process dying, but also of the
+process becoming unresponsive.  Supervisor, because it is a
+general-purpose process monitor, cannot determine when a process is
+surving its function.
+
+People have asked about how toppcloud can be used with an App
+Engine.  I'm not that optimistic about AppScale, because I think it
+overlaps in the wrong ways with toppcloud -- they are more direct
+competitors than likely to be complementary.  Typhoonae on the other
+hand might work better.
+
+The pieces of Typhoonae that would be useful would be its
+implementations of the App Engine APIs, backed with MongoDB (data
+store), RabbitMQ (well... not quite sure what this is for), and
+ejabberd (for chat integration), and possibly other APIs that they've
+implemented with a better backend than what the App Engine SDK itself
+contains.
+
+To integrate these toppcloud would need the necessary services (e.g.,
+a MongoDB service), and then a bit of code to make the Typhoonae
+implementations work with these services (mostly just using the
+configuration toppcloud puts in the environ to setup the Typhoonae
+implementations).  

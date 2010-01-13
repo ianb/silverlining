@@ -1,0 +1,41 @@
+Application Configuration
+----------------------------------------
+
+You application is configured with a file ``app.ini``.  It's really
+recommended that you put this file in your source code repository and
+symlink it into its location at the root of the app directory.
+
+``app_name``:
+    The name of the application, a simple identifier.
+
+``version``:
+    This is the "version" of the application.  You only need to
+    increment this for major updates.  When you do so you can (in
+    theory) have both the older version and the newer version active,
+    only accessing the newer version when you use a version-specific
+    URL.
+
+``runner``:
+    This points to the file that "runs" the application.  This can be
+    a ``.py`` file that defines an object ``application``, a WSGI
+    application.  It can also be a ``.ini`` file which has an
+    ``[app:main]`` section that can be loaded by Paste Deploy (e.g.,
+    for a Pylons application).
+
+``update_fetch``:
+    This option configuration is one (or more) URLs that should be
+    fetched everytime the application is updated.  These can setup
+    tables, create directories, etc.  You can check
+    ``environ['toppcloud.update']`` to be sure this is an internal
+    request.  If you want multiple URLs, put each on its own line (in
+    ``.ini`` files you can use indentation on subsequent lines).
+
+``default_host``:
+    This is a default for ``toppcloud update --host``, so you don't
+    have to enter that option each time you update.
+
+``service.*``
+    The presence of the setting activates the `service <services>`_.
+    It can have a value, which is passed to the service, but no
+    service uses that yet.
+

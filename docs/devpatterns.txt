@@ -1,0 +1,210 @@
+Developing Using toppcloud
+==========================
+
+This document discusses how development looks when using toppcloud.
+Not how you develop toppcloud itself, but how application development
+with toppcloud can work.
+
+Creating a Project/Layout
+-------------------------
+
+The first thing you'll have to do is setup a code layout.  An initial
+layout can be created like this::
+
+    toppcloud init myapp-app
+
+(If you get a big error message about ez_setup.py and Distribute, try
+using ``toppcloud init --setutools myapp-app``)
+
+This is a `virtualenv <http://virtualenv.openplans.org>`_ environment
+with some added stuff.  Here's what the layout looks like::
+
+    app.ini          This contains the configuration for your
+                     application.  To start out with it is filled with
+                     helpful comments.
+
+    bin/             All your scripts for managing your application
+                     (probably none of these should be used when
+                     running your application)
+
+      pip            Use this to install things
+
+      easy_install   You can also use this; I think you should use
+                     pip, but easy_install should work fine too
+
+      activate       Do source myapp-app/bin/activate when doing work
+                     in your environment for convenience (this just
+                     places bin/ first on $PATH).
+
+      python(2.6)    The virtualenv interpreter.  So long as you use
+                     this interpreter you'll get access to all the
+                     libraries you've installed for your app.
+
+    static/          This is where static files go.  Any file found
+                     here will be served directly, not passed to your
+                     application.  You can symlink things into here,
+                     or make the entire directory a symlink.
+
+    lib/python2.6/   Some virtualenv stuff is put in here; you can
+                     ignore it (mostly).
+
+    lib/python2.6/sitecustomize.py
+                     This is the one thing you might pay attention to.
+                     This file sets up the environment.  Most
+                     particularly it adds lib/python to the path (more
+                     about that later).
+
+    lib/python2.6/site-packages/
+                     This is often where packages would be installed,
+                     but not for this environment.  Only
+                     Setuptools/Distribute and pip are installed here.
+
+    lib/python/      This is the directory where everything gets
+                     installed.  It starts out empty, it's just for
+                     your packages.  If you do pip install foobar, then
+                     there will be lib/python/foobar/
+
+      toppcustomize.py
+                     This file doesn't exist to start, but you can add
+                     it to customize the setup, for instance to set
+                     os.environ['DJANGO_SETTINGS_MODULE'].
+
+      easy-install.pth
+                     If you have libraries in src/, there will be
+                     pointers to those paths in this file.  It's
+                     created on demand, so you won't see it at first.
+
+    include/         Created by virtualenv; you can ignore this
+                     directory.
+
+    src/             Just a place to check out your own libraries.
+                     After checking out a library run:
+                       pip -e src/new-library
+
+Next Steps
+----------
+
+Now that you have a basic environment, either create some code in
+``myapp-app/src/myapp`` or check out some existing code into that
+location.  If you are using a framework, install it using ``bin/pip``
+(e.g., ``myapp-app/bin/pip install Pylons``).  Install your app itself
+like ``bin/pip install -e src/myapp`` -- this causes any prerequesites
+listed in ``src/myapp/setup.py`` to also be installed by pip
+(otherwise they might get installed with easy_install, which is *okay*
+but not as graceful).
+
+You might want to put ``app.ini`` into your application (and into
+version control), and then turn it into a symlink, like::
+
+    $ cd myapp-app
+    $ ln -s src/myapp/toppcloud-app.ini app.ini
+
+You have to define your "runner", which is the script or config file
+that starts your application.  You need a line like this in
+``app.ini``::
+
+    runner = src/myapp/toppcloud-runner.py
+
+If you have a ``.py`` file then it must define ``application``, a WSGI
+application.  If you have an ``.ini`` file then it is treated as a
+Paste Deploy config file (as used by Pylons, TurboGears, Repoze --
+though it can be applied to many kinds of applications).
+
+You can also put ``lib/python/`` into version control.  You shouldn't
+*edit* things in ``lib/python/`` except to install newer versions of
+software.  But by putting this directory into version control you can
+be sure you have a consistent and stable set of libraries, and you can
+easily revert problematic library upgrades.
+
+Lastly you can go the extra mile and move ``bin/`` into
+``lib/python/bin/`` and create a symlink back to ``bin/``.  This looks
+like::
+
+    $ mv bin lib/python/
+    $ ln -s lib/python/bin bin
+    $ cd lib/python
+    $ echo "syntax: glob
+    bin/activate*
+    bin/pip
+    bin/easy_install*
+    bin/python*" > .hgignore
+    $ hg addremove
+
+This puts all the items in ``bin/`` into version control, *except*
+those things created automatically by virtualenv (and thus by
+``toppcloud ini``).
+
+Customizing Your Environment
+----------------------------
+
+If you put in a file ``lib/python/toppcloud.py`` this module will be
+loaded everytime you start the environment.  This is a great place to
+do things like::
+
+    import os
+    os.environ['DJANGO_SETTINGS_MODULE'] = 'myapp.settings'
+
+Note also that all the services will get setup everytime you start
+``bin/python`` or any other service, so you can access the database
+from tests or scripts or anything else.
+
+Creating a Build Script
+-----------------------
+
+A nice way to setup an application is to have a script to build the
+layout for your application.  This helps other developers work on the
+project.  Since toppcloud only works on Posix-style (and not Windows)
+systems you can just make a shell script.  Here's an example::
+
+    #!/usr/bin/env bash
+
+    DIR="$1"
+    if [ -z "$DIR" ] ; then
+        echo "Usage: $(basename $0) NEW_DIR"
+        exit 2
+    fi
+
+    if ! which toppcloud ; then
+        echo "You must install toppcloud and have it on \$PATH"
+        exit 3
+    fi
+
+    for COMMAND in hg git svn ; do
+        if ! which $COMMAND ; then
+            echo "You must install $COMMAND"
+            exit 4
+        fi
+    done
+
+    toppcloud init $DIR
+    pushd $DIR
+    # Obviously check it out with whatever is appropriate:
+    if [ ! -e src/myapp/.hg ] ; then
+        hg clone http://blahblah/myapp src/myapp
+    fi
+    if [ ! -e lib/python/.hg ] ; then
+        # We have to delete it first because toppcloud init creates
+        # this directory:
+        rm -rf lib/python
+        hg clone http://blahblah/myapp-lib lib/python
+    fi
+
+    if [ ! -L app.ini ] ; then
+        rm -f app.ini
+        ln -s src/myapp/toppcloud-app.ini app.ini
+    fi
+    
+    if [ ! -L bin ] ; then
+        mv bin bin.tmp
+        ln -s lib/python/bin bin
+        mv bin.tmp/* bin/
+        rmdir bin.tmp
+    fi
+
+    if [ ! -L static ] ; then
+        rmdir static
+        ln -s src/myapp/myapp/static static
+    fi
+
+Then tell people to grab that file directly and run it to get a
+working rig.

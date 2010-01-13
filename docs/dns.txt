@@ -2,13 +2,8 @@ DNS Services
 ------------
 
 toppcloud currently does not handle DNS at all.  But it might be nice
-if it did, no?  With this in mind I've asked around a bit about DNS
-services that include APIs.  So far:
-
-* Slicehost offers something, not sure if you need to sign up for an
-  account.
-
-* Rackspace Cloud has something, but I haven't seen an API for it.
+if it did, don't you think?  With this in mind I've asked around a bit
+about DNS services that include APIs.  So far:
 
 * `DNS Made Easy <http://www.dnsmadeeasy.com/s0306/res/ddnsc.html>`_
 
@@ -19,4 +14,9 @@ services that include APIs.  So far:
   <https://bitbucket.org/dotcloud/pyzerigo/overview/>`_ in the works.
 
 * `DynDNS <http://dyn.com/dynect>`_ has a SOAP interface (yuck!) but
-  should have a REST interface soon.
+  is said to have a REST interface in the works.
+
+* Slicehost offers something, not sure if you need to sign up for an
+  account.
+
+* Rackspace Cloud has something, but I haven't seen an API for it.

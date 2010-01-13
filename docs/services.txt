@@ -11,12 +11,14 @@ TOPPCLOUD environmental variable
 ================================
 
 To see if you are running in a toppcloud production environment, check
-``os.environ.get('TOPPCLOUD')``.
+``os.environ.get('TOPPCLOUD', '').startswith('toppcloud/')``. In
+development this variable will exist but start with ``'devel/'``.
 
 Secrets
 =======
 
-If you need a "secret", get it like::
+If you need a "secret" (something random value that is persistent on
+the server), get it like::
 
     from tcsupport.secret import get_secret
     secret = get_secret()
@@ -55,6 +57,9 @@ recommended you use additional directories under this location for
 different kinds of files (even if to start you can only think of one
 kind of file).
 
+If you want to use SQLite you could simply require the necessary
+packages and then use this files service to store the database.
+
 PostGIS
 ~~~~~~~
 
@@ -77,8 +82,12 @@ Then look for these environmental variables:
     The host (or host:port) to connect to; an empty string means
     localhost.
 
+``CONFIG_PG_SQLALCHEMY``:
+    The complete connection string needed for SQLAlchemy.
+
 Right now it's all local, and there won't be any password or host, but
-in the future that might change.
+in the future that might change.  And in development you can configure
+it however you want.
 
 CouchDB
 ~~~~~~~
@@ -108,3 +117,33 @@ new (Ubuntu) package to be installed by putting this into your
 This makes toppcloud run ``apt-get install package1 package2``
 everytime your application is update (conveniently if the packages are
 already installed then ``apt-get`` is fast and does nothing).
+
+Local/Development Configuration
+============================================================
+
+This all applies to local development (using ``toppcloud serve``), but
+toppcloud does not actually setup any of this.  It's up to you to
+install the necessary servers, create the databases, etc.
+
+You can do this however you want, and effect the configuration using
+``~/.toppcloud.conf`` -- each of these services looks for
+configuration overrides here.  You should put this configuration in a
+section ``[devel]`` or ``[devel:APP_NAME]`` if you want to override a
+value just for one application (instead of all applications).  You
+might do something like::
+
+      [devel]
+      # Use port 5433, where PG 8.3 is running:
+      postgis.host = localhost:5433
+
+      [devel:someapp]
+      postgis.dbname = foobar
+
+Then all applications will look for the database at
+``localhost:5433``, and the ``someapp`` application will also use the
+database name ``foobar``.  If you put the literal string ``APP_NAME``
+in any configuration value, that will be substituted with the
+application name; you might use it like::
+
+    [devel]
+    postgis.dbname = test_APP_NAME
