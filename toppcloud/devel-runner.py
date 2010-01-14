@@ -6,6 +6,12 @@ path = os.path.join(
     os.path.dirname(__file__),
     'server-files/serverroot/var/www/support')
 sys.path.insert(0, path)
+# The parent directory ends up on sys.path, even though we don't want
+# it to; here we remove it:
+here = os.path.abspath(os.path.dirname(__file__))
+for path in list(sys.path):
+    if os.path.abspath(path) == here:
+        sys.path.remove(path)
 from tcsupport import common
 from tcsupport.requests import make_internal_request
 from tcsupport.develconfig import load_devel_config
