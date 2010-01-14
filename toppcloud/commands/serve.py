@@ -7,8 +7,7 @@ def command_serve(config):
     if os.path.exists(os.path.join(dir, 'bin', 'python')):
         # We are in a virtualenv situation...
         cmd = [os.path.join(dir, 'bin', 'python'),
-               os.path.join(os.path.dirname(__file__),
-                            'devel-runner.py'),
+               os.path.abspath(os.path.join(__file__, '../../devel-runner.py')),
                dir]
     else:
         cmd = [sys.executable,
