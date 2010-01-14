@@ -48,6 +48,12 @@ think about this it's a bad idea to do VCS integration.  Some reasons:
    should not be edited, you should only install or upgrade/downgrade
    those libraries (probably using ``pip``) and commit the results.
 
+5. Try before you commit.  Lots of things are okay to do after only
+   changing code and testing in development, but some things are more
+   likely to be problematic.  It's nice to test these things with a
+   real deployment before actually committing the work.  So long as
+   "commit" isn't part of the workflow, this is easy.
+
 Declarative Application Setup
 =============================
 
