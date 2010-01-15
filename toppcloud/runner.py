@@ -157,6 +157,52 @@ parser_serve.add_argument(
     metavar='APP_DIR',
     help='Directory holding app')
 
+parser_run = argparse.ArgumentParser(
+    add_help=False,
+    description="""\
+Run a command for an application; this runs a script in bin/ on the
+remote server.
+
+Use it like:
+    toppcloud run import-something --option-for-import-something
+
+Note any arguments that point to existing files or directories will
+cause those files/directories to be uploaded, and substituted with the
+location of the remote name.
+""")
+
+parser_run.add_argument(
+    '-p', '--provider',
+    metavar='NAME',
+    help="The [provider:NAME] section from ~/.toppcloud.conf to use (default [provider:default])",
+    default="default")
+
+parser_run.add_argument(
+    '-y', '--yes',
+    action='store_true',
+    help="Answer yes to any questions")
+
+add_verbose(parser_run, add_log=True)
+
+parser_run.add_argument(
+    'script',
+    help="script (in bin/) to run")
+
+parser_run.add_argument(
+    '--app', metavar='APP_DIR',
+    help="Location of the app directory (will try to detect)")
+
+parser_run.add_argument(
+    '--host', '-H', metavar='HOST',
+    help="Host where the application is running "
+    "(this will be read from app.ini if not given, and if app.ini has the information)")
+
+parser_run.add_argument(
+    '--user', metavar='USERNAME',
+    default="www-data",
+    help="The user to run the command as; default is www-data.  "
+    "Other options are www-mgr and root")
+
 parser_query = subcommands.add_parser(
     'query', help="See what apps and versions are on a node")
 
@@ -169,12 +215,27 @@ parser_query.add_argument(
     'site-name', nargs='*',
     help="The site or hostname to query (wildcards allowed)")
 
+def catch_error(func):
+    def decorated(*args, **kw):
+        try:
+            return func(*args, **kw)
+        except CommandError, e:
+            print e
+            sys.exit(2)
+    return decorated
+
+@catch_error
 def main():
     if not os.path.exists(createconf.toppcloud_conf):
         print "%s doesn't exists; let's create it" % createconf.toppcloud_conf
         createconf.create_conf()
         return
-    args = parser.parse_args()
+    if len(sys.argv) > 1 and sys.argv[1] == 'run':
+        args, unknown_args = parser_run.parse_known_args(sys.argv[2:])
+        args.unknown_args = unknown_args
+        args.command = 'run'
+    else:
+        args = parser.parse_args()
     create_logger(args)
     config = Config.from_config_file(
         createconf.toppcloud_conf, 'provider:'+args.provider,

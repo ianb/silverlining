@@ -46,6 +46,17 @@ def load_service_module(service_name):
     mod = sys.modules['tcsupport.service.%s' % service_name]
     return mod
 
+def app_dir_for_host(hostname):
+    fp = open(HOSTMAP)
+    try:
+        for line in fp:
+            h, instance_name = line.strip().split(None, 1)
+            if h == hostname:
+                return os.path.join('/var/www', instance_name)
+        raise LookupError(
+            "No app with the hostname %s" % hostname)
+    finally:
+        fp.close()
 
 if __name__ == '__main__':
     app_dir = sys.argv[1]
