@@ -13,9 +13,6 @@ layout can be created like this::
 
     toppcloud init myapp-app
 
-(If you get a big error message about ez_setup.py and Distribute, try
-using ``toppcloud init --setutools myapp-app``)
-
 This is a `virtualenv <http://virtualenv.openplans.org>`_ environment
 with some added stuff.  Here's what the layout looks like::
 
@@ -27,8 +24,8 @@ with some added stuff.  Here's what the layout looks like::
                      (probably none of these should be used when
                      running your application)
 
-                     You can also run *Python* scripts in this
-                     location by using ``toppcloud run``.
+                     You can also run *Python* scripts from here on
+                     the production server by using "toppcloud run".
 
       pip            Use this to install things
 

@@ -174,7 +174,7 @@ similar function, but because mod_wsgi is integrated with the web
 server it is not just aware of the process dying, but also of the
 process becoming unresponsive.  Supervisor, because it is a
 general-purpose process monitor, cannot determine when a process is
-surving its function.
+serving its function.
 
 People have asked about how toppcloud can be used with something more
 closely related to App Engine.  I'm not that optimistic about

@@ -69,7 +69,7 @@ One of the primary things I want to do with toppcloud is to separate
 "application" from "environment", and have toppcloud manage the
 environment and applications exist as more of a Platonic ideal.
 
-If you have needs that arent met by toppcloud, the best way is to
+If you have needs that aren't met by toppcloud, the best way is to
 modify toppcloud itself.  It's a good chance you want to put something
 in ``tcsupport.services.*``.  This isn't perfect, but it has a
 side-effect that there's a collective benefit to these new features
@@ -84,7 +84,7 @@ target the idea of repeatable and isolated build systems.  With
 deployment using these tools, you would run the build process
 (probably from scratch) for each deployment.
 
-It's kind of nice for development, because it works nicely for
+It's kind of nice for development because it works nicely for
 development machines just like production, you just have to run the
 build tool and you have a nice local copy.  One of the problems though
 is you, as the developer setting up the Buildout, become responsible
@@ -117,12 +117,52 @@ Non-.py libraries are handled separately
 ========================================
 
 You'll notice if you need to use some library that isn't pure-Python,
-you need to have the Ubuntu package for that library installed.
+you need to have the Ubuntu package for that library installed.  This
+happens somewhat implicitly for services, and more explicitly with the
+``packages`` `configuration setting <appconfig>`_.
 
-The system for this isn't great yet (services handle some of this, but
-probably not quite the right way for simple libraries, e.g., `lxml
-<http://codespeak.net/lxml/>`_).  But generally I've found that Ubuntu
-packaging of such libraries (a) works well, (b) is stable and updates
-are appropriately conservative (c) is new enough.  Pure-Python
-libraries generally get updated much more frequently, but everyone
-treats these C libraries more conservatively.
+Generally I've found that Ubuntu packaging of such libraries (a) works
+well, (b) is stable and updates are appropriately conservative (c) is
+new enough.  Pure-Python libraries generally get updated much more
+frequently, but everyone treats these C libraries more conservatively.
+
+Fabric
+======
+
+This doesn't really qualify as a "design decision" as it's not a
+particularly deliberate decision, but because it is asked about a
+lot...
+
+`Fabric <http://docs.fabfile.org/>`_ is a library for managing remote
+servers.  It has functions to call remote commands, transfer files,
+etc., typically over ssh.  As such it seems like a no-brainer to use
+for toppcloud, right?
+
+And maybe it is, but when writing toppcloud I did not really want to
+learn a new tool, as it would only distract from what I was trying to
+do (especially at a point in time when I wasn't sure *what* I was trying
+to do).  So I kept things simple, calling out to ssh manually when
+necessary.  And this actually works reasonably well.
+
+Since then it has gotten a bit more complicated, and there's a bit
+more tunneling happening, and the consistency of the codebase has
+suffered.  But not *that badly* all considered.  Most of it would be
+easily resolvable by simple refactoring.  So I remain somewhat
+reluctant to add Fabric to the mix.
+
+And really the biggest concern I have with Fabric is that underlying
+the request is a desire to do ad hoc server manipulations using
+Fabric.  A lot of people have deployment systems using Fabric that
+basically poke around on the server, installing things, configuring
+things, etc, in order to deploy their application.  This is definitely
+**not** how toppcloud should work.  *Internally* toppcloud connects to
+the server and runs commands (though many of the commands it runs are
+scripts hosted on the server).  But individual deployments work at a
+more abstract level.  They should never be making these kinds of
+modifications.  If you are *developing toppcloud itself* then sure,
+you can add new scripts and interactions.  But, as I've noted, it's
+not particularly hard to do with less of a library.
+
+So while I am not opposed to Fabric, I am not sure it is necessary or
+worth the extra layer of abstraction.
+

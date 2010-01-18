@@ -110,7 +110,7 @@ Then look for:
     The host:port to connect to.
 
 Installing Packages
-~~~~~~~~~~~~~~~~~~~
+===================
 
 All your packages should be installed by toppcloud.  You can ask for a
 new (Ubuntu) package to be installed by putting this into your
