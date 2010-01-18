@@ -18,9 +18,9 @@ Differences From App Engine
   up a scalable backend service, and do the associated configuration,
   but I don't know much about those tools anyway.  Scalability isn't
   really a goal; ease and reliability of deployment is more the goal.
+  Not that this should *exclude* scalability, but it's not automatic.
 
-* You can write files, though really that should be another "service"
-  (managed like a database).
+* You can write files.
 
 * App Engine allocates server time dynamically, and this does not in
   any way, though at least it makes your deployments scriptable.
@@ -28,26 +28,29 @@ Differences From App Engine
 * There's no authentication built in, and there won't be; this can be
   handled by per-application libraries.
 
-* There's no limits, and so support for skipping files is not such a
-  big deal.  Dynamic support for different scripts or static files
+* There's no limits (like, for example, the 1000-now-2000 file limit).
+  As a result support for skipping files on upload is not such a big
+  deal.  Dynamic support for multiple runners or static file locations
   also isn't supported (like in ``app.yaml``), because it doesn't seem
-  very important.  If you don't want process isolation, something like
-  `Paste's urlmap <http://pythonpaste.org/modules/urlmap.html>`_ can
-  handle it.
+  very important to me.  If you don't want process isolation,
+  something like `Paste's urlmap
+  <http://pythonpaste.org/modules/urlmap.html>`_ can handle dispatch
+  (implemented in your application's runner).
 
 * Of course, you can run any library or service.  For me `lxml
   <http://codespeak.net/lxml/>`_ and `PostGIS
   <http://postgis.refractions.net/>`_ are important, and the lack of
   those libraries really kept and keeps me from using App Engine.
 
-* No pure-Python libraries are included, because they aren't needed.
+* No pure-Python libraries are included, because they aren't needed
+  (including, for example, Django and WebOb).
 
 Differences From Heroku
 -----------------------
 
 `Heroku <http://heroku.com/>`_ is an App Engine-like service for Ruby
-applications.  But it works different from App Engine, and has some
-different ideas:
+applications.  But it works differently from App Engine, and has some
+novel ideas:
 
 * Heroku uses git to deploy.  I don't see any particular reason to
   integrate with a version control system.  This system uses rsync.
@@ -83,7 +86,7 @@ forward.
 Of course, the primary difference of toppcloud is: it's open source,
 you can adapt the system as you find necessary, and it's a **lot**
 cheaper (since you are paying only for the actual cloud service, which
-is 
+is reasonably priced).
 
 Differences From Media Temple
 -----------------------------
@@ -162,8 +165,8 @@ something like this.
 Differences from Typhoonae
 --------------------------
 
-`Typhoonae <http://code.google.com/p/typhoonae/>`_, like AppScale, an
-open source adaptation of the App Engine API.
+`Typhoonae <http://code.google.com/p/typhoonae/>`_, like AppScale, is
+an open source adaptation of the App Engine API.
 
 Typhoonae uses `supervisord <http://supervisord.org/>`_ for monitoring
 the processes, while toppcloud uses mod_wsgi.  They both have a
@@ -173,11 +176,11 @@ process becoming unresponsive.  Supervisor, because it is a
 general-purpose process monitor, cannot determine when a process is
 surving its function.
 
-People have asked about how toppcloud can be used with an App
-Engine.  I'm not that optimistic about AppScale, because I think it
-overlaps in the wrong ways with toppcloud -- they are more direct
-competitors than likely to be complementary.  Typhoonae on the other
-hand might work better.
+People have asked about how toppcloud can be used with something more
+closely related to App Engine.  I'm not that optimistic about
+AppScale, because I think it overlaps in the wrong ways with toppcloud
+-- they are more direct competitors than likely to be complementary.
+Typhoonae on the other hand might work better.
 
 The pieces of Typhoonae that would be useful would be its
 implementations of the App Engine APIs, backed with MongoDB (data

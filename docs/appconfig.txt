@@ -24,11 +24,15 @@ symlink it into its location at the root of the app directory.
 
 ``update_fetch``:
     This option configuration is one (or more) URLs that should be
-    fetched everytime the application is updated.  These can setup
-    tables, create directories, etc.  You can check
+    fetched everytime the application is updated.  It is also fetch
+    *every time* your development server is started (with ``toppcloud
+    serve``).
+
+    These can setup tables, create directories, etc.  You can check
     ``environ['toppcloud.update']`` to be sure this is an internal
-    request.  If you want multiple URLs, put each on its own line (in
-    ``.ini`` files you can use indentation on subsequent lines).
+    update request.  If you want multiple URLs, put each on its own
+    line (in ``.ini`` files you can use indentation on subsequent
+    lines).
 
 ``default_host``:
     This is a default for ``toppcloud update --host``, so you don't
