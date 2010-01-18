@@ -10,6 +10,7 @@ TOPP Cloud
     services
     appconfig
     devpatterns
+    management-scripts
     php
     processes
     providers
