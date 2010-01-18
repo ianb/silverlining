@@ -24,7 +24,7 @@ symlink it into its location at the root of the app directory.
 
 ``update_fetch``:
     This option configuration is one (or more) URLs that should be
-    fetched everytime the application is updated.  It is also fetch
+    fetched everytime the application is updated.  It is also fetched
     *every time* your development server is started (with ``toppcloud
     serve``).
 

@@ -26,3 +26,8 @@ Also any arguments that you pass that point to a file or directory
 that exists will cause those files to be uploaded, and the remote
 filenames will be substituted.  So in the example
 ``~/import-data.zip`` will be uploaded to the server.
+
+Note that these scripts can be run as ``www-data`` (the default) or
+you can use ``--user=www-mgr`` to run the script as ``www-mgr`` (the
+normal user used to manage the deployment of scripts) or
+``--user=root`` to run the script as ``root``.
