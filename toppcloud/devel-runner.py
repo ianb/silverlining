@@ -113,7 +113,8 @@ class CompoundApp(object):
         path_info = environ.get('PATH_INFO', '')
         path_info = os.path.normpath(path_info)
         path_info = path_info.replace('\\', '/').lstrip('/')
-        path = os.path.join(self.base_path, path_info)
+        path = os.path.join(self.base_path, 'static', path_info)
+        print 'serve path', path
         if os.path.exists(path) and not os.path.isdir(path):
             return self.serve_file(path, environ, start_response)
         return self.app(environ, start_response)
@@ -133,7 +134,7 @@ class CompoundApp(object):
             fp.close()
         start_response('200 OK', [
             ('Content-type', type),
-            ('Content-length', length)])
+            ('Content-length', str(length))])
         return iterator()
 
 def load_paste_reloader():
