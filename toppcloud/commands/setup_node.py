@@ -60,7 +60,6 @@ apt-get -y -q install rsync
             "Continue?")
         if not response:
             return 3
-    setup_rsync(config, 'root', '/root/')
     config.logger.notify(
         "Running apt-get install on server")
     lines = list(open(os.path.abspath(
