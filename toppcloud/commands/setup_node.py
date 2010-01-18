@@ -27,7 +27,8 @@ def command_setup_node(config):
         'Setting up authentication on server...')
     ssh_host = 'root@%s' % node
     proc = subprocess.Popen([
-        'ssh', ssh_host, '''
+        'ssh', '-o', 'StrictHostKeyChecking=no',
+        ssh_host, '''
 if [ -e /root/.toppcloud-server-setup ] ; then
     exit 50
 fi
