@@ -70,6 +70,12 @@ parser_create.add_argument(
     metavar="ID",
     help="Size ID to use")
 
+parser_create.add_argument(
+    '--setup-node', action='store_true',
+    help="Wait for the node to be created (this means the command just "
+    "sits for a couple minutes) and then set up the server.  It is suggested "
+    "you also use --yes with this option.")
+
 parser_default = subcommands.add_parser(
     'default-node', help="Set a node as the default node")
 
