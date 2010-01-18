@@ -1,7 +1,12 @@
 import re
+import subprocess
 from toppcloud import renderscripts
 from cmdutils import CommandError
 from toppcloud.etchosts import set_etc_hosts
+import time
+
+ESTIMATED_TIME = 60
+AFTER_PING_WAIT = 10
 
 def command_create_node(config):
     config.logger.info('Getting image/size info')
@@ -26,3 +31,56 @@ def command_create_node(config):
     config.logger.notify('Status %s at IP %s' % (
         resp.state, public_ip))
     set_etc_hosts(config, [node_hostname], public_ip)
+
+    if config.args.setup_node:
+        wait_for_node_ready_ping(config, public_ip)
+        config.logger.notify('Waiting %s seconds for full boot'
+                             % AFTER_PING_WAIT)
+        time.sleep(AFTER_PING_WAIT)
+        from toppcloud.commands.setup_node import command_setup_node
+        config.args.node = node_hostname
+        config.logger.notify('Setting up server')
+        command_setup_node(config)
+       
+def wait_for_node_ready(config, node_name):
+    config.logger.start_progress('Waiting for server to be ready...')
+    config.logger.debug('Waiting an initial %s seconds' % ESTIMATED_TIME)
+    time.sleep(ESTIMATED_TIME)
+    while 1:
+        config.logger.show_progress()
+        for node in config.driver.list_nodes():
+            if node.name == node_name:
+                if node.state == 'ACTIVE':
+                    active = True
+                else:
+                    active = False
+                break
+        else:
+            config.logger.warn(
+                "No node with the name %s listed" % node_name)
+            config.logger.warn(
+                "Continuing, but this may not complete")
+        time.sleep(10)
+    config.logger.end_progress('server active.')
+
+def wait_for_node_ready_ping(config, node_hostname):
+    start = time.time()
+    config.logger.start_progress('Waiting for server to be ready...')
+    config.logger.debug('Waiting an initial %s seconds' % ESTIMATED_TIME)
+    time.sleep(ESTIMATED_TIME)
+    while 1:
+        config.logger.show_progress()
+        proc = subprocess.Popen(
+            ['ping', '-c 2', '-w', '10', node_hostname],
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        proc.communicate()
+        if proc.returncode:
+            config.logger.debug('Ping did not return successful result')
+        else:
+            config.logger.end_progress(
+                "Server created (%s to create)" % format_time(time.time()-start))
+            break
+
+def format_time(secs):
+    return '%i:%02i' % (int(secs/60), int(secs)%60)
+

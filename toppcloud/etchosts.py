@@ -60,9 +60,8 @@ def set_etc_hosts(config, hostnames, ip):
            "/etc/hosts",
            ip] + list(hostnames)
     config.logger.notify('The hostname/ip is not setup in /etc/hosts')
-    resp = raw_input('Would you like me to set it up? ')
-    resp = resp.strip().lower()
-    if resp and resp[0] == 'y':
+    resp = config.ask('Would you like me to set it up? ')
+    if resp:
         config.logger.notify('Executing %s' % ' '.join(cmd))
         proc = subprocess.Popen(cmd)
         proc.communicate()

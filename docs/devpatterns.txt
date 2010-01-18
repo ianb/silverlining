@@ -27,12 +27,15 @@ with some added stuff.  Here's what the layout looks like::
                      (probably none of these should be used when
                      running your application)
 
+                     You can also run *Python* scripts in this
+                     location by using ``toppcloud run``.
+
       pip            Use this to install things
 
       easy_install   You can also use this; I think you should use
                      pip, but easy_install should work fine too
 
-      activate       Do source myapp-app/bin/activate when doing work
+      activate       Do "source myapp-app/bin/activate" when doing work
                      in your environment for convenience (this just
                      places bin/ first on $PATH).
 
@@ -42,8 +45,8 @@ with some added stuff.  Here's what the layout looks like::
 
     static/          This is where static files go.  Any file found
                      here will be served directly, not passed to your
-                     application.  You can symlink things into here,
-                     or make the entire directory a symlink.
+                     application as a request.  You can symlink things 
+                     into here, or make the entire directory a symlink.
 
     lib/python2.6/   Some virtualenv stuff is put in here; you can
                      ignore it (mostly).
@@ -52,7 +55,7 @@ with some added stuff.  Here's what the layout looks like::
                      This is the one thing you might pay attention to.
                      This file sets up the environment.  Most
                      particularly it adds lib/python to the path (more
-                     about that later).
+                     about that later).  You shouldn't edit this.
 
     lib/python2.6/site-packages/
                      This is often where packages would be installed,
@@ -131,8 +134,8 @@ like::
     $ hg addremove
 
 This puts all the items in ``bin/`` into version control, *except*
-those things created automatically by virtualenv (and thus by
-``toppcloud ini``).
+those things created automatically by virtualenv (and so automatically
+created by ``toppcloud init``).
 
 Customizing Your Environment
 ----------------------------
@@ -206,5 +209,5 @@ systems you can just make a shell script.  Here's an example::
         ln -s src/myapp/myapp/static static
     fi
 
-Then tell people to grab that file directly and run it to get a
-working rig.
+Then tell people to grab the script you write directly and run it to
+get a working rig.
