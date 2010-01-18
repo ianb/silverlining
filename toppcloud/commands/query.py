@@ -67,6 +67,10 @@ def command_query(config):
         sites = new_sites
     info = config.logger.info
     notify = config.logger.notify
+    special_hosts = {}
+    for hostname, site in hosts.items():
+        if site in ('disabled', 'notfound'):
+            special_hosts.setdefault(site, []).append(hostname)
     for site in sorted(sites):
         if len(sites) > 1:
             notify('Site: %s' % site)
@@ -78,7 +82,8 @@ def command_query(config):
                     if ':' in hostname:
                         # boring
                         continue
-                    if hostname.startswith('www.'):
+                    if (hostname.startswith('www.')
+                        or hostname.startswith('prev.www')):
                         continue
                     if inst == instance_name:
                         hostnames.append(hostname)
@@ -93,3 +98,17 @@ def command_query(config):
         finally:
             if len(sites) > 1:
                 config.logger.indent -= 2
+    if special_hosts.get('disabled'):
+        notify('Disabled hosts:')
+        for hostname in sorted(special_hosts['disabled']):
+            if (':' in hostname or hostname.startswith('www.')
+                or hostname.startswith('prev.www.')):
+                continue
+            notify('  %s' % hostname)
+    if special_hosts.get('notfound'):
+        notify('Hosts marked as not-found:')
+        for hostname in sorted(special_hosts['disabled']):
+            if (':' in hostname or hostname.startswith('www.')
+                or hostname.startswith('prev.www.')):
+                continue
+            notify('  %s' % hostname)

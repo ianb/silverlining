@@ -1,5 +1,6 @@
 import os
 import sys
+import re
 from ConfigParser import ConfigParser
 
 SITE_DIR = '/var/www'
@@ -57,6 +58,69 @@ def app_dir_for_host(hostname):
             "No app with the hostname %s" % hostname)
     finally:
         fp.close()
+
+def update_hostmap(hostname, appname):
+    """Updates /var/www/hostmap.txt with the new hostname to appname
+    association
+
+    This is called multiple times to update the hostmap.  It also
+    creates the prev.hostname association (pointing to the old app).
+    """
+    fp = open(HOSTMAP)
+    lines = list(fp)
+    fp.close()
+    hostnames = [
+      hostname,
+      hostname+':80',
+      hostname+':443',
+      'www.'+hostname,
+      'www.'+hostname+':80',
+      'www.'+hostname+':443',
+    ]
+    new_lines = []
+    for line in lines:
+        if not line.strip() or line.strip().startswith('#'):
+            new_lines.append(line)
+            continue
+        line_hostname, line_appname = line.strip().split(None, 1)
+        if line_hostname in hostnames:
+            new_lines.append('prev.%s %s\n' % (line_hostname, line_appname))
+            #print 'Renaming host %s to prev.%s' % (line_hostname, line_hostname)
+            continue
+        if (line_hostname.startswith('prev.')
+            and line_hostname[5:] in hostnames):
+            #print 'Removing line %s' % line.strip()
+            continue
+        new_lines.append(line)
+    for hostname in hostnames:
+        new_lines.append('%s %s\n' % (hostname, appname))
+    ## FIXME: This should just append to the file when that's possible:
+    fp = open(HOSTMAP, 'w')
+    fp.writelines(new_lines)
+    fp.close()
+
+def remove_host(hostname, keep_prev):
+    """Updates /var/www/hostmap.txt to remove the given hostname"""
+    if not keep_prev:
+        prev = r'(?:prev\.)?'
+    hostname_re = re.compile(
+        r'^%s(?:www\.)?(?:\d+\.)?%s(?::80)?(?::443)?$' %
+        (prev, re.escape(hostname)),
+        re.I)
+    fp = open(HOSTMAP)
+    lines = list(fp)
+    fp.close()
+    new_lines = []
+    for line in lines:
+        if not line.strip() or line.strip().startswith('#'):
+            new_lines.append(line)
+            continue
+        line_hostname, line_appname = line.strip().split(None, 1)
+        if not hostname_re.search(line_hostname):
+            new_lines.append(line)
+    fp = open(HOSTMAP, 'w')
+    fp.writelines(new_lines)
+    fp.close()
 
 if __name__ == '__main__':
     app_dir = sys.argv[1]

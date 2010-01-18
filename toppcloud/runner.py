@@ -221,6 +221,43 @@ parser_query.add_argument(
     'site-name', nargs='*',
     help="The site or hostname to query (wildcards allowed)")
 
+parser_activate = subcommands.add_parser(
+    'activate', help="Activate a site instance for a given domain")
+
+parser_activate.add_argument(
+    '--node',
+    metavar="NODE_HOSTNAME",
+    help="Node to act on")
+
+parser_activate.add_argument(
+    'host',
+    help="The hostname to act on")
+
+parser_activate.add_argument(
+    'instance_name',
+    help="The instance name to activate (can also be a version number or \"prev\")")
+
+parser_deactivate = subcommands.add_parser(
+    'deactivate', help="Deactivate a site (leaving it dangling)")
+
+parser_deactivate.add_argument(
+    '--node',
+    metavar="NODE_HOSTNAME",
+    help="Node to act on")
+
+parser_deactivate.add_argument(
+    'hosts', nargs='+',
+    help="The hostname to act on; if you give more than one, "
+    "they must all be on the same node")
+
+parser_deactivate.add_argument(
+    '--disable', action='store_true',
+    help="Set the host to the status disabled, pointing it at the disabled application (good for a temporary removal)")
+
+parser_deactivate.add_argument(
+    '--keep-prev', action='store_true',
+    help="Keep the prev.* host activate (by default it is deleted)")
+
 def catch_error(func):
     def decorated(*args, **kw):
         try:

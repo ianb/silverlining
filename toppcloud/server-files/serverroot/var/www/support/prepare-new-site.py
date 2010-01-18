@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import sys, os
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+import glob
 from tcsupport.common import site_dir, sites
 from optparse import OptionParser
 
@@ -20,10 +21,15 @@ def prepare_new_site(site_name, version):
     """Creates the new directory and copies it over"""
     n = 0
     date = time.strftime('%Y-%m-%d')
-    app_dir = '%s.%s.%s' % (site_name, version, date)
-    while os.path.exists(site_dir(app_dir)):
-        n += 1
-        app_dir = '%s.%s.%s_%s' % (site_name, version, date, n)
+    app_fn = '/var/www/%s.%s.%s_*' % (site_name, version, date)
+    names = list(glob.glob(app_fn))
+    if not names:
+        n = 1
+    else:
+        n = max(
+            [int(name.rsplit('_', 1)[1])
+             for name in names])[-1] + 1
+    app_dir = '%s.%s.%s_%03i' % (site_name, version, date, n)
     other_sites = []
     for name in sites():
         if name.startswith('%s.' % site_name):

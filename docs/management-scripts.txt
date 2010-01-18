@@ -18,8 +18,9 @@ this should be a script in the ``bin/`` directory (in this example
 the file locally and don't do ``toppcloud update`` remember that it
 will use the old version of the script.
 
-The script must be a Python script.  The path will be appropriate
-setup and then the script will be run, passing all arguments you
+The script must be a Python script.  The path will be appropriately
+setup so all your libraries will be ready, and environmental variables
+set, and then the script will be run, passing all arguments you
 provide to the script.
 
 Also any arguments that you pass that point to a file or directory
