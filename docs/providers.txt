@@ -36,6 +36,13 @@ applications.  It's harder to test things without the ability to
 create and destroy servers on demand, but the basic infrastructure is
 not really dependent on that.
 
+**Don't use this on a server you want to keep!**  ``toppcloud
+setup-node`` is not aggressive in modifying the server, but it doesn't
+particularly keep track of what it does, nor is there any reason it
+should.  Also if you have local modifications on the server, those
+modifications can be lost; all updates are done with the assumption
+that it's being given a bare Ubuntu installation to work with.
+
 Other Providers
 ---------------
 
