@@ -12,9 +12,6 @@ def command_update(config):
     if not os.path.exists(config.args.dir):
         raise CommandError(
             "No directory in %s" % config.args.dir)
-    if not config.args.name:
-        config.args.name = os.path.basename(os.path.abspath(config.args.dir))
-        config.logger.info('Using app name=%r' % config.args.name)
     config.logger.info('Fixing up .pth and .egg-info files')
     virtualenv.logger = config.logger
     config.logger.indent += 2

@@ -120,7 +120,7 @@ parser_update.add_argument(
 parser_update.add_argument(
     '--name',
     metavar="NAME",
-    help="'Name' of the site; defaults to directory name")
+    help="'Name' of the site; defaults to app_name")
 
 parser_update.add_argument(
     '--node',
@@ -445,13 +445,15 @@ class App(object):
     
     def __init__(self, dir, site_name, host):
         self.dir = dir
-        self.site_name = site_name
         self.host = host
         parser = ConfigParser()
         assert parser.read([os.path.join(self.dir, 'app.ini')]), (
             "No %s/app.ini found!" % self.dir)
         self.config = parser.asdict()
         self.version = int(self.config['production']['version'])
+        if not site_name:
+            site_name = self.config['production']['app_name']
+        self.site_name = site_name
 
     def sync(self, host, instance_name):
         dest_dir = os.path.join('/var/www', instance_name)
