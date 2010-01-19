@@ -166,3 +166,37 @@ not particularly hard to do with less of a library.
 So while I am not opposed to Fabric, I am not sure it is necessary or
 worth the extra layer of abstraction.
 
+Ubuntu
+======
+
+This system is based on Ubuntu.  Jaunty, Karmic, in the future no
+doubt other updates will come around.  For the most part the
+Jaunty/Karmic distinction is temporary (I suppose it should just be
+upgraded to Karmic), and supporting multiple revisions isn't ideal or
+desired.
+
+Support for other Linux distributions is not desired.  No one has
+asked about this so far, so I'm hoping this will be a
+non-controversial choice.  Many parts of the system expose Ubuntu
+(especially the ``packages`` configuration).  The config files are
+written based on their locations in Ubuntu and Ubuntu policy.  I don't
+want to introduce any indirection to this, or any abstraction layer.
+The consistency and reliability of the system is based on the
+consistency of its components, and this is an area where I have no
+desire to support flexibility in return for consistency.
+
+Bare Base Systems
+=================
+
+Being based on "cloud" servers, toppcloud prefers a bare server.  Much
+like the Ubuntu decision, this is intentional and provides needed
+consistency.  It's not a goal to support existing servers that have
+been setup in eclectic ways.  You don't have to use a "cloud" server
+to get a bare server, of course; but you **do** need a bare server.
+
+
+.. some variables:
+
+     Local Variables:
+     mode: rst
+     End:
