@@ -73,9 +73,21 @@ RewriteRule . - [E=SITE:${hostmap:disabled|default-disabled}]
 RewriteCond %{HTTP_HOST} (.*)
 RewriteRule . - [E=SITE:${hostmap:%1}]
 
+# Refuse /index.html files (redirect):
+RewriteCond /var/www/%{ENV:SITE}/static%{REQUEST_URI} -f
+RewriteRule (.*/)index.html $1 [L]
 # Serve up any static files:
-RewriteCond /var/www/%{ENV:SITE}/static%{REQUEST_URI} -f 
+RewriteCond /var/www/%{ENV:SITE}/static%{REQUEST_URI} -f
 RewriteRule . /var/www/%{ENV:SITE}/static%{REQUEST_URI} [L]
+# Add a trailing slash when necessary:
+RewriteCond /var/www/%{ENV:SITE}/static%{REQUEST_URI} -d
+RewriteCond %{REQUEST_URI} [^/]$
+RewriteCond /var/www/%{ENV:SITE}/static%{REQUEST_URI}/index.html -f
+RewriteRule (.*) $1/ [R]
+# Otherwise serve up index.html:
+RewriteCond /var/www/%{ENV:SITE}/static%{REQUEST_URI}/index.html -f
+RewriteRule . /var/www/%{ENV:SITE}/static%{REQUEST_URI}/index.html [L]
+
 
 # Some PHP setup; first allow for a site directory
 # First, we determine the "root" directory of the PHP app...
