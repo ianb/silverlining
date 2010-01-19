@@ -28,7 +28,7 @@ def prepare_new_site(site_name, version):
     else:
         n = max(
             [int(name.rsplit('_', 1)[1])
-             for name in names])[-1] + 1
+             for name in names]) + 1
     app_dir = '%s.%s.%s_%03i' % (site_name, version, date, n)
     other_sites = []
     for name in sites():
