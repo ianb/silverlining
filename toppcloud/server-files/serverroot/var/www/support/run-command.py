@@ -16,13 +16,17 @@ def main():
         rest = [
             r.replace('$TMP', tmp_dir)
             for r in rest]
-    activate_dir(app_dir)
     path = os.path.join(app_dir, 'bin', command)
     ns = {'__file__': path, '__name__': '__main__'}
     os.environ['TOPPCLOUD'] = 'toppcloud/0.0'
+    activate_dir(app_dir)
+    app_name = os.path.basename(app_dir)
+    for service, config in sorted(
+        common.services_config(app_name).items()):
+        common.load_service_module(service).app_setup(
+            app_name, config, os.environ)
     sys.argv = [path] + rest
     os.chdir(app_dir)
-    print 'argv', sys.argv
     execfile(path, ns)
 
 def activate_dir(base_path):
