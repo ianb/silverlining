@@ -65,6 +65,10 @@ def command_init(config):
         _distutils_init,
         os.path.join(dir, 'lib', 'python2.6', 'distutils', '__init__.py'),
         config.logger, vars, append=True)
+    init_copystring(
+        _activate_this,
+        os.path.join(dir, 'bin', 'activate_this.py'),
+        config.logger, vars, append=True)
 _distutils_cfg = """\
 # This is what makes things install into lib/python instead of lib/python2.6:
 [install]
@@ -85,6 +89,13 @@ def parse_config_files(self, filenames=None):
         else:
             opt_dict['home'] = (location, value.replace('<sys.prefix>', sys.prefix))
 dist.Distribution.parse_config_files = parse_config_files
+"""
+
+_activate_this = """\
+# This is some extra code to make activate_this.py run sitecustomize:
+sitecustomize = os.path.abspath(os.path.join(__file__, '../../lib/python%s/sitecustomize.py' % sys.version[:3]))
+if os.path.exists(sitecustomize):
+    execfile(sitecustomize, dict(__file__=sitecustomize, __name__='sitecustomize'))
 """
 
 def init_copy(source, dest, logger, vars, append=False):
