@@ -45,7 +45,8 @@ sub vcl_fetch {
         pass;
     }
     # Django regularly sends pages with Set-Cookie and cache control, 
-    # which is bad; we'll ignore Cache-Control in that case.
+    # we'll ignore Cache-Control in that case, as there's no point to
+    # caching something that sets a cookie.
     if (obj.http.Set-Cookie) {
         unset obj.http.Cache-Control;
         pass;
