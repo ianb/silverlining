@@ -92,6 +92,8 @@ dist.Distribution.parse_config_files = parse_config_files
 """
 
 _activate_this = """\
+
+# Added by toppcloud:
 # This is some extra code to make activate_this.py run sitecustomize:
 sitecustomize = os.path.abspath(os.path.join(__file__, '../../lib/python%s/sitecustomize.py' % sys.version[:3]))
 if os.path.exists(sitecustomize):

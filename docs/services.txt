@@ -84,8 +84,10 @@ Then look for these environmental variables:
     The password to use (an empty string means no password is required).
 
 ``CONFIG_PG_HOST``: 
-    The host (or host:port) to connect to; an empty string means
-    localhost.
+    The host to connect to; an empty string means localhost.
+
+``CONFIG_PG_PORT``:
+    The port to connect to; an empty string means the default port (5432).
 
 ``CONFIG_PG_SQLALCHEMY``:
     The complete connection string needed for SQLAlchemy.

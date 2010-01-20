@@ -92,6 +92,7 @@ def app_setup(app_dir, config, environ,
         environ['CONFIG_PG_USER'] = 'www-mgr'
         environ['CONFIG_PG_PASSWORD'] = ''
         environ['CONFIG_PG_HOST'] = ''
+        environ['CONFIG_PG_PORT'] = ''
         environ['CONFIG_PG_SQLALCHEMY'] = 'postgres://postgres@/%s' % app_name
     else:
         import getpass
@@ -99,6 +100,7 @@ def app_setup(app_dir, config, environ,
         environ['CONFIG_PG_USER'] = getpass.getuser()
         environ['CONFIG_PG_PASSWORD'] = ''
         environ['CONFIG_PG_HOST'] = ''
+        environ['CONFIG_PG_PORT'] = ''
         for name, value in devel_config.items():
             if name.startswith('postgis.'):
                 name = name[len('postgis.'):]
@@ -112,6 +114,38 @@ def app_setup(app_dir, config, environ,
         if environ.get('CONFIG_PG_HOST'):
             ## FIXME: should this check for 'localhost', which SA actually doesn't like?
             sa += environ['CONFIG_PG_HOST']
+        if environ.get('CONFIG_PG_PORT'):
+            sa += ':' + environ['CONFIG_PG_PORT']
         sa += '/' + environ['CONFIG_PG_DBNAME']
         environ['CONFIG_PG_SQLALCHEMY'] = sa
                 
+def backup(app_dir, config, environ, output_dir):
+    e = os.environ.copy()
+    e['LANG'] = 'C'
+    proc = subprocess.Popen(
+        ['pg_dump', '-Fc', environ['CONFIG_PG_DBNAME'],
+         '--file', os.path.join(output_dir, 'postgis.pgdump')],
+        env=e)
+    proc.communicate()
+    fp = open(os.path.join(output_dir, 'postgis.README.txt'), 'w')
+    fp.write(BACKUP_README)
+    fp.close()
+
+BACKUP_README = """\
+The backup is created by pg_dump -Fc.  To restore it use pg_restore.
+"""
+
+def restore(app_dir, config, environ, input_dir):
+    path = os.path.join(input_dir, 'postgis.pgdump')
+    dbname = environ['CONFIG_PG_DBNAME']
+    proc = subprocess.Popen(
+        ['pg_restore', '--dbname', dbname, path])
+    proc.communicate()
+
+def clear(app_dir, config, environ):
+    dbname = environ['CONFIG_PG_DBNAME']
+    proc = subprocess.Popen(
+        ['dropdb', dbname])
+    proc.communicate()
+    install(app_dir, config)
+    

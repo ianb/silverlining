@@ -3,6 +3,8 @@
 import os
 import pwd
 import grp
+import subprocess
+import shutil
 
 def dir_for_instance_name(instance_name):
     base = instance_name.split('.')[0]
@@ -35,3 +37,24 @@ def app_setup(app_dir, config, environ,
             print 'Creating file location %s' % environ['CONFIG_FILES']
             os.makedirs(environ['CONFIG_FILES'])
 
+def backup(app_dir, config, environ, output_dir):
+    path = environ['CONFIG_FILES']
+    ## FIXME: should this be compressed, or just rely on that to
+    ## happen at a higher level?
+    proc = subprocess.Popen(
+        ['tar', 'fc', os.path.join(output_dir, 'files.tar'), '.'],
+        cwd=path)
+    proc.communicate()
+    
+def restore(app_dir, config, environ, input_dir):
+    path = environ['CONFIG_FILES']
+    proc = subprocess.Popen(
+        ['tar', 'fx', os.path.join(input_dir, 'files.tar')],
+        cwd=path)
+    proc.communicate()
+
+def clear(app_dir, config, environ):
+    path = environ['CONFIG_FILES']
+    for p in os.listdir(path):
+        p = os.path.join(path, p)
+        shutil.rmtree(p)
