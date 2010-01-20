@@ -114,7 +114,9 @@ class CompoundApp(object):
         path_info = os.path.normpath(path_info)
         path_info = path_info.replace('\\', '/').lstrip('/')
         path = os.path.join(self.base_path, 'static', path_info)
-        print 'serve path', path
+        ## FIXME: this should redirect (add / etc) same as wsgi_runner does:
+        if os.path.exists(path) and os.path.isdir(path) and os.path.exists(os.path.join(path, 'index.html')):
+            return self.serve_file(os.path.join(path, 'index.html'), environ, start_response)
         if os.path.exists(path) and not os.path.isdir(path):
             return self.serve_file(path, environ, start_response)
         return self.app(environ, start_response)
