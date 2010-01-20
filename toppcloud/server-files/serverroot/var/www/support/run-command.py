@@ -25,6 +25,9 @@ def main():
         common.services_config(app_name).items()):
         common.load_service_module(service).app_setup(
             app_name, config, os.environ)
+    # Buffering can happen because this isn't obviously hooked up to a
+    # terminal (even though it is indirectly):
+    sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
     sys.argv = [path] + rest
     os.chdir(app_dir)
     execfile(path, ns)
