@@ -44,6 +44,12 @@ sub vcl_fetch {
     if (obj.status >= 300) {
         pass;
     }
+    # Django regularly sends pages with Set-Cookie and cache control, 
+    # which is bad; we'll ignore Cache-Control in that case.
+    if (obj.http.Set-Cookie) {
+        unset obj.http.Cache-Control;
+        pass;
+    }
     if (obj.http.Cache-Control ~ "max-age" || obj.http.Expires) {
         unset obj.http.Set-Cookie;
         deliver;
