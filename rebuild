@@ -50,7 +50,8 @@ if [ -z "$DEVEL" ] ; then
     cp docs/_static/HEADER.html $ZIP_DIR
     sed -i "s/MOST_RECENT/$VERSION/g" $ZIP_DIR/HEADER.html
     echo "RewriteEngine On
-RewriteRule toppcloud-mostrecent.zip http://%{HOST}/zip/toppcloud-$VERSION.zip [R,L]
+RewriteCond %{HOST} (.*)
+RewriteRule toppcloud-mostrecent.zip http://%1/zip/toppcloud-$VERSION.zip [R,L]
 " > $ZIP_DIR/.htaccess
 fi
 
