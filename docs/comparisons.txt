@@ -194,3 +194,14 @@ a MongoDB service), and then a bit of code to make the Typhoonae
 implementations work with these services (mostly just using the
 configuration toppcloud puts in the environ to setup the Typhoonae
 implementations).  
+
+Differences from Rubber
+-----------------------
+
+`Rubber <http://github.com/wr0ngway/rubber/wikis>`_ is a tool based on
+Ruby/Rails and Capistrano.
+
+I'll have to look into it some.  It, like Moonshine, is based on
+Capistrano.  It is a more general configuration management tool.  It
+also has more features for scaling.
+
