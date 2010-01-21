@@ -205,3 +205,25 @@ I'll have to look into it some.  It, like Moonshine, is based on
 Capistrano.  It is a more general configuration management tool.  It
 also has more features for scaling.
 
+Bitnami
+-------
+
+`Bitname <http://bitnami.org/>`_ is kind of a package for pre-built
+open source applications.  For instance, you grab a Joomla image and
+you get Joomla.  From what I can tell, Bitnami itself is actually
+proprietary.
+
+This has actually made me think a lot in the last few... well, hours.
+toppcloud doesn't support Windows, and may never support Windows.
+Similarly, when I work with people on platforms that they don't
+regularly develop on, it can be hard to get things like PostGIS setup.
+What if toppcloud could also build "development images"?  Take an
+Ubuntu image, set it up *somewhat* similarly to how a production
+server is set up, add the application.  The application isn't
+"deployed" or updated from outside, instead it's live in the image
+itself, and editable.  All source control preserved.  Some file
+sharing is setup so the developer can edit files from the image in
+their native environment.  One can imagine a few tools, for things
+like source control and deployment.  Or just login to the image and
+use the command line.
+
