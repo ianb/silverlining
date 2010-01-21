@@ -10,27 +10,6 @@ _tmp_re = re.compile(r'tmp="(.*)"')
 
 def command_run(config):
     args = config.args
-    if not args.app:
-        venv = os.environ.get('VIRTUAL_ENV')
-        if venv:
-            args.app = venv
-        else:
-            ## FIXME: should search harder
-            raise CommandError(
-                "Could not find app.ini")
-    app_ini = os.path.join(args.app, 'app.ini')
-    if not os.path.exists(app_ini):
-        raise CommandError(
-            "Could not find app.ini in %s" % app_ini)
-    app = App(args.app, site_name=None, host=args.host)
-    if not args.host:
-        default = app.config.get('production', {}).get('default_host')
-        if default:
-            app.host = default
-        else:
-            raise CommandError(
-                "You did not provide --host and %s has no default_host setting"
-                % app_ini)
     out = StringIO()
     zip = zipfile.ZipFile(out, 'w')
     translated_args = []
@@ -64,14 +43,14 @@ def command_run(config):
     zip.close()
     zip_content = out.getvalue()
     if args.user == 'root':
-        ssh_host = 'root@%s' % app.host
+        ssh_host = 'root@%s' % args.host
         cmd_prefix = ''
     elif args.user == 'www-mgr':
-        ssh_host = 'www-mgr@%s' % app.host
+        ssh_host = 'www-mgr@%s' % args.host
         cmd_prefix = ''
     elif args.user == 'www-data':
-        ssh_host = 'www-mgr@%s' % app.host
-        cmd_prefix = 'sudo -u www-data '
+        ssh_host = 'www-mgr@%s' % args.host
+        cmd_prefix = 'sudo -H -u www-data '
     else:
         raise CommandError(
             "Unknown --user=%s" % args.user)
@@ -95,7 +74,7 @@ def command_run(config):
     proc = subprocess.Popen(
         ['ssh', ssh_host,
          '%s/var/www/support/run-command.py %s %s %s %s'
-         % (cmd_prefix, app.host, location, args.script,
+         % (cmd_prefix, args.host, location, args.script,
             shell_quoted(translated_args))],
         env=env)
     proc.communicate()
