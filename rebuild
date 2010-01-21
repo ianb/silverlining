@@ -47,5 +47,10 @@ if [ -z "$DEVEL" ] ; then
     source $ENV_PATH/bin/activate
     
     ./toppcloud/create-zip.sh
+    cp docs/_static/HEADER.html $ZIP_DIR
+    sed -i "s/MOST_RECENT/$VERSION/g" $ZIP_DIR/HEADER.html
+    echo "RewriteEngine On
+RewriteRule toppcloud-mostrecent.zip toppcloud-$VERSION.zip [L]
+" > $ZIP_DIR/.htaccess
 fi
 
