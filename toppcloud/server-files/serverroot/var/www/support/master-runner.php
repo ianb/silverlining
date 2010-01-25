@@ -5,7 +5,7 @@
    */
 $topp_base = "/var/www/{$_SERVER[SITE]}";
 $topp_app_ini = "$topp_base/app.ini";
-$topp_app_config = parse_ini_file($topp_app_ini);
+$topp_app_config = parse_ini_file($topp_app_ini, true);
 $topp_runner = $topp_app_config['production']['runner'];
 
 function topp_load_services() {
