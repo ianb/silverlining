@@ -1,0 +1,162 @@
+Things toppcloud Should Do
+==========================
+
+This document lists out things that I think toppcloud should do, but
+does not yet do.  It's also kind of a notepad for design ideas.  It
+should not surprise you if I forget to remove something from this
+document after implementing it.
+
+Long-time expiration of static content
+--------------------------------------
+
+It's nice to present static content with far-future expiration dates.
+Do do this while still allowing this static content to be updated, it
+is conventional to use a timestamp of some sort in the URL itself.  An
+example might be::
+
+    /static/20100127_1/media/style.css
+
+Then if the application is updated this URL will change.  You could
+use the modification date of the file itself, but a sweeping
+invalidation of all content is less error-prone and requires very
+little framework support.
+
+I think toppcloud should add a new location (like in the example)
+where content in the ``static/`` directory is served with this
+caching, and an environmental variable ``$STATIC_URL`` which you use
+to prefix all your media files.  Probably the current pattern will be
+preserved, as it can be handy when retrofitting an application.
+
+Then in the future there should also be support for uploading these
+static files to a CDN, at which point the variable will point to the
+CDN.
+
+Groups of servers, replication
+------------------------------
+
+This is kind of an obvious feature for toppcloud, being all "cloud"
+like.  Instead of hosting things like a database locally, it should be
+possible to host it on a central server with many "application"
+servers pointing to it.  
+
+And, in turn, it should be possible to use replication or sharding to
+have many database servers, though this is more difficult.
+
+Then, though it's largely outside the scope of toppcloud itself, it
+should be possible to move frontend (varnish) caching to another
+layer, and load balancing around that.  While it might be reasonable
+to manage that with toppcloud, nothing toppcloud currently does is
+really interested in that layer.
+
+For the first two it will be necessary to add a new concept of a
+server group.  This is too big to shove in ``~/.toppcloud.conf`` (and
+should probably be version-control-friendly).  I expect a new document
+describing server groups will be necessary.
+
+Backups
+-------
+
+It should be possible to get a nice backup file of everything, or
+upload one to some location.  It would be very nice if backup files
+were portable.  Then, for instance, you could download the backups to
+replicate live data on your site.
+
+It would be even more neat if backup files were somewhat version
+control friendly.  E.g., well-ordered SQL dumps.
+
+Backup restore should also be handled; writing backup code without
+restore code is just silly.
+
+Logs
+----
+
+Log files should also be handled gracefully, tracked, and possibly
+some frontend.  Though I feel like some kind of management interface is
+better, and then a "deployed" app would use that interface.  Actually,
+"interface" is probably saying too much; documented and conscious
+server layout that an application can be written to inspect.
+
+Create Virtual Machine Images
+-----------------------------
+
+Local development can for some people be quite hard.  This is
+especially true of Windows users (for which toppcloud doesn't have any
+support, and no support is planned).
+
+It would be nice to be able to run something like:
+
+    toppcloud setup-develop-image .
+
+and have it get a bare Ubuntu image (for VMWare, VirtualBox, or
+whatever) and run some adaptation of setup-node, and setup a file
+server to make editing files easy, and then upload the application
+(version control files and everything).
+
+To make it more awesome, a built-in web app for managing the image;
+checking in files, restarting, tooling, etc.  Maybe the image could be
+run headless then?  This is more ambitious, but it could in some way
+be an introduction to good open source development practices.
+
+Test-Before-Activate
+--------------------
+
+There should be a kind of "check functions are go" URL or command,
+similar to how ``update_fetch`` works.  This would be fetched on
+update, but before the update was really made live (the internal
+request mechanism can be run on any instance, even one that is not
+live yet).  If this returned a non-2xx result, then the update would
+be aborted.
+
+Backup/Restore/Revert on update
+-------------------------------
+
+Each update is a point when a persistence checkpoint should happen.
+This is most easily done with a local backup.
+
+There should also be a "run all database updates" URL (also similar to
+``update_fetch``).  This might fail, in which case the backup should
+be restored and the update aborted.
+
+I'm not sure if this should be the same as the test-before-activate
+URL, or if not whether it should be run before or after.
+
+Debugging
+---------
+
+I'm fairly conflicted about what toppcloud should do with respect to
+debugging.  I am inclined to say that applications should be
+instrumented with debugging tools natively, e.g., using Django's
+built-in tools or weberror, etc.
+
+On the other hand, without this kind of wrapping you get something
+that really sucks -- normal Apache error logs.  Maybe at least
+``environ['wsgi.errors']`` should be fixed (along with stderr) to
+point to something better/reasonable.
+
+Setting up the ``logging`` module is somewhat similar.
+
+Also there should be centralized configuration of things like, e.g.,
+where error messages are sent.  Then tools could be configured in a
+more transportable way (e.g., ``DEBUG_EMAIL =
+os.environ['TOPPCLOUD_DEBUG_EMAIL']``).
+
+Configuration
+-------------
+
+I'm not even sure what this *means*, but I know it needs to be
+implemented in some way.  I'm kind of holding off because I don't want
+apps/servers to get configured a lot.  But for reusable application
+packages *something* has to be implemented.  And I suspect there are
+places where this is really sensible.
+
+I will probably resist this until it is clear what it should mean.
+
+API Keys
+--------
+
+This is the obvious kind of non-portable configuration.  There is some
+support for this already, but it is poorly exposed.
+
+This is something that might be good to manage organization-wide.
+Which just makes the workflow slightly different.
+
