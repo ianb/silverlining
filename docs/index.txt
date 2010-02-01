@@ -18,6 +18,7 @@ TOPP Cloud
     todo
     comparisons
     dns
+    devel-toppcloud
     license
     Repository <http://bitbucket.org/ianb/toppcloud>
     Pre-built zip files <http://toppcloud.colorstudy.com/zip/>
