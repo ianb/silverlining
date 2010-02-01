@@ -76,6 +76,14 @@ better, and then a "deployed" app would use that interface.  Actually,
 "interface" is probably saying too much; documented and conscious
 server layout that an application can be written to inspect.
 
+Monitoring
+----------
+
+Basically a way is needed to answer the question "do I need to rent
+bigger (or smaller) nodes?" Basic metrics like load, RAM, swap and
+requets per second should be monitored and graphed. Munin seems to be a
+popular choice for that.
+
 Create Virtual Machine Images
 -----------------------------
 
