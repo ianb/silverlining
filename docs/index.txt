@@ -237,7 +237,9 @@ the hostname setup in ``/etc/hosts``.
     Creates a new node (aka server).
 
 ``toppcloud destroy-node``:
-    Deletes a node.
+    Deletes a node. It is advisable to remove the node from
+    ``~/.ssh/known_hosts`` after destroying it to avoid SSH warnings
+    in future.
 
 ``toppcloud default-node``:
     This sets the default node, so you can do ``toppcloud update
