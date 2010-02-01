@@ -1,6 +1,11 @@
 Processes
 ---------
 
+.. warning::
+
+   I'm pretty sure my understanding of the process model is actually
+   incorrect, and this document isn't correct.
+
 This document explains the process model of toppcloud.
 
 toppcloud runs under `mod_wsgi <http://code.google.com/p/modwsgi/>`_,
