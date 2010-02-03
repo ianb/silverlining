@@ -19,6 +19,28 @@ import mimetypes
 
 toppcloud_conf = os.path.join(os.environ['HOME'], '.toppcloud.conf')
 
+def load_paste_reloader():
+    try:
+        from paste import reloader
+        return reloader
+    except ImportError:
+        import new
+        ## FIXME: not sure if this'll work well if sys.path is fixed
+        ## up later with a Paste:
+        init_mod = new.module('paste')
+        init_mod.__path__ = []
+        sys.modules['paste'] = init_mod
+        mod = new.module('paste.reloader')
+        init_mod.reloader = mod
+        execfile(os.path.join(os.path.dirname(__file__),
+                              'paste-reloader.py'),
+                 mod.__dict__)
+        sys.modules['paste.reloader'] = mod
+        return mod
+
+reloader = load_paste_reloader()
+reloader.install()
+
 def get_app(base_path):
     site = 'localhost'
     os.environ['SITE'] = site
@@ -33,7 +55,9 @@ def get_app(base_path):
         execfile(sitecustomize, ns)
 
     parser = ConfigParser()
-    parser.read([os.path.join(base_path, 'app.ini')])
+    app_ini = os.path.join(base_path, 'app.ini')
+    parser.read([app_ini])
+    reloader.watch_file(app_ini)
     app_name = parser.get('production', 'app_name')
 
     devel_config = load_devel_config(app_name)
@@ -52,6 +76,7 @@ def get_app(base_path):
     else:
         spec = None
     runner = os.path.join(base_path, runner)
+    reloader.watch_file(runner)
     if not os.path.exists(runner):
         raise Exception(
             "The setting ([production] runner) points to the file %s which does not exist"
@@ -139,29 +164,9 @@ class CompoundApp(object):
             ('Content-length', str(length))])
         return iterator()
 
-def load_paste_reloader():
-    try:
-        from paste import reloader
-        return reloader
-    except ImportError:
-        import new
-        ## FIXME: not sure if this'll work well if sys.path is fixed
-        ## up later with a Paste:
-        init_mod = new.module('paste')
-        init_mod.__path__ = []
-        sys.modules['paste'] = init_mod
-        mod = new.module('paste.reloader')
-        init_mod.reloader = mod
-        execfile(os.path.join(os.path.dirname(__file__),
-                              'paste-reloader.py'),
-                 mod.__dict__)
-        sys.modules['paste.reloader'] = mod
-        return mod
 
 def main(base_path):
     app = CompoundApp(base_path)
-    reloader = load_paste_reloader()
-    reloader.install()
     import wsgiref.simple_server
     server = wsgiref.simple_server.make_server(
         '127.0.0.1', 8080, app)
