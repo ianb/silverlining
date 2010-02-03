@@ -2,8 +2,8 @@ Developing Using toppcloud
 ==========================
 
 This document discusses how development looks when using toppcloud.
-Not `how you develop toppcloud itself <devel-toppcloud>`_, but how
-application development with toppcloud can work.
+Not `how you develop toppcloud itself <devel-toppcloud.html>`_, but
+how application development with toppcloud can work.
 
 Creating a Project/Layout
 -------------------------
