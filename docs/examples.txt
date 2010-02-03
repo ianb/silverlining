@@ -14,22 +14,22 @@ Neighborly
 complete `installation instructions
 <http://github.com/ianb/neighborly/blob/master/INSTALL.txt>`_ and a
 fairly complete `build script
-<http://github.com/ianb/neighborly/blob/master/boot.sh>`_.
+<http://github.com/ianb/neighborly/blob/master/boot.sh>`__.
 
 Interactive Somerville
 ----------------------
 
-`This <http://interactivesomerville.org/>`_ is a
+`This <http://interactivesomerville.org/>`__ is a
 Django/GeoDjango/Pinax application to collect community feedback on a
 proposed extension to the Boston Greenline.  You might want to look at
 the `source <http://bitbucket.org/geraldmc/frank-src/src/>`_ or the
 `build script
-<http://bitbucket.org/geraldmc/frank-src/src/tip/build-fs-layout>`_.
+<http://bitbucket.org/geraldmc/frank-src/src/tip/build-fs-layout>`__.
 
 bbdocs
 ------
 
-`This <http://bitbucket.org/ianb/bbdocs/>`_ is a very small
+`This <http://bitbucket.org/ianb/bbdocs/>`__ is a very small
 application (just plain WebOb without a framework) for getting commit
 events from `bitbucket <http://bitbucket.org>`_ and using that to
 regenerate documentation or other files.  It's what builds
