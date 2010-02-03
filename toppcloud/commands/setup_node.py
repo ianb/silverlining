@@ -36,8 +36,18 @@ mkdir -p /root/.ssh
 cat >> /root/.ssh/authorized_keys
 ''',
         ], stdin=subprocess.PIPE)
-    key = open(os.path.join(os.environ['HOME'],
-                            '.ssh', 'id_dsa.pub'), 'rb').read()
+    dsa_path = os.path.join(os.environ['HOME'],'.ssh', 'id_dsa.pub')
+    rsa_path = os.path.join(os.environ['HOME'],'.ssh', 'id_rsa.pub')
+    if os.path.exists(dsa_path):
+        key = open(dsa_path, 'rb').read()
+        config.logger.notify("Using key file:  %s", dsa_path)
+    elif os.path.exists(rsa_path):
+        key = open(rsa_path, 'rb').read()
+        config.logger.notify("Using key file:  %s", dsa_path)
+    else:
+        config.logger.fatal("Can't locate any key file")
+        #not sure what error code are used for here but 8 was unused
+        return 8
     proc.communicate(key)
     # if proc.returncode == 50:
     #     config.logger.fatal(
