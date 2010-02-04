@@ -126,6 +126,34 @@ well, (b) is stable and updates are appropriately conservative (c) is
 new enough.  Pure-Python libraries generally get updated much more
 frequently, but everyone treats these C libraries more conservatively.
 
+Application API has a small surface area
+========================================
+
+Exactly *how* toppcloud works will change over time.  There are a lot
+of places to generalize and expand its operation.  As this happens it
+is important that toppcloud applications *not* change very much.
+
+Right now the API for toppcloud is fairly small (from the perspective
+of an application).  There are some environmental variables, there is
+a small ``app.ini`` configuration file.
+
+While no doubt there are some additions to be made to the application
+API, I want to keep those additions as small as possible.  Building up
+the infrastructure *around* applications is okay; generally that means
+stuff that we can iterate on, figure out, maybe discard.  So long as
+applications are kept abstracted from the environment we have a lot of
+flexibility.  As soon as we collapse the application with the
+environment we're going to have constraints and future problems.  So:
+we must resist doing that.
+
+We should also consider Java as a counterexample.  In the JVM
+environment they abstracted away anything resembling a specific
+operating system.  Python hasn't done that, and I don't want to do
+that; if the environment leaks into an application we should still
+resist creating an abstraction.  Undocumented application abilities
+will get used and may be fragile, but they are betting than documented
+APIs that get changed.
+
 Fabric
 ======
 

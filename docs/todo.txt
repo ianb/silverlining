@@ -127,7 +127,21 @@ Monitoring
 Basically a way is needed to answer the question "do I need to rent
 bigger (or smaller) nodes?" Basic metrics like load, RAM, swap and
 requets per second should be monitored and graphed. Munin seems to be a
-popular choice for that.
+popular choice for that.  Probably a Nagios setup makes sense here.
+`This post
+<http://agiletesting.blogspot.com/2010/02/web-site-monitoring-techniques-and.html>`_
+also has some additional ideas.
+
+Also similar to ``update_fetch`` etc, there should be an optional
+defined "ping" URL for an application.  This would be some location
+that could be safely fetched, wouldn't be time-intensive, and would
+report general errors.  An application could do self-testing here.
+Monitoring infrastructure would then be setup to ping this URL.
+Unlike ``update_fetch`` and other management URLs, this would be
+fetched in-process in the live server (management URLs get fetched
+with an analogous but non-mod_wsgi request).  Probably there should be
+some indication of how often the pinging should happen (i.e., if the
+ping is cheap do it often, if it's expensive be more reserved).
 
 Create Virtual Machine Images
 -----------------------------
@@ -153,6 +167,17 @@ be an introduction to good open source development practices.
 Probably the generalized "DEST" idea of toppcloud backup would be
 useful here and elsewhere.  Of course toppcloud backup is done on the
 remote server and uploaded from there, while this is done locally.
+
+The core of this is probably two variations:
+
+* ``setup-node``, except setting up a "development" node.  This would
+  be a node with git/hg/svn installed, somewhat different mod_wsgi
+  configuration, and other such details.
+
+* ``update``, except again a "development" version, one that copies
+  over VCS metadata (``.hg/`` etc).  Also it wouldn't create
+  versioned/dated directories, but instead support only one version of
+  an application (the version you are developing).
 
 Test-Before-Activate
 --------------------
