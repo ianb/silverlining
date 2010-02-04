@@ -5,7 +5,7 @@ from cmdutils import CommandError
 def setup_rsync(config, source, dest):
     cwd = os.path.abspath(os.path.join(__file__, '../../server-files'))
     proc = subprocess.Popen([
-        'rsync', '--quiet', '-rvC',
+        'rsync', '--quiet', '-prvC',
         source, 'root@%s:%s' % (config.args.node, dest)],
                             cwd=cwd)
     config.logger.notify(

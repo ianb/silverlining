@@ -121,6 +121,14 @@ Maybe there should be a standard way to effect the Python standard
 logging module output, and then put it in a normal location (I think
 ``/var/log/toppcloud/apps/NAME/*``).
 
+Monitoring
+----------
+
+Basically a way is needed to answer the question "do I need to rent
+bigger (or smaller) nodes?" Basic metrics like load, RAM, swap and
+requets per second should be monitored and graphed. Munin seems to be a
+popular choice for that.
+
 Create Virtual Machine Images
 -----------------------------
 

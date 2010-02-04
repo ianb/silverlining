@@ -57,6 +57,7 @@ mkdir -p /var/lib/toppcloud
 rm -f /var/www/index.html
 chown www-mgr:www-mgr /var/www
 chown -R root:root /var/www/support
+find /var/www/support -name '*.py' -exec chmod 755 {} \;
 chmod +x /etc/init.d/topp-setup
 chown www-mgr:www-mgr /var/lib/toppcloud
 # This gives unnecessary error-like output, so we're ignore the output
