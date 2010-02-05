@@ -15,6 +15,7 @@ TOPP Cloud
     processes
     providers
     examples
+    django-quickstart
     todo
     comparisons
     dns
