@@ -41,6 +41,13 @@ pushd $BUILD_DIR
 if [ -z "$ZIP_DIR" ] ; then
     ZIP_DIR="."
 fi
-zip -r $ZIP_DIR/toppcloud-${VERSION}.zip toppcloud-${VERSION}
-mv toppcloud-${VERSION}.zip ../dist
+F="$ZIP_DIR/toppcloud-${VERSION}.zip"
+zip -r $F toppcloud-${VERSION}
+if [ -d ../dist ] ; then
+    mv $F ../dist
+else 
+    if [ -d ../../dist ] ; then
+        mv $F ../../dist
+    fi
+fi
 popd

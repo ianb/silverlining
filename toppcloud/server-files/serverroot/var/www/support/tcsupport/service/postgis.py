@@ -59,6 +59,7 @@ def install(app_dir, config):
             ['psql', 'template_postgis'],
             env=env, stdin=subprocess.PIPE)
         parts = ['CREATE LANGUAGE plpgsql;\n']
+        parts.append("UPDATE pg_database SET datistemplate='true' WHERE datname='template_postgis';")
         for filename in ['lwpostgis.sql', 'lwpostgis_upgrade.sql',
                          'spatial_ref_sys.sql']:
             filename = os.path.join(
@@ -67,6 +68,8 @@ def install(app_dir, config):
             parts.append(fp.read())
             parts.append('\n;\n')
             fp.close()
+        parts.append("GRANT ALL ON geometry_columns TO PUBLIC;\n")
+        parts.append("GRANT ALL ON spatial_ref_sys TO PUBLIC;\n")
         proc.communicate(''.join(parts))
     
     app_name = app_dir.split('.')[0]

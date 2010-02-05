@@ -1,0 +1,430 @@
+Things toppcloud Should Do
+==========================
+
+This document lists out things that I think toppcloud should do, but
+does not yet do.  It's also kind of a notepad for design ideas.  It
+should not surprise you if I forget to remove something from this
+document after implementing it.
+
+Long-time expiration of static content
+--------------------------------------
+
+It's nice to present static content with far-future expiration dates.
+Do do this while still allowing this static content to be updated, it
+is conventional to use a timestamp of some sort in the URL itself.  An
+example might be::
+
+    /static/20100127_1/media/style.css
+
+Then if the application is updated this URL will change.  You could
+use the modification date of the file itself, but a sweeping
+invalidation of all content is less error-prone and requires very
+little framework support.
+
+I think toppcloud should add a new location (like in the example)
+where content in the ``static/`` directory is served with this
+caching, and an environmental variable ``$STATIC_URL`` which you use
+to prefix all your media files.  Probably the current pattern will be
+preserved, as it can be handy when retrofitting an application.
+
+Then in the future there should also be support for uploading these
+static files to a CDN, at which point the variable will point to the
+CDN.
+
+Groups of servers, replication
+------------------------------
+
+This is kind of an obvious feature for toppcloud, being all "cloud"
+like.  Instead of hosting things like a database locally, it should be
+possible to host it on a central server with many "application"
+servers pointing to it.  
+
+And, in turn, it should be possible to use replication or sharding to
+have many database servers, though this is more difficult.
+
+Then, though it's largely outside the scope of toppcloud itself, it
+should be possible to move frontend (varnish) caching to another
+layer, and load balancing around that.  While it might be reasonable
+to manage that with toppcloud, nothing toppcloud currently does is
+really interested in that layer.
+
+For the first two it will be necessary to add a new concept of a
+server group.  This is too big to shove in ``~/.toppcloud.conf`` (and
+should probably be version-control-friendly).  I expect a new document
+describing server groups will be necessary.
+
+Maybe a server group would look like::
+
+    [group:NAME]
+    provider = <name of provider in ~/.toppcloud.conf>
+    apps = <number of app servers>
+    service.postgis = <number of postgis servers, or blank means 1>
+
+Not all services support multiple applications; ``service.files``
+particularly does not support this.  If you had a service like this
+then it'd give an error.  Also not all services would necessarily
+support multiple servers.  To do PostGIS, for instance, you'd need to
+setup replication.  This is relatively easy on CouchDB, but it might
+be a while before it is well configured on PostGIS.
+
+Also there's the possibility of a sharding front-end, or a front-end
+that does "stick" load balancing (where a user is redirected back to
+the same server they were at before).  On the backend there could be
+sharding, where the application server must select the proper database
+server.  Right now there's only really support for a single database
+server per application, so there'd have to be a concept of usefully
+named servers.  So... sharding is not that easy.
+
+Backups
+-------
+
+It should be possible to get a nice backup file of everything, or
+upload one to some location.  It would be very nice if backup files
+were portable.  Then, for instance, you could download the backups to
+replicate live data on your site.
+
+It would be even more neat if backup files were somewhat version
+control friendly.  E.g., well-ordered SQL dumps.
+
+Backup restore should also be handled; writing backup code without
+restore code is just silly.
+
+A backup might look like::
+
+    toppcloud backup hostname DEST
+
+The destination could be a local file, ``-`` (stdout), a URL to PUT to
+(maybe a URI template), some name on the remote server (more like a
+checkpoint), or a ssh/scp location.  Restore would look similar::
+
+    toppcloud restore hostname SOURCE
+
+And then probably something like::
+
+    toppcloud backup-info hostname
+
+Which would note any local checkpoints, and show log information about
+any other backups.
+
+Logs
+----
+
+Log files should also be handled gracefully, tracked, and possibly
+some frontend.  Though I feel like some kind of management programming
+interface is better, and then a "deployed" app would use that
+interface.  Actually, "interface" is probably saying too much;
+documented and conscious server layout that an application can be
+written to inspect.
+
+There should be a way to get a list of all log files for a host/app.
+Maybe there should be a standard way to effect the Python standard
+logging module output, and then put it in a normal location (I think
+``/var/log/toppcloud/apps/NAME/*``).
+
+Monitoring
+----------
+
+Basically a way is needed to answer the question "do I need to rent
+bigger (or smaller) nodes?" Basic metrics like load, RAM, swap and
+requets per second should be monitored and graphed. Munin seems to be a
+popular choice for that.  Probably a Nagios setup makes sense here.
+`This post
+<http://agiletesting.blogspot.com/2010/02/web-site-monitoring-techniques-and.html>`_
+also has some additional ideas.
+
+Also similar to ``update_fetch`` etc, there should be an optional
+defined "ping" URL for an application.  This would be some location
+that could be safely fetched, wouldn't be time-intensive, and would
+report general errors.  An application could do self-testing here.
+Monitoring infrastructure would then be setup to ping this URL.
+Unlike ``update_fetch`` and other management URLs, this would be
+fetched in-process in the live server (management URLs get fetched
+with an analogous but non-mod_wsgi request).  Probably there should be
+some indication of how often the pinging should happen (i.e., if the
+ping is cheap do it often, if it's expensive be more reserved).
+
+Create Virtual Machine Images
+-----------------------------
+
+Local development can for some people be quite hard.  This is
+especially true of Windows users (for which toppcloud doesn't have any
+support, and no support is planned).
+
+It would be nice to be able to run something like:
+
+    toppcloud setup-develop-image . some-image-filename
+
+and have it get a bare Ubuntu image (for VMWare, VirtualBox, or
+whatever) and run some adaptation of setup-node, and setup a file
+server to make editing files easy, and then upload the application
+into the machine (version control files and everything).
+
+To make it more awesome, a built-in web app for managing the image;
+checking in files, restarting, tooling, etc.  Maybe the image could be
+run headless then?  This is more ambitious, but it could in some way
+be an introduction to good open source development practices.
+
+Probably the generalized "DEST" idea of toppcloud backup would be
+useful here and elsewhere.  Of course toppcloud backup is done on the
+remote server and uploaded from there, while this is done locally.
+
+The core of this is probably two variations:
+
+* ``setup-node``, except setting up a "development" node.  This would
+  be a node with git/hg/svn installed, somewhat different mod_wsgi
+  configuration, and other such details.
+
+* ``update``, except again a "development" version, one that copies
+  over VCS metadata (``.hg/`` etc).  Also it wouldn't create
+  versioned/dated directories, but instead support only one version of
+  an application (the version you are developing).
+
+Test-Before-Activate
+--------------------
+
+There should be a kind of "check functions are go" URL or command,
+similar to how ``update_fetch`` works.  This would be fetched on
+update, but before the update was really made live (the internal
+request mechanism can be run on any instance, even one that is not
+live yet).  If this returned a non-2xx result, then the update would
+be aborted.
+
+Backup/Restore/Revert on update
+-------------------------------
+
+Each update is a point when a persistence checkpoint should happen.
+This is most easily done with a local backup.
+
+There should also be a "run all database updates" URL (also similar to
+``update_fetch``).  This might fail, in which case the backup should
+be restored and the update aborted.
+
+I'm not sure if this should be the same as the test-before-activate
+URL, or if not whether it should be run before or after.
+
+Debugging
+---------
+
+I'm fairly conflicted about what toppcloud should do with respect to
+debugging.  I am inclined to say that applications should be
+instrumented with debugging tools natively, e.g., using Django's
+built-in tools or weberror, etc.
+
+On the other hand, without this kind of wrapping you get something
+that really sucks -- normal Apache error logs.  Maybe at least
+``environ['wsgi.errors']`` should be fixed (along with stderr) to
+point to something better/reasonable.  (And maybe warnings
+specifically should be handled, so only unique warnings are logged,
+and they are reset between updates.)
+
+Setting up the ``logging`` module is somewhat similar, it could be
+done manually by applications.
+
+Also there should be centralized configuration of things like, e.g.,
+where error messages are sent.  Then tools could be configured in a
+more transportable way (e.g., ``DEBUG_EMAIL =
+os.environ['TOPPCLOUD_DEBUG_EMAIL']``).  This might fit into how
+configuration is generally handled.
+
+Error reporting for non-requests (like a cron script) is harder.  Most
+of these are done synchronously, so you can just show the user what is
+happening, but at least for cron and perhaps tasks this is necessarily
+not the case.
+
+Unify Environment Setup
+-----------------------
+
+Environment setup happens in some scripts (like ``master_runner.py``
+and ``internal-request.py``) and in other places like
+``lib/python2.6/sitecustomize.py``).  These should all work exactly
+the same.
+
+As a result the environment should become more command-line-program
+friendly.  Probably most places where URLs are fetched could also
+accept program invocations (e.g., ``django-admin.py syncdb``).  I kind
+of like using requests... but I also realize there's little reason to
+*require* them in this system, so the constraint really doesn't have
+to exist.
+
+Some of the monitoring mod_wsgi provides would be nice to (optionally)
+provide to command-line scripts.  Like, if a script stalls out it
+should be killed.  Maybe.  At least for cron jobs or something (they
+might have a max-time setting, with some default, so long-running
+values would be possible but only if explicitly requested.)
+
+Cron and Tasks
+--------------
+
+App Engine style cronjobs and tasks are definitely planned.  (I also
+just found some code called PyPeriodic that I think I wrote a long
+time ago and forgot.)
+
+Cron jobs are based on requests run periodically.  Though I guess they
+could also be commands.  One advantage of keeping to requests is to
+have some kind of monitoring for failed or rejected requests (though
+the internal request mechanism is not as robust currently as the
+external request system, which is managed by mod_wsgi).
+
+Tasks are things to be done in the future, asynchronously with any
+request.  These are queued, get retried in cases of failure (non-2xx
+response); maybe given multiple servers they could be run on different
+servers.
+
+Cron is a higher priority.
+
+Configuration
+-------------
+
+I'm not even sure what this *means*, but I know it needs to be
+implemented in some way.  I'm kind of holding off because I don't want
+apps/servers to get configured a lot.  But for reusable application
+packages *something* has to be implemented.  And I suspect there are
+places where this is really sensible.
+
+I will probably resist this until it is clear what it should mean.
+
+API Keys
+--------
+
+This is the obvious kind of non-portable configuration.  There is some
+support for this already, but it is poorly exposed.
+
+This is something that might be good to manage organization-wide.
+Which just makes the workflow slightly different.
+
+Writable Static Files
+---------------------
+
+Right now there's not really a way to manage static files.  This is
+kind of weird to me because Sphinx makes nice static files, and I
+can't actually host them with toppcloud.
+
+I can't quite figure out how this would work, except I guess you might
+define something in ``app.ini`` like::
+
+    writable_static_files =
+        /foo
+        /bar
+
+And then there would be environmental variables to give the file paths
+of those locations.  It's kind of structured, so fitting it into an
+environmental variable is kind of awkward.  It's similar to
+``service.files``, just visible files.
+
+If you are hosting non-public files, then
+``environ['wsgi.file_wrapper']`` will remain the better option, and
+can be achieved currently with ``service.files``.
+
+This will require Apache configuration support, as the file locations
+will probably work just like static files, with RewriteRules to detect
+and serve the files.  If multiple locations are supported I don't see
+a way to do it with any static map, instead I'll need to write a
+rewrite map script.  But probably rewrite map scripts are a necessity
+anyway. 
+
+Per-path applications
+---------------------
+
+Right now an application is only associated with a hostname.  Isolated
+and independent applications should be possible with a path (e.g.,
+upload an application to ``example.com/blog/``).  This will require
+changes to the hostmap (probably writing some `mapping code
+<http://httpd.apache.org/docs/2.2/mod/mod_rewrite.html#rewritemap>`_
+in Python to be run by Apache).  This also will effect the
+nomenclature as "hostname" won't become a unique identifier, only
+"hostname[/path]".
+
+Inter-application communication
+-------------------------------
+
+This will only happen with a strong use case to motivate it; I can
+certainly *imagine* such use cases, but I need something more concrete
+than my imagination.
+
+In that case, an application could receive configuration information
+for other applications.  Communication would have to be through some
+service (e.g., a database) or HTTP.  Accessing applications on other
+servers would probably not be supported (though potentially it could
+be), but given per-path applications it is reasonable to consider
+cases where this would be useful.  Auth is an obvious case.
+
+The toppcloud secret is currently per-server (and will probably be
+per-group in the future), so some things like reading cookies could be
+done across applications already (given the appropriate code).
+
+Testing and Test Fixture Setup
+------------------------------
+
+It would be nice to have a nice setup for getting test data setup.  I
+think some degree of testing support would be nice, though simply
+installing and using a standard test runner seems mostly fine.  A
+recipe for integration testing would be nice.  A recipe for full-stack
+testing (e.g., with Windmill or Selenium) would be nice.  These are
+probably more recipes than core toppcloud things.
+
+Full-stack development environment
+----------------------------------
+
+I can imagine a through-the-browser development environment, based on
+Bespin.  This could be cool.  It could be really VM-friendly as well.
+Circumstances may determine if I really try this out.
+
+Application Packs
+-----------------
+
+Right now this system emphasizes development.  It would be nice to
+also support ready-to-go applications.  This might be simply a zip
+file created from an application, that can be easily uploaded.  It
+might not be something at all fancy.  But thinking it out would be
+nice.
+
+Trac would be an ideal candidate for sometihng like this.  It also has
+enough customization that I can imagine some interesting use cases;
+how do you select the plugins you want and the templates you want to
+override?  If you aren't "developing" the application then this isn't
+as clear.
+
+Maybe on application upload you could have two directories; one the
+"code" and another the "customizations".  The code would have a script
+to check and merge in the customizations before upload.  One can
+imagine other useful things the code could do with the customizations
+(for instance, support plugin installation through knowledge of the
+app's plugin index and techniques).
+
+Maybe it would look like::
+
+    toppcloud update someapp.zip --customize=mycustomizations/
+
+That's the easy way.  Plugin installation?
+
+::
+
+    toppcloud manage-app someapp.zip --customize=mycustomizations/ \
+              --list-commands
+    toppcloud manage-app someapp.zip --customize=mycustomizations/ \
+              install-plugin Akismet
+
+It feels a bit crude.  Maybe another command besides ``toppcloud`` for
+pre-packaged apps?  Or another set of subcommands.
+
+Application Versions
+--------------------
+
+It's hard to figure out exactly what "version" of an application is
+installed somewhere.  There's no particular line, and no one thing is
+the only important version number.
+
+It'd be nice to look around the files for VCS data and get a version
+snapshot for all pieces.
+
+Remote Diff
+-----------
+
+I'd like to be able to do::
+
+    toppcloud diff . hostname
+
+and see a unified diff between the directory and what is present
+remotely.  This could let you feel more confident about the effect of
+updates.
+

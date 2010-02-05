@@ -1,0 +1,45 @@
+Running Examples Of toppcloud Apps
+==================================
+
+This lists running examples of apps that other people can clone, look
+at, and even deploy if they want.  If you have another example, email
+me or do a pull request on patch to `this document
+<http://bitbucket.org/ianb/toppcloud/src/tip/docs/examples.txt>`_.
+
+Neighborly
+----------
+
+`Neighborly <http://pages.e-democracy.org/Neighborly>`_ is a
+(currently very minimal) Django/GeoDjango application.  It has fairly
+complete `installation instructions
+<http://github.com/ianb/neighborly/blob/master/INSTALL.txt>`_ and a
+fairly complete `build script
+<http://github.com/ianb/neighborly/blob/master/boot.sh>`__.
+
+Interactive Somerville
+----------------------
+
+`This <http://interactivesomerville.org/>`__ is a
+Django/GeoDjango/Pinax application to collect community feedback on a
+proposed extension to the Boston Greenline.  You might want to look at
+the `source <http://bitbucket.org/geraldmc/frank-src/src/>`_ or the
+`build script
+<http://bitbucket.org/geraldmc/frank-src/src/tip/build-fs-layout>`__.
+
+bbdocs
+------
+
+`This <http://bitbucket.org/ianb/bbdocs/>`__ is a very small
+application (just plain WebOb without a framework) for getting commit
+events from `bitbucket <http://bitbucket.org>`_ and using that to
+regenerate documentation or other files.  It's what builds
+http://toppcloud.colorstudy.com and the `zip files
+<http://toppcloud.colorstudy.com/zip/>`_.
+
+PylonsHQ
+--------
+
+The `Pylons <http://pylonshq.com/>`_ site runs on toppcloud, including
+Trac instances.  Ben Bangert `described what he did
+<http://be.groovie.org/post/321827504/deploying-python-web-apps-with-toppcloud>`_.
+I don't believe the actual code is in a public repository right now.

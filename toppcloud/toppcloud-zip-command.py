@@ -8,7 +8,7 @@ for path in list(sys.path):
     if os.path.abspath(path) == here and path in sys.path:
         sys.path.remove(path)
 
-from toppcloud.command import main
+from toppcloud.runner import main
 
 if __name__ == '__main__':
     main()

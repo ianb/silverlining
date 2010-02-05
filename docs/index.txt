@@ -14,11 +14,15 @@ TOPP Cloud
     php
     processes
     providers
+    examples
+    django-quickstart
+    todo
     comparisons
     dns
+    devel-toppcloud
     license
     Repository <http://bitbucket.org/ianb/toppcloud>
-    Pre-built zip files </zip/>
+    Pre-built zip files <http://toppcloud.colorstudy.com/zip/>
 
 This is a script and server layout to manage Python-based web
 applications.  And PHP.
@@ -26,10 +30,12 @@ applications.  And PHP.
 Author, license, etc
 --------------------
 
-This is written by `Ian Bicking <http://ianbicking.org>`_; `email him
-<mailto:ianb@colorstudy.com>`_ with feedback (maybe in the future more
-complete project infrastructure will exist).  It was written with
-support by `The Open Planning Project <http://openplans.org>`_.
+This is written by `Ian Bicking <http://ianbicking.org>`_; you might
+`email him <mailto:ianb@colorstudy.com>`_ with feedback, or `open a
+ticket <http://bitbucket.org/ianb/toppcloud/issues/>`_, or maybe head
+on over to FreeNode, #pythonpaste.  There's a `bitbucket repository
+<http://bitbucket.org/ianb/toppcloud>`_.  It was written with support
+by `The Open Planning Project <http://openplans.org>`_.
 
 It's under the `GPL <license.html>`_, though that **does not** imply
 anything with respect to the licensing on applications that use this
@@ -55,7 +61,7 @@ very close).
    proprietary extensions to it, then eh, I'm not really interested.
 
 Who Should Use toppcloud
---------------------------------------------------
+------------------------
 
 Maybe not you!  toppcloud is not a supported product.  If you want to
 use toppcloud, then toppcloud is not for you.  If you want to help
@@ -67,7 +73,7 @@ tool; but that time is not right now.
 To repeat: toppcloud is for collaborators, not users!
 
 What Does It Do?
-------------------------------
+----------------
 
 This is a script that:
 
@@ -83,7 +89,7 @@ You shouldn't concern yourself too much with the server at this
 point.  Instead, let us ask: what does the application look like?
 
 The Application
-------------------------------
+---------------
 
 toppcloud is inspired by Google App Engine in this respect; an
 application is a bunch of files that are uploaded to the server.  You
@@ -234,7 +240,9 @@ the hostname setup in ``/etc/hosts``.
     Creates a new node (aka server).
 
 ``toppcloud destroy-node``:
-    Deletes a node.
+    Deletes a node. It is advisable to remove the node from
+    ``~/.ssh/known_hosts`` after destroying it to avoid SSH warnings
+    in future.
 
 ``toppcloud default-node``:
     This sets the default node, so you can do ``toppcloud update

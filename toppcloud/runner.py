@@ -90,7 +90,7 @@ parser_setup = subcommands.add_parser(
 parser_setup.add_argument(
     'node',
     metavar='HOSTNAME',
-    help="The hostname of then node to setup")
+    help="The hostname of the node to setup")
 
 parser_clean = subcommands.add_parser(
     'clean-node', help="Clean unused application instances on a node")
@@ -188,20 +188,15 @@ parser_run.add_argument(
     action='store_true',
     help="Answer yes to any questions")
 
-add_verbose(parser_run, add_log=True)
+#add_verbose(parser_run, add_log=True)
+
+parser_run.add_argument(
+    'host',
+    help="Host where the application is running")
 
 parser_run.add_argument(
     'script',
     help="script (in bin/) to run")
-
-parser_run.add_argument(
-    '--app', metavar='APP_DIR',
-    help="Location of the app directory (will try to detect)")
-
-parser_run.add_argument(
-    '--host', '-H', metavar='HOST',
-    help="Host where the application is running "
-    "(this will be read from app.ini if not given, and if app.ini has the information)")
 
 parser_run.add_argument(
     '--user', metavar='USERNAME',
@@ -324,8 +319,13 @@ class Config(UserDict):
                                % section[len('provider:'):])
         config = full_config[section]
         config['section_name'] = section
-        DriverClass = libcloud_get_driver(getattr(Provider, config['provider'].upper()))
-        driver = DriverClass(config['username'], config['secret'])
+        provider = config['provider']
+        #FIXME, a proper solution will be to fix the DummyProvider in libcloud
+        if provider == 'localhost':
+            driver = object()
+        else:
+            DriverClass = libcloud_get_driver(getattr(Provider, provider.upper()))
+            driver = DriverClass(config['username'], config['secret'])
         return cls(config, driver, args=args)
 
     @property

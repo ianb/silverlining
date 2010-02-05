@@ -1,0 +1,24 @@
+Developing toppcloud Itself
+===========================
+
+You should read and consider the `design notes <design>`_ of course.
+
+Version Control
+---------------
+
+Generally I like to use forks for feature additions, and only use hg
+branches for things like a stable branch.  So if you want to add a
+feature, you should fork/clone the repository and make those changes.
+I appreciate some note (in the description field) about what your
+fork's purpose is.  It might simply be "to mess around with
+toppcloud", but I still appreciate the note.
+
+The main repository is for integration.  I'm not shy about giving out
+write access to this repository, if you are making consistent
+contributions it's easier for both of us if you can simply push
+directly to the main branch.  This doesn't remove the utility of
+forks; if you are doing something that will take a while to complete
+or you aren't sure if it's in line with toppcloud's design, it's still
+reasonable to do your own fork.
+
+
