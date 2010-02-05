@@ -9,7 +9,7 @@ application.  This loading process only happens once.
 Also for each request the environment is fixed up some to represent
 the request properly after having gone through Varnish.
 """
-import os, sys
+import os, sys, time, _strptime
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from tcsupport import common
 import re
