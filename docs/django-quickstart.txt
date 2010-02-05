@@ -213,3 +213,13 @@ settings::
 
     SECRET_KEY = 'ASF#@$@#JFAS#@'
 
+With this::
+
+    from tcsupport.secret import get_secret
+    SECRET_KEY = get_secret()
+
+Then you don't have to worry about checking a secret into version
+control.
+
+You still don't really have an application, but the rest is mere
+"programming" so have at it!
