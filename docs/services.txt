@@ -111,6 +111,27 @@ Then look for:
 ``CONFIG_COUCHDB_HOST``:
     The host:port to connect to.
 
+MongoDB
+~~~~~~~
+
+For MongoDB do::
+
+    service.mongodb =
+
+Then look for:
+
+``CONFIG_MONGODB_DB``:
+    The name of the database to connect to.
+
+``CONFIG_MONGODB_HOST``:
+    The host:port to connect to.
+
+Currently this has several limitations:
+
+It's based on the very alpha ubuntu packages from 10gen
+It works on 9.10 (patching for older versions is simple, choosing is harder)
+It runs the lastest unsable mongodb currently 1.3.x it won't install 1.2.x as no packages are avaliable for it
+
 Installing Packages
 ===================
 
