@@ -144,13 +144,14 @@ The server is setup thusly:
 
 * But you don't directly interact with either of these.
 
-* For my own reasons I've only added support for PostgreSQL with the
-  PostGIS extensions.  Right now the persistence handling is minimal;
+* Right now the persistence handling is minimal;
   this is where the most additional support needs to be added to the
   system (backups, migration, cloning, separating servers, and
-  eventually stuff like replication).
+  eventually stuff like replication). Currently there is basic setup for:
 
-* CouchDB is the other currently-supported database.
+  * PostgreSQL with the PostGIS extensions.
+  * CouchDB served locally
+  * MongoDB served locally
 
 * Nothing cron-like has been implemented yet, though probably it will
   be implemented very similar to App Engine (with internal requests).
