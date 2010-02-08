@@ -92,6 +92,16 @@ apt-get -y -q install rsync
             return 5
     
     setup_rsync(config, 'serverroot/', '/')
+    proc = subprocess.Popen([
+        'ssh', ssh_host,
+        'mv /var/root/* /root/'])
+    proc.communicate()
+    
+    # Move over the root files, we do *not* rsync a /root dir because
+    # that would copy the wrong permissions for the /root directorty
+    # which results in ssh key auth no longer working
+    
+    
     setup_script = open(os.path.abspath(os.path.join(
         __file__, '../../server-files/update-server-script.sh'))).read()
     import getpass
