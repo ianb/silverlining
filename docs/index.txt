@@ -16,6 +16,7 @@ TOPP Cloud
     providers
     examples
     django-quickstart
+    docswanted
     todo
     comparisons
     dns

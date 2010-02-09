@@ -1,0 +1,17 @@
+Documents Wanted
+================
+
+Here I list documents that I think should exist, but do not:
+
+* A deployment equivalent to `Development Patterns
+  <devpatterns.html>`_ -- outline the typical workflow for deploying
+  applications.
+
+* Quickstarts for: Pylons/TurboGears/Repoze (they are all pretty
+  similar), and for using SQLAlchemy, CouchDB, and whatever else comes
+  along.  (The persistence ones will be small, but I think quite
+  helpful for arranging code.)
+
+* How Stuff Works; descriptions of the inner workings of toppcloud.
+
+
