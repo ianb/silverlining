@@ -417,6 +417,10 @@ specifically for this case it seems like it would be nice.  By
 including a test suite configuration it might generally be possible to
 do a very simple and easy Hudson setup.
 
+Another interface would control toppcloud itself, allowing you to
+configure production providers and deploy to them.  It could be very
+simple.
+
 Hudson is not currently a Debian package through Ubuntu, which is
 disappointing though there may be a third-party package for it.
 Bespin would probably be deployed as a toppcloud application itself.
@@ -426,6 +430,7 @@ you'd have:
 * ``www.mydevel``: the application itself, running
 * ``dev.mydevel``: Bespin
 * ``test.mydevel``: Hudson
+* ``deploy.mydevel``: toppcloud interface
 
 One could imagine a load tester somewhere in here too.  And maybe
 a rig for Selenium or other through-the-web tester?
