@@ -13,7 +13,8 @@ symlink it into its location at the root of the app directory.
     increment this for major updates.  When you do so you can (in
     theory) have both the older version and the newer version active,
     only accessing the newer version when you use a version-specific
-    URL.
+    URL.  All versions will share the same database servers and other
+    persistence mechanisms.
 
 ``runner``:
     This points to the file that "runs" the application.  This can be
@@ -23,23 +24,23 @@ symlink it into its location at the root of the app directory.
     for a Pylons application).
 
 ``update_fetch``:
-    This option configuration is one (or more) URLs that should be
-    fetched everytime the application is updated.  It is also fetched
-    *every time* your development server is started (with ``toppcloud
-    serve``).
+    This option gives one (or more) URLs that should be fetched
+    every time the application is updated.  It is also fetched *every
+    time* your development server is started (with ``toppcloud
+    serve``).  (Maybe this last bit should be changed.)
 
     These can setup tables, create directories, etc.  You can check
     ``environ['toppcloud.update']`` to be sure this is an internal
     update request.  If you want multiple URLs, put each on its own
     line (in ``.ini`` files you can use indentation on subsequent
-    lines).
+    lines to continue a configuration value).
 
 ``default_host``:
     This is a default for ``toppcloud update --host``, so you don't
     have to enter that option each time you update.
 
 ``service.*``
-    The presence of the setting activates the `service <services>`_.
+    The presence of the setting activates the `service <services.html>`_.
     It can have a value, which is passed to the service, but no
     service uses that yet.
 

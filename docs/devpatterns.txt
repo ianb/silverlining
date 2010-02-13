@@ -29,8 +29,9 @@ with some added stuff.  Here's what the layout looks like::
 
       pip            Use this to install things
 
-      easy_install   You can also use this; I think you should use
-                     pip, but easy_install should work fine too
+      easy_install   You can also use this to install things; I think 
+                     you should use pip, but easy_install should work 
+                     fine too
 
       activate       Do "source myapp-app/bin/activate" when doing work
                      in your environment for convenience (this just
@@ -61,8 +62,9 @@ with some added stuff.  Here's what the layout looks like::
 
     lib/python/      This is the directory where everything gets
                      installed.  It starts out empty, it's just for
-                     your packages.  If you do pip install foobar, then
-                     there will be lib/python/foobar/
+                     your application's packages.  If you do pip
+                     install foobar, then there will be
+                     lib/python/foobar/
 
       toppcustomize.py
                      This file doesn't exist to start, but you can add
@@ -73,6 +75,10 @@ with some added stuff.  Here's what the layout looks like::
                      If you have libraries in src/, there will be
                      pointers to those paths in this file.  It's
                      created on demand, so you won't see it at first.
+                     It initially contains absolute paths (that's how
+                     Setuptools puts the file together), but when
+                     you upload an application those paths will be
+                     made relative.
 
     include/         Created by virtualenv; you can ignore this
                      directory.

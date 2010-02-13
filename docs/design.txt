@@ -24,22 +24,22 @@ think about this it's a bad idea to do VCS integration.  Some reasons:
 
 2. You need a separate tool regardless.  ``toppcloud update`` does
    stuff like updating ``/etc/hosts``, and actually a bunch of other
-   things, all of which is easy enough in that context.  It's not the
-   kind of thing that is reasonable to do in a post-commit hook; I
+   things, all of which is easy enough in a separate tool.  It's not
+   the kind of thing that is reasonable to do in a post-commit hook; I
    think it is advantageous to handle deployment synchronously.
 
 3. You have to choose a VCS.  I like Mercurial.  Other people like
    git.  Some people even like bzr and svn.  None of this relates to
-   what toppcloud does.
+   what toppcloud does, it doesn't need to enter that battle.
 
 4. Applications are *assemblies* of code.  This is a big one;
    applications are generally made up of stuff from several
-   repositories.  I actually like putting library files into a
-   repository, even when that means copying the files from an upstream
-   repository.  I like this *sometimes*.  If you are writing the
-   library, then this isn't a good idea; you should be dealing
-   directly with the appropriate repository, without combining code
-   from multiple repositories into one repository.
+   repositories.  I actually `like putting library files into a
+   repository <devpatterns.html>`_, even when that means copying the
+   files from an upstream repository.  I like this *sometimes*.  If
+   you are writing the library, then this isn't a good idea; you
+   should be dealing directly with the appropriate repository, without
+   combining code from multiple repositories into one repository.
 
    A typical application will have at least two repositories: one for
    the "application" (i.e., the code you are developing) and another
@@ -52,13 +52,16 @@ think about this it's a bad idea to do VCS integration.  Some reasons:
    changing code and testing in development, but some things are more
    likely to be problematic.  It's nice to test these things with a
    real deployment before actually committing the work.  So long as
-   "commit" isn't part of the workflow, this is easy.
+   "commit" isn't part of the workflow, this is easy: you call
+   ``toppcloud update``, and it doesn't care if you haven't actually
+   committed everything yet.
 
 Declarative Application Setup
 =============================
 
 The application's deployment needs are generally defined in
-``app.ini``.  It's small, but it covers all the details so far.
+``app.ini``.  `It's small <appconfig.html>`_, but it covers all the
+details so far.
 
 It's come up that people have wanted hooks to do things like configure
 a database.  I don't want that to happen in applications; applications
@@ -74,6 +77,9 @@ modify toppcloud itself.  It's a good chance you want to put something
 in ``tcsupport.services.*``.  This isn't perfect, but it has a
 side-effect that there's a collective benefit to these new features
 (since it's something reusable), and applications stay a bit simpler.
+Big features (a bunch are listed in the `todo <todo.html>`_ also
+usually belong in toppcloud -- at least some of them, there are also
+of course big features that go right in the application.
 
 No Build Process On The Server
 ==============================
@@ -103,10 +109,11 @@ then activate the new build.  This is incredibly un-fun.
 
 There is *absolutely no building* when you deploy an application with
 toppcloud.  Files are copied over.  Maybe your app gets a little
-chance to set itself up.  In the future toppcloud will probably handle
-backups, simple testing (to see if the app runs at all) and reverting
-the application when there's a failure.  But there are no compiler
-errors.  New hard-coded paths aren't introduced.  It's simple.
+chance to set itself up (``update_fetch``).  In the future toppcloud
+will probably handle backups, simple testing (to see if the app runs
+at all) and reverting the application when there's a failure.  But
+there are no compiler errors.  New hard-coded paths aren't introduced.
+It's simple.
 
 In my experience this *greatly* increases the ease and reliability of
 deployments.  If you have a small problem with your application, you
@@ -119,12 +126,20 @@ Non-.py libraries are handled separately
 You'll notice if you need to use some library that isn't pure-Python,
 you need to have the Ubuntu package for that library installed.  This
 happens somewhat implicitly for services, and more explicitly with the
-``packages`` `configuration setting <appconfig>`_.
+``packages`` `configuration setting <appconfig.html>`_.
 
 Generally I've found that Ubuntu packaging of such libraries (a) works
 well, (b) is stable and updates are appropriately conservative (c) is
 new enough.  Pure-Python libraries generally get updated much more
-frequently, but everyone treats these C libraries more conservatively.
+frequently, but everyone treats these C libraries more
+conservatively.  You *should* treat C libraries more conservatively.
+
+This doesn't entirely stop you from handling a volatile C library, or
+even developing one in concert with your application.  But you will
+have to turn it into a Debian package and probably create a Launchpad
+PPA.  It's substantial work, but before you go messing with C
+libraries in your application you should be ready to do a lot of work
+anyway.
 
 Application API has a small surface area
 ========================================
@@ -151,7 +166,7 @@ environment they abstracted away anything resembling a specific
 operating system.  Python hasn't done that, and I don't want to do
 that; if the environment leaks into an application we should still
 resist creating an abstraction.  Undocumented application abilities
-will get used and may be fragile, but they are betting than documented
+will get used and may be fragile, but they are better than documented
 APIs that get changed.
 
 Fabric
@@ -175,7 +190,8 @@ necessary.  And this actually works reasonably well.
 Since then it has gotten a bit more complicated, and there's a bit
 more tunneling happening, and the consistency of the codebase has
 suffered.  But not *that badly* all considered.  Most of it would be
-easily resolvable by simple refactoring.  So I remain somewhat
+easily resolvable by simple refactoring (and the same refactoring
+would be needed even if switching to Fabric).  So I remain somewhat
 reluctant to add Fabric to the mix.
 
 And really the biggest concern I have with Fabric is that underlying
@@ -189,10 +205,14 @@ scripts hosted on the server).  But individual deployments work at a
 more abstract level.  They should never be making these kinds of
 modifications.  If you are *developing toppcloud itself* then sure,
 you can add new scripts and interactions.  But, as I've noted, it's
-not particularly hard to do with less of a library.
+not particularly hard to do these remote interactions with raw ssh
+callouts.
 
 So while I am not opposed to Fabric, I am not sure it is necessary or
-worth the extra layer of abstraction.
+worth the extra layer of abstraction.  Also I am a bit worried about
+the added Paramiko dependency (Paramiko implements the ssh
+interaction, and doesn't use the normal openssh ssh client, and I
+worry is a bit big; but admittedly I haven't looked closely).
 
 Ubuntu
 ======
@@ -211,7 +231,7 @@ written based on their locations in Ubuntu and Ubuntu policy.  I don't
 want to introduce any indirection to this, or any abstraction layer.
 The consistency and reliability of the system is based on the
 consistency of its components, and this is an area where I have no
-desire to support flexibility in return for consistency.
+desire to support flexibility at the sacrifice of consistency.
 
 Bare Base Systems
 =================
@@ -222,9 +242,27 @@ consistency.  It's not a goal to support existing servers that have
 been setup in eclectic ways.  You don't have to use a "cloud" server
 to get a bare server, of course; but you **do** need a bare server.
 
+Functionality is added from concrete needs
+==========================================
 
-.. some variables:
+I'm trying to avoid implementing things I don't need at the moment.
+Of course, patches from people who have needs-at-the-moment are also
+cool.  I don't want to predict how things should happen based on
+unrealistic ideas of how toppcloud gets used.  I want to react to how
+someone actually wants to use toppcloud, with a problem clearly in
+hand.
 
-     Local Variables:
-     mode: rst
-     End:
+We see the same bugs, we fix the same bugs
+==========================================
+
+Part of the consistency of the server environment is that we can have
+a consistent experience, all of us, one big community of reluctant
+sysadmin/programmers (we play dual class characters).  With this
+consistency bugs aren't obscure.  We all deal with the same system and
+the same bugs.  I want to preserve that.  Forks of the code are fine,
+but I really hope they are temporary, because I want us to be fixing
+each other's bugs.  There are a lot of moving pieces.  I want this to
+be a finely tuned machine; complex, but refined.  That takes a lot of
+iterating, and I need a community of people iterating with me to get
+there.
+
