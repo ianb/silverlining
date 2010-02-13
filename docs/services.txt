@@ -1,8 +1,8 @@
 toppcloud Services
 ------------------
 
-This document answers the question: what does toppcloud do, and what
-does my app do?
+This document answers some parts of the question: what does toppcloud
+do, and what does my app do?
 
 The items listed here are things toppcloud does *for* you, and so you
 shouldn't do them for yourself.
@@ -25,7 +25,11 @@ the server), get it like::
 
 This is a stable, ASCII secret.  You don't *have* to use this secret
 (you could put a secret in some config file, for instance), this is
-simply offered to you if you want to skip secret generation.
+simply offered to you if you want to skip secret generation.  It makes
+it easier to put configuration files into version control.  This
+secret is *not* put in an environmental variable, because of a
+tendency of environmental variables to leak into error reports and
+other locations.
 
 Temporary files
 ===============
@@ -121,8 +125,8 @@ new (Ubuntu) package to be installed by putting this into your
     packages = package1
                package2
 
-This makes toppcloud run ``apt-get install package1 package2``
-everytime your application is update (conveniently if the packages are
+This makes toppcloud run ``apt-get install package1 package2`` every
+time your application is update (conveniently if the packages are
 already installed then ``apt-get`` is fast and does nothing).
 
 Local/Development Configuration

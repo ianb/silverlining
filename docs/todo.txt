@@ -6,8 +6,8 @@ does not yet do.  It's also kind of a notepad for design ideas.  It
 should not surprise you if I forget to remove something from this
 document after implementing it.
 
-Long-time expiration of static content
---------------------------------------
+Far-future expiration of static content
+---------------------------------------
 
 It's nice to present static content with far-future expiration dates.
 Do do this while still allowing this static content to be updated, it
@@ -25,7 +25,9 @@ I think toppcloud should add a new location (like in the example)
 where content in the ``static/`` directory is served with this
 caching, and an environmental variable ``$STATIC_URL`` which you use
 to prefix all your media files.  Probably the current pattern will be
-preserved, as it can be handy when retrofitting an application.
+preserved, as it can be handy when retrofitting an application.  The
+datestamp_version used in the application directories is apppriately
+unique.
 
 Then in the future there should also be support for uploading these
 static files to a CDN, at which point the variable will point to the
@@ -40,7 +42,8 @@ possible to host it on a central server with many "application"
 servers pointing to it.  
 
 And, in turn, it should be possible to use replication or sharding to
-have many database servers, though this is more difficult.
+have many database servers, though this is more difficult (this is a
+second step).
 
 Then, though it's largely outside the scope of toppcloud itself, it
 should be possible to move frontend (varnish) caching to another
@@ -60,6 +63,10 @@ Maybe a server group would look like::
     apps = <number of app servers>
     service.postgis = <number of postgis servers, or blank means 1>
 
+Probably you should be able to put in ``[provider:NAME]`` sections
+too, though those usually contain private data so maybe it isn't
+important.
+
 Not all services support multiple applications; ``service.files``
 particularly does not support this.  If you had a service like this
 then it'd give an error.  Also not all services would necessarily
@@ -68,12 +75,16 @@ setup replication.  This is relatively easy on CouchDB, but it might
 be a while before it is well configured on PostGIS.
 
 Also there's the possibility of a sharding front-end, or a front-end
-that does "stick" load balancing (where a user is redirected back to
+that does "sticky" load balancing (where a user is redirected back to
 the same server they were at before).  On the backend there could be
 sharding, where the application server must select the proper database
 server.  Right now there's only really support for a single database
 server per application, so there'd have to be a concept of usefully
-named servers.  So... sharding is not that easy.
+named servers.  So... sharding is not that easy.  Also there is
+probably a place for code in the VERY front of everything that routes
+a user to the right server, which is not something you can always do
+very automatically (e.g., authentication might have to happen before
+you can route the user).
 
 Backups
 -------
@@ -81,10 +92,13 @@ Backups
 It should be possible to get a nice backup file of everything, or
 upload one to some location.  It would be very nice if backup files
 were portable.  Then, for instance, you could download the backups to
-replicate live data on your site.
+replicate live data on your site for your development.  (PostGIS is a
+case where portable backups can be a bit tricky at times.)
 
 It would be even more neat if backup files were somewhat version
-control friendly.  E.g., well-ordered SQL dumps.
+control friendly.  E.g., well-ordered SQL dumps.  This might make the
+backup process do double duty as a test fixture process, and a process
+to setup data in new instances.
 
 Backup restore should also be handled; writing backup code without
 restore code is just silly.
@@ -119,7 +133,8 @@ written to inspect.
 There should be a way to get a list of all log files for a host/app.
 Maybe there should be a standard way to effect the Python standard
 logging module output, and then put it in a normal location (I think
-``/var/log/toppcloud/apps/NAME/*``).
+``/var/log/toppcloud/apps/NAME/*``).  There are some more notes down
+in Debugging_.
 
 Monitoring
 ----------
@@ -164,9 +179,11 @@ checking in files, restarting, tooling, etc.  Maybe the image could be
 run headless then?  This is more ambitious, but it could in some way
 be an introduction to good open source development practices.
 
-Probably the generalized "DEST" idea of toppcloud backup would be
-useful here and elsewhere.  Of course toppcloud backup is done on the
-remote server and uploaded from there, while this is done locally.
+This is an aside, but probably the generalized "DEST" idea of
+toppcloud backup would be useful here and elsewhere: anywhere you
+write something (like an image file) allow remote locations.  Of
+course toppcloud backup is done on the remote server and uploaded from
+there, while this is done locally, so the advantage is smaller.
 
 The core of this is probably two variations:
 
@@ -199,8 +216,8 @@ There should also be a "run all database updates" URL (also similar to
 ``update_fetch``).  This might fail, in which case the backup should
 be restored and the update aborted.
 
-I'm not sure if this should be the same as the test-before-activate
-URL, or if not whether it should be run before or after.
+I think this should be run before test-before-activate, but if
+test-before-activate fails then the databases should also be reverted.
 
 Debugging
 ---------
@@ -218,7 +235,9 @@ specifically should be handled, so only unique warnings are logged,
 and they are reset between updates.)
 
 Setting up the ``logging`` module is somewhat similar, it could be
-done manually by applications.
+done manually by applications.  (Sometimes you want to turn up
+logging, *in production* temporarily to see what is going on in a live
+server: this is something not in the current workflow.)
 
 Also there should be centralized configuration of things like, e.g.,
 where error messages are sent.  Then tools could be configured in a
@@ -228,8 +247,9 @@ configuration is generally handled.
 
 Error reporting for non-requests (like a cron script) is harder.  Most
 of these are done synchronously, so you can just show the user what is
-happening, but at least for cron and perhaps tasks this is necessarily
-not the case.
+happening, but at least for cron and perhaps tasks this is not the
+case.  Unifying environment setup might resolve this particular
+issue...
 
 Unify Environment Setup
 -----------------------
@@ -281,7 +301,8 @@ apps/servers to get configured a lot.  But for reusable application
 packages *something* has to be implemented.  And I suspect there are
 places where this is really sensible.
 
-I will probably resist this until it is clear what it should mean.
+I will probably resist this until it is clear what it should mean,
+which means an actual circumstance where it is needed arises.
 
 API Keys
 --------
@@ -321,6 +342,17 @@ and serve the files.  If multiple locations are supported I don't see
 a way to do it with any static map, instead I'll need to write a
 rewrite map script.  But probably rewrite map scripts are a necessity
 anyway. 
+
+It's possible that multiple locations aren't necessary (e.g., ``/foo``
+and ``/bar`` as in the example), but that only a single location can
+be provided, and like ``static/`` it can get the first chance to serve
+up *all* files.  So if you request ``/foo/image.png`` and
+``$CONFIG_WRITABLE_FILES/foo/image.png`` exists, then it will be
+served.
+
+I might integrate this with `bbdocs
+<http://bitbucket.org/ianb/bbdocs>`_, as that would make the
+deployment simpler.
 
 Per-path applications
 ---------------------
@@ -362,12 +394,48 @@ recipe for integration testing would be nice.  A recipe for full-stack
 testing (e.g., with Windmill or Selenium) would be nice.  These are
 probably more recipes than core toppcloud things.
 
+It's possible that toppcloud could setup a second set of "testing"
+services.  So if you ran development off a database named ``myapp``,
+maybe in "testing" mode it would use ``test_myapp`` (and the database
+would be cleared on every run).
+
 Full-stack development environment
 ----------------------------------
 
 I can imagine a through-the-browser development environment, based on
 Bespin.  This could be cool.  It could be really VM-friendly as well.
 Circumstances may determine if I really try this out.
+
+To do this, Bespin would be installed and running, and configured to
+point at the application location.  Version control can be managed
+through Bespin.
+
+Additionally Hudson could be installed, enabling a kind of built-in
+test suite.  I'm not sure how else Hudson could be enabled (except
+perhaps to list a test script in ``app.ini`` and go from there), but
+specifically for this case it seems like it would be nice.  By
+including a test suite configuration it might generally be possible to
+do a very simple and easy Hudson setup.
+
+Hudson is not currently a Debian package through Ubuntu, which is
+disappointing though there may be a third-party package for it.
+Bespin would probably be deployed as a toppcloud application itself.
+I imagine you might define a base domain (e.g., ``mydevel``) and then
+you'd have:
+
+* ``www.mydevel``: the application itself, running
+* ``dev.mydevel``: Bespin
+* ``test.mydevel``: Hudson
+
+One could imagine a load tester somewhere in here too.  And maybe
+a rig for Selenium or other through-the-web tester?
+
+With all these, heck, maybe I'd develop through a virtual machine even
+though I'm on Linux already.
+
+Bespin would not preclude file sharing so that you could do editing
+(even version control) as though it was local.  It would simply be
+another alternative.
 
 Application Packs
 -----------------
@@ -427,4 +495,114 @@ I'd like to be able to do::
 and see a unified diff between the directory and what is present
 remotely.  This could let you feel more confident about the effect of
 updates.
+
+Local/CDN Javascript
+--------------------
+
+I've done some applications that are mostly static pages on the
+frontend with Javascript.  I like to use Google's hosted versions of
+these libraries.  But then offline I lose access to the app :(
+
+It would be nice to have a local cache of these files in toppcloud.
+Except I can't figure out how you'd write a static HTML file that
+could select the local or remote file.  Maybe one option is to use
+Google's loader, but kind of mock it out for local use.  But even that
+is tricky.  It would be possible to do a small amount of rewriting of
+HTML pages, replacing those links (maybe literally) with local
+versions.  During development static files are served fairly naively,
+so it wouldn't be hard to do this substitution.  Also minimized files
+could be replaced with unminimized files.  Because the actual HTML
+would be production-ready there's no compromise, only in development
+are they reverted.
+
+toppcloud could ship these libraries, or maybe there could be an
+``app.ini`` setting like::
+
+    [development]
+    local_html_replacements =
+        http://ajax.googleapis.com/ajax/libs/jquery/1.4.0/jquery.min.js /_devel/jquery.js
+
+Then you'd put that file in ``static/_devel/jquery.js``.  I can't even
+get that on a single line...  maybe these replacements should be put
+in a separate file, and maybe that should be a set of regular
+expressions.  On the other hand, if this is really restricted to URLs
+and local files, you could "sync" these files automatically.  But in
+this case, as an example, you actually want a different file during
+development (the non-minimized ``jquery.js``).
+
+Also while this is otherwise kind of unresolvable for static files, it
+would be nice if this also worked for dynamic files.  There would then
+have to be some API.  Maybe each of these resources would be "named",
+in a file like::
+
+    [jquery]
+    production = http://ajax.googleapis.com/ajax/libs/jquery/1.4.0/jquery.min.js
+    devel = /_devel/jquery.js
+
+And then an API like::
+
+    <script src="${tcsupport.href['jquery']}"></script>
+
+Using ``__getitem__`` would make this more Django-template friendly I
+believe (though a more traditional ``tcsupport.href('jquery')`` could
+also be supported).
+
+This could also be the basis for the CDN setup, and it's possible that
+minimization could happen using this.  Maybe like::
+
+    [js]
+    jquery.json file = static/js/jquery.json.js
+    app.js file = static/js/app.js
+    all_js combine = jquery.json app.js
+
+Then in production ``tcsupport.href('all_js')`` would return a URL
+pointing to the minimized and combined version of all those files, and
+``tcsupport.href('jquery.json')`` and ``tcsupport.href('app.js')``
+would both return None.  In development the inverse would be true.
+
+Using ``toppcloud serve`` there should be an option to do
+minimization, so the minimized versions could be tested.  The same
+ideas apply to CSS.  Something like this might make sense for images,
+but no minimization would occur.  You might not want to enumerate
+images, so you might do:
+
+    [images]
+    images directory = static/images/
+
+And then use ``${tcsupport.href('images')}/folder.png``
+
+Start Up Local Service
+----------------------
+
+There should be a way (probably via ``~/.toppcloud.conf``) to indicate
+how to start local services.  Then, for example, you would not need to
+run PostgreSQL or Couch all the time, but could make it available as
+needed.  Maybe it would look like::
+
+    [service.couchdb]
+    start = sudo /etc/init.d/couchdb start
+    stop = sudo /etc/init.d/couchdb stop
+
+Of course starting and stopping all the time is annoying, but it
+wouldn't have to happen if the reloader did the restart.  Also perhaps
+toppcloud could lazily stop the service by daemonizing a stop-script
+on exit.  (Maybe only if there's an additional ``lazy_stop`` setting.)
+
+Keep setup-node Version
+-----------------------
+
+It would be good to auto-detect when setup-node has to be rerun.  I
+imagine either simply using a hash of all files that are part of
+setup-node, or using the latest timestamp.  The timestamp would change
+from computer to computer though, giving false positives.
+
+I imagine if you run ``toppcloud update`` that it would do something
+like::
+
+    $ toppcloud update --node=foo
+    Warning: the node foo is not up to date; setup-node should be run
+    Continue anyway (y)es/(n)o/(u)pdate?
+
+Yes (which would work with ``--yes``) would just keep going, No
+aborts, Update would run setup-node immediately and then continue.
 

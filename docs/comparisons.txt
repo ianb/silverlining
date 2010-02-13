@@ -10,32 +10,48 @@ casual comparison...
 Differences From App Engine
 ---------------------------
 
+App Engine is in many ways the basis for toppcloud; at least, all the
+choices I made when starting toppcloud were in reaction to App Engine:
+either deliberately copying App Engine, or deliberately *not* copying
+it.
+
+So, some specific differences:
+
 * This doesn't do security isolation between apps on a server.
   Individual servers aren't that expensive, so untrusted applications
-  just shouldn't comingle.
+  just shouldn't comingle with toppcloud.
 
 * This doesn't have a scalable backend.  It would be possible to set
   up a scalable backend service, and do the associated configuration,
   but I don't know much about those tools anyway.  Scalability isn't
-  really a goal; ease and reliability of deployment is more the goal.
+  the first goal; ease and reliability of deployment is more the goal.
   Not that this should *exclude* scalability, but it's not automatic.
+  With work and when using scalable backends, this might become easy
+  with toppcloud in the future.  But it's going to be a lot of steps,
+  and in total a great deal of work.
 
 * You can write files.
 
 * App Engine allocates server time dynamically, and this does not in
-  any way, though at least it makes your deployments scriptable.
+  any way, though at least it makes your deployments scriptable so you
+  might be able to deploy new servers in an automated fashion.
 
 * There's no authentication built in, and there won't be; this can be
   handled by per-application libraries.
 
 * There's no limits (like, for example, the 1000-now-2000 file limit).
   As a result support for skipping files on upload is not such a big
-  deal.  Dynamic support for multiple runners or static file locations
-  also isn't supported (like in ``app.yaml``), because it doesn't seem
-  very important to me.  If you don't want process isolation,
-  something like `Paste's urlmap
-  <http://pythonpaste.org/modules/urlmap.html>`_ can handle dispatch
-  (implemented in your application's runner).
+  deal.  Cloud disk space is fairly cheap, so optimizing tihs isn't a
+  big deal.  
+
+* Dynamic support for multiple runners or static file locations isn't
+  supported (like in ``app.yaml``), because it doesn't seem very
+  important to me.  If you don't want process isolation, something
+  like `Paste's urlmap <http://pythonpaste.org/modules/urlmap.html>`_
+  can handle dispatch (implemented in your application's runner).  At
+  some point it should be possible to upload entirely separate
+  applications into different paths, but that will be more isolated
+  than what App Engine provides through ``app.yaml``.
 
 * Of course, you can run any library or service.  For me `lxml
   <http://codespeak.net/lxml/>`_ and `PostGIS
@@ -43,7 +59,9 @@ Differences From App Engine
   those libraries really kept and keeps me from using App Engine.
 
 * No pure-Python libraries are included, because they aren't needed
-  (including, for example, Django and WebOb).
+  (including, for example, Django and WebOb).  toppcloud keeps the
+  runtime quite clean (except for libraries installed system-wide,
+  which would be the case for something like lxml).
 
 Differences From Heroku
 -----------------------
@@ -57,17 +75,22 @@ novel ideas:
 
 * Configuration seems to be done somewhat magically with Heroku, and
   just with environmental variables in this system.  Magic is
-  annoying.
+  annoying.  You need to glue together the environmental variables
+  with your configuration manually, though you only need to do it
+  *once*.  (If you aren't using a framework that includes
+  "configuration" then you can probably just hardcode the
+  environmental variables in your code.)
 
 * Stuff like migration is built-in.  I want to do that stuff too.
 
 * Apps seem to be more chroot'd than in this system.  I'm not that
   concerned about this, as I expect people to just do that isolation
-  at the server level.
+  by using multiple servers.
 
-* There's a bunch of nice add-ons.  I want to do that stuff too (not
-  exactly the same way, but the same basic idea: if you want Solr, you
-  can just say so and get it).
+* There's a bunch of nice add-ons for Heroku.  These will map to
+  toppcloud services.  While not yet implemented, in the future
+  enabling Solr will be a matter of writing ``service.solr =`` in your
+  ``app.ini``.
 
 * Heroku uses Ruby.  I believe Ruby is very supportable by this
   system, but it isn't supported now, and I'm unlikely to add it
@@ -77,7 +100,8 @@ novel ideas:
   application.  You can give toppcloud apps a bigger server (up to the
   limits of your service provider), and if you deploy an application
   on multiple servers/nodes you can be reasonably assured they are
-  identical, but scaling of the persistence is not handled.
+  identical, but scaling of the persistence is not handled, and so
+  adding new nodes isn't really handled.
 
 Generally Heroku seems like a faster-moving target than App Engine,
 with lots of interesting ideas; I hope to get more ideas from it going
@@ -116,12 +140,10 @@ toppcloud was written because I liked *parts* of the App Engine
 toolset, but I couldn't embrace the constraints of the platform.
 
 toppcloud also I believe scales *down* further than AppScale.  You can
-run as many sites on one server/node as you care to.  It uses
-mod_wsgi's features that allow processes to be spun up on demand and
-shut down when demand is lacking (not unlike App Engine, really).  So
-it is quite suitable for deploying several small applications
-cheaply.  I believe toppcloud will make the life of the average web
-developer easier and simpler very quickly.
+run as many sites on one server/node as you care to.  So it is quite
+suitable for deploying several small applications cheaply.  I believe
+toppcloud will make the life of the average web developer easier and
+simpler very quickly.
 
 toppcloud is meant to be usable with existing applications.  You can
 use pretty much any database (some support code needs to be written to
@@ -139,28 +161,8 @@ Django)::
 
 Everything you can do in a traditional deployment system, you can do
 with toppcloud (at least, potentially; extra support code may be
-necessary).
-
-Differences from Moonshine
---------------------------
-
-So far, `Moonshine <http://github.com/railsmachine/moonshine>`_ sounds
-like the closest thing to toppcloud in functionality, with even many
-of the same choices, except Ruby instead of Python.  It uses Ubuntu,
-Apache, and Passenger (where Passenger is the closest thing to a Ruby
-equivalent of mod_wsgi).  It also uses Ruby Enterprise Edition (?) and
-MySQL, where toppcloud does not have a single persistence backend.
-
-``config/moonshine.yml`` is a lot like ``app.ini``, ``cap
-deploy:setup`` is like ``toppcloud setup-node`` and ``cap deploy`` is
-like ``toppcloud update``.
-
-It's built on Capistrano, not using its own native constructs.  In
-this sense it is glue.
-
-It has a notion of "shared config", which is configuration not in your
-source tree, but which is needed for deployment.  toppcloud needs
-something like this.
+necessary).  I don't think AppScale provides this nor do I think this
+is a goal of AppScale.
 
 Differences from Typhoonae
 --------------------------
@@ -179,7 +181,7 @@ serving its function.
 People have asked about how toppcloud can be used with something more
 closely related to App Engine.  I'm not that optimistic about
 AppScale, because I think it overlaps in the wrong ways with toppcloud
--- they are more direct competitors than likely to be complementary.
+-- they are more like direct competitors than complementary tools.
 Typhoonae on the other hand might work better.
 
 The pieces of Typhoonae that would be useful would be its
@@ -187,13 +189,37 @@ implementations of the App Engine APIs, backed with MongoDB (data
 store), RabbitMQ (well... not quite sure what this is for), and
 ejabberd (for chat integration), and possibly other APIs that they've
 implemented with a better backend than what the App Engine SDK itself
-contains.
+contains.  These would each be services.  Possibly something like the
+Data Store API would just be a library you install, plus
+``service.mongodb``, but they could be presented as first-class
+services (e.g. ``service.typhoonae_datastore``).  I'd probably prefer
+they not be first-class services, because that means Typhoonae
+releases would have to be tied one-to-one to toppcloud releases.  I'd
+rather see something like a ``toppcloud_typhoonae`` distribution that
+you could install into your app.
 
-To integrate these toppcloud would need the necessary services (e.g.,
-a MongoDB service), and then a bit of code to make the Typhoonae
-implementations work with these services (mostly just using the
-configuration toppcloud puts in the environ to setup the Typhoonae
-implementations).  
+Differences from Moonshine
+--------------------------
+
+So far, `Moonshine <http://github.com/railsmachine/moonshine>`_ sounds
+like the closest thing to toppcloud in functionality, with even many
+of the same choices, except Ruby instead of Python.  It uses Ubuntu,
+Apache, and Passenger (where Passenger is the closest thing to a Ruby
+equivalent of mod_wsgi).  It also uses Ruby Enterprise Edition (?) and
+MySQL, where toppcloud does not have a single persistence backend.
+
+``config/moonshine.yml`` is a lot like ``app.ini``, ``cap
+deploy:setup`` is like ``toppcloud setup-node`` and ``cap deploy`` is
+like ``toppcloud update``.
+
+It's built on Capistrano, not using its own native constructs.  In
+this sense it is glue, but it's kind of a matter of perspective.  If
+Capistrano worked a little differently then it might look like
+Moonshine was the application and Capistrano the library.
+
+It has a notion of "shared config", which is configuration not in your
+source tree, but which is needed for deployment.  toppcloud needs
+something like this.
 
 Differences from Rubber
 -----------------------
@@ -208,22 +234,12 @@ also has more features for scaling.
 Bitnami
 -------
 
-`Bitname <http://bitnami.org/>`_ is kind of a package for pre-built
+`Bitnamo <http://bitnami.org/>`_ is kind of a package for pre-built
 open source applications.  For instance, you grab a Joomla image and
 you get Joomla.  From what I can tell, Bitnami itself is actually
-proprietary.
+proprietary.  The supported applications seem to be PHP.
 
-This has actually made me think a lot in the last few... well, hours.
-toppcloud doesn't support Windows, and may never support Windows.
-Similarly, when I work with people on platforms that they don't
-regularly develop on, it can be hard to get things like PostGIS setup.
-What if toppcloud could also build "development images"?  Take an
-Ubuntu image, set it up *somewhat* similarly to how a production
-server is set up, add the application.  The application isn't
-"deployed" or updated from outside, instead it's live in the image
-itself, and editable.  All source control preserved.  Some file
-sharing is setup so the developer can edit files from the image in
-their native environment.  One can imagine a few tools, for things
-like source control and deployment.  Or just login to the image and
-use the command line.
+Bitnami also creates virtual images you can use to develop.  It has
+inspired me to at least add a `todo item
+<todo.html#create-virtual-machine-images>`_.
 

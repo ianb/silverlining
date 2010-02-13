@@ -1,7 +1,7 @@
 PHP Support
 -----------
 
-PHP support in toppcloud is a bit experimental.  Meaning, I'm not sure
+PHP support in toppcloud is experimental.  Meaning, I'm not sure
 exactly *how* it should work, or if it is working well.  It also adds
 a slightly Pythonesque flare to the request dispatching.
 
@@ -22,6 +22,11 @@ that yourself, like::
 
     packages = php5-pgsql
 
+(Note: this should probably be fixed by extending services to be aware
+of what kinds of application is being installed, and then
+``tcsupport.services.postgis`` would start installig this package for
+PHP apps.)
+
 Requests that point to a file in ``static/`` will (like with Python)
 serve that file directly.  Files that point to something in
 ``php_root`` (in this example ``site/``) will also be served directly,
@@ -40,4 +45,6 @@ This is somewhat easier than it might otherwise be with a PHP
 application, because you can be sure that *all* (dynamic) requests
 will go through your runner.  But it means if your application has a
 sophisticated set of rewrite rules, for example, you'll have to
-replicate them in PHP.
+replicate them in PHP.  This is probably fairly mechanical (you can
+turn those rules into PHP regexes), but documentation on how to do
+that translation would be extremely helpful.
