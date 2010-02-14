@@ -421,11 +421,10 @@ Another interface would control toppcloud itself, allowing you to
 configure production providers and deploy to them.  It could be very
 simple.
 
-Hudson is not currently a Debian package through Ubuntu, which is
-disappointing though there may be a third-party package for it.
-Bespin would probably be deployed as a toppcloud application itself.
-I imagine you might define a base domain (e.g., ``mydevel``) and then
-you'd have:
+Hudson is available as a `third-party Debian package
+<http://hudson-ci.org/debian/>`_.  Bespin would probably be deployed
+as a toppcloud application itself.  I imagine you might define a base
+domain (e.g., ``mydevel``) and then you'd have:
 
 * ``www.mydevel``: the application itself, running
 * ``dev.mydevel``: Bespin
