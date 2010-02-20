@@ -1,3 +1,8 @@
+"""Renders the scripts in scripts/ for use in a newly-created server
+"""
+
+## FIXME: this should all just be removed, we aren't really using this
+
 import os
 import zipfile
 import time

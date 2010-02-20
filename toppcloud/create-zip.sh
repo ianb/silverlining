@@ -1,4 +1,12 @@
 #!/usr/bin/env bash
+# This script creates the zip file that is a runnable version of toppcloud.
+# Usage:
+#   create-zip.sh
+# You may set these environmental variables to control it:
+#   $BUILD_DIR: place to put the zip file
+#   $VIRTUALENV: location of a virtualenv.py script
+#   $VERSION: version to build
+#   $ZIP_DIR: place to put the zip file
 
 pushd "$(dirname $BASH_SOURCE)/../"
 if [ -z "$VERSION" ] ; then

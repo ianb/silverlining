@@ -1,7 +1,14 @@
-"""Script to update /etc/hosts"""
+"""Script to update /etc/hosts
+
+This is called by toppcloud.etchosts.set_etc_hosts.  It's a separate
+script because this is called with sudo and runs as root.
+"""
+
 import time
 
 def update_hosts(filename, ip, hostname):
+    """Add the hostname->ip relation to the given file (typically /etc/hosts)
+    """
     fp = open(filename)
     lines = list(fp)
     fp.close()

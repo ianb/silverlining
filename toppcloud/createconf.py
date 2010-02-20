@@ -1,3 +1,9 @@
+"""Creates ~/.toppcloud.conf
+
+This builds the file from a template, and asks the user some questions
+about how to build it.
+"""
+
 import os
 import tempita
 

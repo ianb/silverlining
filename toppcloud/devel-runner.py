@@ -1,3 +1,11 @@
+"""This is the server that is run for toppcloud serve.
+
+Note that this is a script, and is run as a script, it is not a
+module.  This allows a server to be run without toppcloud itself on
+sys.path.
+"""
+
+# Setup sys.path to include tcsupport:
 from site import addsitedir
 import sys
 import os
@@ -44,6 +52,9 @@ reloader.install()
 def get_app(base_path):
     site = 'localhost'
     os.environ['SITE'] = site
+    # We add the virtualenv packages, and also run sitecustomize.py
+    # (which isn't automatic unless you start from the virtualenv
+    # itself):
     lib_path = os.path.join(base_path, 'lib', 'python%s' % sys.version[:3],
                             'site-packages')
     if lib_path not in sys.path:
@@ -76,12 +87,12 @@ def get_app(base_path):
     else:
         spec = None
     runner = os.path.join(base_path, runner)
-    reloader.watch_file(runner)
     if not os.path.exists(runner):
         raise Exception(
             "The setting ([production] runner) points to the file %s which does not exist"
             % runner)
-    ## FIXME: copied from master_runner.py, which is lame
+    reloader.watch_file(runner)
+    ## FIXME: this is copied from master_runner.py, which is lame
     if runner.endswith('.ini'):
         from paste.deploy import loadapp
         runner = 'config:%s' % runner
@@ -107,6 +118,8 @@ def get_app(base_path):
         raise Exception(
             "Unknown kind of runner (%s)" % runner)
 
+    # This calls the update_fetch URL on every reload/restart, which
+    # is... questionable.
     if parser.has_option('production', 'update_fetch'):
         urls = parser.get('production', 'update_fetch')
         urls = [url for url in urls.splitlines()
@@ -128,6 +141,11 @@ def get_app(base_path):
     return found_app
 
 class CompoundApp(object):
+    """Application that simulates the Apache configuration of toppcloud
+
+    This basically serves up the normal WSGI application, plus the
+    static files.
+    """
 
     def __init__(self, base_path):
         self.base_path = base_path
@@ -147,6 +165,13 @@ class CompoundApp(object):
         return self.app(environ, start_response)
 
     def serve_file(self, path, environ, start_response):
+        """Serve a file.
+
+        This does not use any library because we want this server to
+        be library-agnostic.  It's not a great server (e.g., no cache
+        handling), but since this is only for development it should be
+        okay.
+        """
         length = os.path.getsize(path)
         type, encoding = mimetypes.guess_type(path)
         if not type:
@@ -163,7 +188,6 @@ class CompoundApp(object):
             ('Content-type', type),
             ('Content-length', str(length))])
         return iterator()
-
 
 def main(base_path):
     app = CompoundApp(base_path)

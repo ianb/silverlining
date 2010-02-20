@@ -1,3 +1,13 @@
+"""toppcloud interface
+
+This implements the command-line interface of toppcloud.  It includes
+all the commands and their options, though the implementation of the
+commands are in toppcloud.commands.*
+
+There are also a few shared objects implemented here, specifically
+`Config` and `App`
+"""
+
 import os
 import sys
 import fnmatch
@@ -20,6 +30,7 @@ Runs a variety of cloud-related commands
 parser = argparse.ArgumentParser(
     description=description)
 
+## FIXME: these options should also be available in the subparsers:
 parser.add_argument(
     '-p', '--provider',
     metavar='NAME',
@@ -163,6 +174,13 @@ parser_serve.add_argument(
     metavar='APP_DIR',
     help='Directory holding app')
 
+## We can't handle toppcloud run well with a subparser, because
+## there's a bug in subparsers that they can't ignore arguments they
+## don't understand.  Because there will be arguments passed to the
+## remote command we need that, so instead we create an entirely
+## separate parser, and we'll do a little checking to see if the run
+## command is given:
+
 parser_run = argparse.ArgumentParser(
     add_help=False,
     description="""\
@@ -254,6 +272,7 @@ parser_deactivate.add_argument(
     help="Keep the prev.* host activate (by default it is deleted)")
 
 def catch_error(func):
+    """Catch CommandError and turn it into an error message"""
     def decorated(*args, **kw):
         try:
             return func(*args, **kw)
@@ -269,6 +288,7 @@ def main():
         createconf.create_conf()
         return
     if len(sys.argv) > 1 and sys.argv[1] == 'run':
+        # Special case for toppcloud run:
         args, unknown_args = parser_run.parse_known_args(sys.argv[2:])
         args.unknown_args = unknown_args
         args.command = 'run'
@@ -291,7 +311,10 @@ class Config(UserDict):
 
     Kind of a holder for all the runtime bits.
     """
+    ## FIXME: refactoring this (and App) would be excellent
 
+    ## FIXME: the one and only default configuration; this should be
+    ## converted to be hardcoded:
     defaults = dict(remote_username='www-mgr')
     
     def __init__(self, config_dict, driver, args=None):
@@ -305,6 +328,7 @@ class Config(UserDict):
 
     @classmethod
     def from_config_file(cls, filename, section, args):
+        """Instantiate from a configuration file"""
         parser = ConfigParser()
         parser.read([filename])
         full_config = parser.asdict()

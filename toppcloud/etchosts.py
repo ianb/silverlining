@@ -1,3 +1,12 @@
+"""Handle /etc/hosts
+
+This has methods to put a new host->ip setting in /etc/hosts, as well
+as get a setting from that file.
+
+As /etc/hosts can only be edited by root, this ultimately calls out to
+sudo to do the actual edit.
+"""
+
 import os
 import subprocess
 
