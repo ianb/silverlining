@@ -36,14 +36,12 @@ mkdir -p /root/.ssh
 cat >> /root/.ssh/authorized_keys
 ''',
         ], stdin=subprocess.PIPE)
-    dsa_path = os.path.join(os.environ['HOME'],'.ssh', 'id_dsa.pub')
-    rsa_path = os.path.join(os.environ['HOME'],'.ssh', 'id_rsa.pub')
-    if os.path.exists(dsa_path):
-        key = open(dsa_path, 'rb').read()
-        config.logger.notify("Using key file:  %s", dsa_path)
-    elif os.path.exists(rsa_path):
-        key = open(rsa_path, 'rb').read()
-        config.logger.notify("Using key file:  %s", dsa_path)
+    for path in ['id_rsa.pub', 'id_dsa.pub']:
+        pubkey_path = os.path.join(os.environ['HOME'], '.ssh', path)
+        if os.path.exists(pubkey_path):
+            key = open(pubkey_path, 'rb').read()
+            config.logger.notify("Using key file:  %s", pubkey_path)
+            break
     else:
         config.logger.fatal("Can't locate any key file")
         #not sure what error code are used for here but 8 was unused

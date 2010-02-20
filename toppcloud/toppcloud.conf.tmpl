@@ -4,9 +4,9 @@ username = {{username}}
 secret = {{api_key}}
 image_name = base_image_*
 size_id = 1
-{{if id_dsa}}
+{{if pubkey}}
 root_authorized_keys = 
-    {{id_dsa}}
+    {{pubkey}}
 {{endif}}
 
 [environment]
