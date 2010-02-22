@@ -52,6 +52,7 @@ reloader.install()
 def get_app(base_path):
     site = 'localhost'
     os.environ['SITE'] = site
+    os.environ['CANONICAL_HOST'] = 'localhost:8080'
     # We add the virtualenv packages, and also run sitecustomize.py
     # (which isn't automatic unless you start from the virtualenv
     # itself):
