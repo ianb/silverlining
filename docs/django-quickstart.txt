@@ -49,7 +49,7 @@ Next we'll install Django::
 Then we'll set up a standard Django site::
 
     $ cd src/sampleapp
-    $ django-admin.py sampleapp
+    $ django-admin.py startproject sampleapp
 
 Also we'd like to be able to import this file.  It'd be nice if there
 was a ``setup.py`` file, and we could run ``pip -e src/sampleapp``,

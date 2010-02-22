@@ -9,7 +9,9 @@ application.  This loading process only happens once.
 Also for each request the environment is fixed up some to represent
 the request properly after having gone through Varnish.
 """
-import os, sys, time, _strptime
+import os, sys
+# Import these to work around a mod_wsgi problem:
+import time, _strptime
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from tcsupport import common
 import re
@@ -22,6 +24,7 @@ def application(environ, start_response):
     global found_app, found_app_site
     site = environ['SITE']
     os.environ['SITE'] = site
+    os.environ['CANONICAL_HOST'] = common.canonical_hostname(site) or ''
     ## FIXME: give a real version here...
     environ['TOPPCLOUD'] = os.environ['TOPPCLOUD'] = 'toppcloud/0.0'
     
