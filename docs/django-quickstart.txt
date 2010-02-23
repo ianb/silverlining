@@ -221,5 +221,23 @@ With this::
 Then you don't have to worry about checking a secret into version
 control.
 
-You still don't really have an application, but the rest is mere
-"programming" so have at it!
+Setting Up Your Deployed Database
+---------------------------------
+
+After you write an app and are ready to deploy it, you just run
+``toppcloud update``.  *But*, while you'll get a blank database to
+use, it will be empty until you run ``syncdb``.  A good way to do that
+is::
+
+    $ toppcloud run HOSTNAME manage.py syncdb
+
+This runs ``bin/manage.py`` on the host named ``HOSTNAME``.  You can
+use this for imports or other management tasks as well.
+
+A more robust mechanism is to use the ``update_fetch`` setting in
+``app.ini``: this is a URL (provided *by* your application) that is
+fetched everytime your application is updated.  This URL can check the
+database, create tables, etc.  (In the future I expect this can use
+scripts in addition to URLs, at which point you can run ``syncdb``
+directly; for now you could also create a URL in your app that calls
+``syncdb`` programmatically.)

@@ -59,6 +59,7 @@ RewriteRule (.*) http://%1$1
 
 RewriteMap platforms txt:/var/www/platforms.txt
 RewriteMap php-roots txt:/var/www/php-roots.txt
+RewriteMap process-types txt:/var/www/process-types.txt
 
 # Figure out what "site" to map this request to:
 RewriteMap hostmap txt:/var/www/hostmap.txt 
@@ -101,14 +102,18 @@ RewriteCond /var/www/%{ENV:SITE}/%{ENV:PHP_ROOT}%{REQUEST_URI} -f
 RewriteCond %{REQUEST_URI} !\.php$
 RewriteRule . /var/www/%{ENV:SITE}/%{ENV:PHP_ROOT}%{REQUEST_URI} [L]
 
+RewriteCond ${process-types:%{ENV:SITE}} ^debug$
+RewriteRule . - [E=PROCESS_DEBUG:_debug]
+
 # Lastly, we run the actual PHP:
 RewriteCond ${platforms:%{ENV:SITE}} ^php$
 RewriteRule . /var/www/support/master-runner.php [L]
 
 # Lastly, setup the WSGI application:
 WSGIApplicationGroup %{ENV:SITE}
-WSGIProcessGroup general
-WSGIDaemonProcess general user=www-data processes=5 threads=1 maximum-requests=200 inactivity-timeout=3600 display-name=wsgi home=/var/www
+WSGIProcessGroup general%{ENV:PROCESS_DEBUG}
+WSGIDaemonProcess general user=www-data processes=5 threads=1 maximum-requests=200 display-name=wsgi home=/var/www
+WSGIDaemonProcess general_debug user=www-data processes=1 threads=10 maximum-requests=200 display-name=wsgi home=/var/www
 WSGIPassAuthorization On
 
 WSGIScriptAlias / /var/www/support/master_runner.py

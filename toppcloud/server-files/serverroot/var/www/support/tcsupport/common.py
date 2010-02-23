@@ -7,6 +7,7 @@ SITE_DIR = '/var/www'
 HOSTMAP = '/var/www/hostmap.txt'
 PLATFORM_MAP = '/var/www/platforms.txt'
 PHP_ROOT_MAP = '/var/www/php-roots.txt'
+PROCESS_TYPE_MAP = '/var/www/process-types.txt'
 
 IGNORE_SITES = set(['default-notfound', 'default-disabled'])
 
