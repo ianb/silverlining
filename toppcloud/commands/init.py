@@ -27,12 +27,12 @@ def command_init(config):
             virtualenv_file = virtualenv_file[:-1]
         if config.args.distribute:
             cmd = [
-                'python2.6', virtualenv_file,
+                '/usr/bin/python2.6', virtualenv_file,
                 '--unzip-setuptools', '--distribute',
                 dir]
         else:
             cmd = [
-                'python2.6', virtualenv_file,
+                '/usr/bin/python2.6', virtualenv_file,
                 '--unzip-setuptools', dir]
         proc = subprocess.Popen(cmd)
         proc.communicate()
