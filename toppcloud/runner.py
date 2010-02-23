@@ -317,11 +317,11 @@ class Config(UserDict):
     ## converted to be hardcoded:
     defaults = dict(remote_username='www-mgr')
     
-    def __init__(self, config_dict, driver, args=None):
+    def __init__(self, config_dict, args=None):
         self.data = config_dict
         for name, value in self.defaults.iteritems():
             self.data.setdefault(name, value)
-        self.driver = driver
+        self._driver = None
         self.args = args
         if args:
             self.logger = args.logger
@@ -343,14 +343,15 @@ class Config(UserDict):
                                % section[len('provider:'):])
         config = full_config[section]
         config['section_name'] = section
-        provider = config['provider']
-        #FIXME, a proper solution will be to fix the DummyProvider in libcloud
-        if provider == 'localhost':
-            driver = object()
-        else:
+        return cls(config, args=args)
+
+    @property
+    def driver(self):
+        if self._driver is None:
+            provider = self['provider']
             DriverClass = libcloud_get_driver(getattr(Provider, provider.upper()))
-            driver = DriverClass(config['username'], config['secret'])
-        return cls(config, driver, args=args)
+            self._driver = DriverClass(self['username'], self['secret'])
+        return self._driver
 
     @property
     def node_hostname(self):
