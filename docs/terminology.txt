@@ -10,6 +10,15 @@ Node:
     which is also the domain name it can be accessed by.  The name
     doesn't have to be in DNS (/etc/hosts is setup for this).
 
+Hostname:
+    This is a running instance of an application.  It lives on some
+    Node, and can be deployed to.  Over its life a hostname will have
+    many application instances deployed to it.  In most cases once a
+    hostname has been assigned to a node, you can use the hostname
+    instead of the node name (all toppcloud really cares about is that
+    the nodename is a DNS-or-/etc/hosts-resolvable name, so the
+    canonical and the per-site host names are interchangeable).
+
 Application:
     This is a codebase that can be run.  It has an app.ini file, and a
     main.py or config.ini file for actually running the application.
