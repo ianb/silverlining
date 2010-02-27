@@ -10,16 +10,16 @@ casual comparison...
 Differences From App Engine
 ---------------------------
 
-App Engine is in many ways the basis for toppcloud; at least, all the
-choices I made when starting toppcloud were in reaction to App Engine:
-either deliberately copying App Engine, or deliberately *not* copying
-it.
+App Engine is in many ways the basis for Silver Lining; at least, all
+the choices I made when starting Silver Lining were in reaction to App
+Engine: either deliberately copying App Engine, or deliberately *not*
+copying it.
 
 So, some specific differences:
 
 * This doesn't do security isolation between apps on a server.
   Individual servers aren't that expensive, so untrusted applications
-  just shouldn't comingle with toppcloud.
+  just shouldn't comingle with Silver Lining.
 
 * This doesn't have a scalable backend.  It would be possible to set
   up a scalable backend service, and do the associated configuration,
@@ -27,8 +27,8 @@ So, some specific differences:
   the first goal; ease and reliability of deployment is more the goal.
   Not that this should *exclude* scalability, but it's not automatic.
   With work and when using scalable backends, this might become easy
-  with toppcloud in the future.  But it's going to be a lot of steps,
-  and in total a great deal of work.
+  with Silver Lining in the future.  But it's going to be a lot of
+  steps, and in total a great deal of work.
 
 * You can write files.
 
@@ -59,7 +59,7 @@ So, some specific differences:
   those libraries really kept and keeps me from using App Engine.
 
 * No pure-Python libraries are included, because they aren't needed
-  (including, for example, Django and WebOb).  toppcloud keeps the
+  (including, for example, Django and WebOb).  Silver Lining keeps the
   runtime quite clean (except for libraries installed system-wide,
   which would be the case for something like lxml).
 
@@ -88,7 +88,7 @@ novel ideas:
   by using multiple servers.
 
 * There's a bunch of nice add-ons for Heroku.  These will map to
-  toppcloud services.  While not yet implemented, in the future
+  Silver Lining services.  While not yet implemented, in the future
   enabling Solr will be a matter of writing ``service.solr =`` in your
   ``app.ini``.
 
@@ -96,21 +96,21 @@ novel ideas:
   system, but it isn't supported now, and I'm unlikely to add it
   myself (mostly because I don't know quite how it should work).
 
-* Heroku has more support for dynamically scaling up your
-  application.  You can give toppcloud apps a bigger server (up to the
-  limits of your service provider), and if you deploy an application
-  on multiple servers/nodes you can be reasonably assured they are
-  identical, but scaling of the persistence is not handled, and so
-  adding new nodes isn't really handled.
+* Heroku has more support for dynamically scaling up your application.
+  You can give Silver Lining apps a bigger server (up to the limits of
+  your service provider), and if you deploy an application on multiple
+  servers/nodes you can be reasonably assured they are identical, but
+  scaling of the persistence is not handled, and so adding new nodes
+  isn't really handled.
 
 Generally Heroku seems like a faster-moving target than App Engine,
 with lots of interesting ideas; I hope to get more ideas from it going
 forward.
 
-Of course, the primary difference of toppcloud is: it's open source,
-you can adapt the system as you find necessary, and it's a **lot**
-cheaper (since you are paying only for the actual cloud service, which
-is reasonably priced).
+Of course, the primary difference of Silver Lining is: it's open
+source, you can adapt the system as you find necessary, and it's a
+**lot** cheaper (since you are paying only for the actual cloud
+service, which is reasonably priced).
 
 Differences From Media Temple
 -----------------------------
@@ -127,40 +127,40 @@ implementation of the Google App Engine API.  It features a bunch of
 database backends, and can do a lot of the management of scaling
 nodes.
 
-While toppcloud takes ideas from App Engine, the priorities are really
-quite different.  toppcloud is focused on simple, reliable, repeatable
-deployment of applications.  The deployments really aren't that
-different from how software might traditionally be deployed, it just
-formalizes those pieces and factors the problem in a way that makes
-the actual deployment as simple and reliable as possible.
+While Silver Lining takes ideas from App Engine, the priorities are
+really quite different.  Silver Lining is focused on simple, reliable,
+repeatable deployment of applications.  The deployments really aren't
+that different from how software might traditionally be deployed, it
+just formalizes those pieces and factors the problem in a way that
+makes the actual deployment as simple and reliable as possible.
 
 AppScale (at least from what I can tell) is more focused on scaling,
 and App Engine-like infrastructure.  It provides the App Engine API;
-toppcloud was written because I liked *parts* of the App Engine
+Silver Lining was written because I liked *parts* of the App Engine
 toolset, but I couldn't embrace the constraints of the platform.
 
-toppcloud also I believe scales *down* further than AppScale.  You can
-run as many sites on one server/node as you care to.  So it is quite
-suitable for deploying several small applications cheaply.  I believe
-toppcloud will make the life of the average web developer easier and
-simpler very quickly.
+Silver Lining also I believe scales *down* further than AppScale.  You
+can run as many sites on one server/node as you care to.  So it is
+quite suitable for deploying several small applications cheaply.  I
+believe Silver Lining will make the life of the average web developer
+easier and simpler very quickly.
 
-toppcloud is meant to be usable with existing applications.  You can
-use pretty much any database (some support code needs to be written to
-manage each kind of database, but it's quite simple).  You can write
-files.  Traditional "configuration" is actually kind of pushed *into*
-the application, but it just means you should do things like (in
-Django)::
+Silver Lining is meant to be usable with existing applications.  You
+can use pretty much any database (some support code needs to be
+written to manage each kind of database, but it's quite simple).  You
+can write files.  Traditional "configuration" is actually kind of
+pushed *into* the application, but it just means you should do things
+like (in Django)::
 
     DATABASE_ENGINE = 'postgresql_psycopg2'
-    DATABASE_NAME = os.environ['PG_DBNAME']
-    DATABASE_USER = os.environ['PG_DBUSER']
-    DATABASE_PASSWORD = os.environ['PG_DBPASSWORD']
-    DATABASE_HOST = os.environ['PG_DBHOST']
-    DATABASE_PORT = os.environ['PG_DBPORT']
+    DATABASE_NAME = os.environ['CONFIG_PG_DBNAME']
+    DATABASE_USER = os.environ['CONFIG_PG_DBUSER']
+    DATABASE_PASSWORD = os.environ['CONFIG_PG_DBPASSWORD']
+    DATABASE_HOST = os.environ['CONFIG_PG_DBHOST']
+    DATABASE_PORT = os.environ['CONFIG_PG_DBPORT']
 
 Everything you can do in a traditional deployment system, you can do
-with toppcloud (at least, potentially; extra support code may be
+with Silver Lining (at least, potentially; extra support code may be
 necessary).  I don't think AppScale provides this nor do I think this
 is a goal of AppScale.
 
@@ -171,18 +171,18 @@ Differences from Typhoonae
 an open source adaptation of the App Engine API.
 
 Typhoonae uses `supervisord <http://supervisord.org/>`_ for monitoring
-the processes, while toppcloud uses mod_wsgi.  They both have a
+the processes, while Silver Lining uses mod_wsgi.  They both have a
 similar function, but because mod_wsgi is integrated with the web
 server it is not just aware of the process dying, but also of the
 process becoming unresponsive.  Supervisor, because it is a
 general-purpose process monitor, cannot determine when a process is
 serving its function.
 
-People have asked about how toppcloud can be used with something more
-closely related to App Engine.  I'm not that optimistic about
-AppScale, because I think it overlaps in the wrong ways with toppcloud
--- they are more like direct competitors than complementary tools.
-Typhoonae on the other hand might work better.
+People have asked about how Silver Lining can be used with something
+more closely related to App Engine.  I'm not that optimistic about
+AppScale, because I think it overlaps in the wrong ways with Silver
+Lining -- they are more like direct competitors than complementary
+tools.  Typhoonae on the other hand might work better.
 
 The pieces of Typhoonae that would be useful would be its
 implementations of the App Engine APIs, backed with MongoDB (data
@@ -194,23 +194,24 @@ Data Store API would just be a library you install, plus
 ``service.mongodb``, but they could be presented as first-class
 services (e.g. ``service.typhoonae_datastore``).  I'd probably prefer
 they not be first-class services, because that means Typhoonae
-releases would have to be tied one-to-one to toppcloud releases.  I'd
-rather see something like a ``toppcloud_typhoonae`` distribution that
-you could install into your app.
+releases would have to be tied one-to-one to Silver Lining releases.
+I'd rather see something like a ``silverlining_typhoonae``
+distribution that you could install into your app.
 
 Differences from Moonshine
 --------------------------
 
 So far, `Moonshine <http://github.com/railsmachine/moonshine>`_ sounds
-like the closest thing to toppcloud in functionality, with even many
-of the same choices, except Ruby instead of Python.  It uses Ubuntu,
-Apache, and Passenger (where Passenger is the closest thing to a Ruby
-equivalent of mod_wsgi).  It also uses Ruby Enterprise Edition (?) and
-MySQL, where toppcloud does not have a single persistence backend.
+like the closest thing to Silver Lining in functionality, with even
+many of the same choices, except Ruby instead of Python.  It uses
+Ubuntu, Apache, and Passenger (where Passenger is the closest thing to
+a Ruby equivalent of mod_wsgi).  It also uses Ruby Enterprise Edition
+(?) and MySQL, where Silver Lining does not have a single persistence
+backend.
 
 ``config/moonshine.yml`` is a lot like ``app.ini``, ``cap
-deploy:setup`` is like ``toppcloud setup-node`` and ``cap deploy`` is
-like ``toppcloud update``.
+deploy:setup`` is like ``silver setup-node`` and ``cap deploy`` is
+like ``silver update``.
 
 It's built on Capistrano, not using its own native constructs.  In
 this sense it is glue, but it's kind of a matter of perspective.  If
@@ -218,7 +219,7 @@ Capistrano worked a little differently then it might look like
 Moonshine was the application and Capistrano the library.
 
 It has a notion of "shared config", which is configuration not in your
-source tree, but which is needed for deployment.  toppcloud needs
+source tree, but which is needed for deployment.  Silver Lining needs
 something like this.
 
 Differences from Rubber

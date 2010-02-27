@@ -29,7 +29,7 @@ def command_setup_node(config):
     proc = subprocess.Popen([
         'ssh', '-o', 'StrictHostKeyChecking=no',
         ssh_host, '''
-if [ -e /root/.toppcloud-server-setup ] ; then
+if [ -e /root/.silverlining-server-setup ] ; then
     exit 50
 fi
 mkdir -p /root/.ssh
@@ -49,7 +49,7 @@ cat >> /root/.ssh/authorized_keys
     proc.communicate(key)
     # if proc.returncode == 50:
     #     config.logger.fatal(
-    #         "The server has already been setup (/root/.toppcloud-server-setup exists)")
+    #         "The server has already been setup (/root/.silverlining-server-setup exists)")
     #     return 2
     config.logger.notify(
         "Updating indexes and setting up rsync")

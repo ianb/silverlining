@@ -2,12 +2,12 @@
 import os
 from ConfigParser import ConfigParser
 
-if os.environ.get('TOPPCLOUD', '').startswith('toppcloud/'):
-    secret_file = '/var/lib/toppcloud/secret.txt'
-    key_file = '/var/lib/toppcloud/keys.ini'
+if os.environ.get('SILVER_VERSION', '').startswith('silverlining/'):
+    secret_file = '/var/lib/silverlining/secret.txt'
+    key_file = '/var/lib/silverlining/keys.ini'
 else:
     secret_file = os.path.join(
-        os.environ['HOME'], '.toppcloud-secret')
+        os.environ['HOME'], '.silverlining-secret')
     if not os.path.exists(secret_file):
         import base64
         fp = open(secret_file, 'wb')
@@ -15,7 +15,7 @@ else:
         fp.write(secret)
         fp.close()
     key_file = os.path.join(
-        os.environ['HOME'], '.toppcloud.conf')
+        os.environ['HOME'], '.silverlining.conf')
 
 def get_secret():
     fp = open(secret_file, 'rb')

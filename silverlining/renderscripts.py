@@ -11,7 +11,7 @@ import tempita
 
 def render_files(**ns):
     script_dir = os.path.join(os.path.dirname(__file__), 'scripts')
-    base_path = '/var/topp/build-files/build-%s.zip' % time.strftime('%Y-%m-%d')
+    base_path = '/var/silverlining/build-files/build-%s.zip' % time.strftime('%Y-%m-%d')
     zip_buffer = StringIO()
     zip = zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED)
     auth_keys = None

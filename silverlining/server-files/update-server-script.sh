@@ -49,36 +49,36 @@ fi
 
 ## Make sure some standard directories are in place, ownership is
 ## correct, etc.:
-mkdir -p /var/topp/build-files
-mkdir -p /var/log/topp-setup
-mkdir -p /var/log/toppcloud
+mkdir -p /var/silverlining/build-files
+mkdir -p /var/log/silverlining-setup
+mkdir -p /var/log/silverlining
 mkdir -p /var/www
-mkdir -p /var/lib/toppcloud
+mkdir -p /var/lib/silverlining
 rm -f /var/www/index.html
 chown www-mgr:www-mgr /var/www
 chown -R root:root /var/www/support
 # Sometimes it has been reported that the executable bit isn't rsync'd over properly:
 chmod 755 /var/www/support/*.py
-chmod +x /etc/init.d/topp-setup
+chmod +x /etc/init.d/silverlining-setup
 chmod 0440 /etc/sudoers
-chown www-mgr:www-mgr /var/lib/toppcloud
+chown www-mgr:www-mgr /var/lib/silverlining
 # This gives unnecessary error-like output, so we're ignore the output
-rcconf --on=topp-setup &> /dev/null
+rcconf --on=silverlining-setup &> /dev/null
 
 ## This is just a piece of configuration I (Ian) like:
 sed -i "s/ -backup/-backup/" /etc/joe/jmacsrc
 
 ## Make sure there's a secret:
-if [ ! -e /var/lib/toppcloud/secret.txt ] ; then
+if [ ! -e /var/lib/silverlining/secret.txt ] ; then
     python -c '
 import os, base64, sys
 secret = base64.b64encode(os.urandom(24), "_-").strip("=")
-sys.stdout.write(secret)' > /var/lib/toppcloud/secret.txt
-    chown root /var/lib/toppcloud/secret.txt
+sys.stdout.write(secret)' > /var/lib/silverlining/secret.txt
+    chown root /var/lib/silverlining/secret.txt
 fi
 
 echo "Rerun setup-node on $(date)
 Run by: __REMOTE_USER__
 ----------------------------------------
 
-" >> /var/log/toppcloud/setup-node.log
+" >> /var/log/silverlining/setup-node.log

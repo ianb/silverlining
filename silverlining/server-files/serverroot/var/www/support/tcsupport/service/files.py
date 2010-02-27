@@ -8,7 +8,7 @@ import shutil
 
 def dir_for_instance_name(instance_name):
     base = instance_name.split('.')[0]
-    dir = os.path.join('/var/lib/toppcloud/apps', base)
+    dir = os.path.join('/var/lib/silverlining/apps', base)
     return dir
 
 def install(app_dir, config):
@@ -28,7 +28,7 @@ def app_setup(app_dir, config, environ,
         app_name = app_dir.split('.')[0]
         environ['CONFIG_FILES'] = os.path.join(
             os.environ['HOME'],
-            'toppcloud-app-data',
+            '.silverlining-app-data',
             app_name)
         if 'files' in devel_config:
             environ['CONFIG_FILES'] = os.path.expanduser(

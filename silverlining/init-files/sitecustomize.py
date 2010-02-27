@@ -6,18 +6,18 @@ import warnings
 from ConfigParser import ConfigParser
 
 def add_tcsupport():
-    toppcloud_conf = os.path.join(os.environ['HOME'], '.toppcloud.conf')
+    silverlining_conf = os.path.join(os.environ['HOME'], '.silverlining.conf')
     parser = ConfigParser()
-    parser.read([toppcloud_conf])
+    parser.read([silverlining_conf])
     if (not parser.has_section('environment')
-        or not parser.has_option('environment', 'toppcloud_location')):
-        warnings.warn('Problem loading %s: no [environment] toppcloud_location setting'
-                      % toppcloud_conf)
+        or not parser.has_option('environment', 'silverlining_location')):
+        warnings.warn('Problem loading %s: no [environment] silverlining_location setting'
+                      % silverlining_conf)
         return
     # Now we make tcsupport importable:
-    toppcloud_location = parser.get('environment', 'toppcloud_location')
+    silverlining_location = parser.get('environment', 'silverlining_location')
     tcsupport_location = os.path.join(
-        toppcloud_location, 'server-files/serverroot/var/www/support/')
+        silverlining_location, 'server-files/serverroot/var/www/support/')
     sys.path.append(tcsupport_location)
 
 def setup_services():
@@ -38,14 +38,14 @@ def setup_services():
             app_name, config, os.environ, devel=True,
             devel_config=devel_config)
 
-if not os.environ.get('TOPPCLOUD', '').startswith('toppcloud/'):
+if not os.environ.get('SILVERLINING', '').startswith('silverlining/'):
     # Not a production environment...
     add_tcsupport()
     setup_services()
-    os.environ.setdefault('TOPPCLOUD', 'devel/0.0')
+    os.environ.setdefault('SILVERLINING', 'devel/0.0')
 
 try:
-    import toppcustomize
+    import silvercustomize
 except ImportError:
     pass
 

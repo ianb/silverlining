@@ -12,5 +12,6 @@ Here I list documents that I think should exist, but do not:
   along.  (The persistence ones will be small, but I think quite
   helpful for arranging code.)
 
-* How Stuff Works; descriptions of the inner workings of toppcloud.
+* How Stuff Works; descriptions of the inner workings of Silver
+  Lining.
 

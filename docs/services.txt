@@ -1,18 +1,19 @@
-toppcloud Services
-------------------
+Silver Lining Services
+----------------------
 
-This document answers some parts of the question: what does toppcloud
-do, and what does my app do?
+This document answers some parts of the question: what does Silver
+Lining do, and what does my app do?
 
-The items listed here are things toppcloud does *for* you, and so you
-shouldn't do them for yourself.
+The items listed here are things Silver Lining does *for* you, and so
+you shouldn't do them for yourself.
 
-TOPPCLOUD environmental variable
-================================
+SILVER_VERSION environmental variable
+=====================================
 
-To see if you are running in a toppcloud production environment, check
-``os.environ.get('TOPPCLOUD', '').startswith('toppcloud/')``. In
-development this variable will exist but start with ``'devel/'``.
+To see if you are running in a Silver Lining production environment,
+check ``os.environ.get('SILVER_VERSION',
+'').startswith('silverlining/')``. In development this variable will
+exist but start with ``'devel/'``.
 
 Secrets
 =======
@@ -42,15 +43,15 @@ works fine.
 Persistence
 ===========
 
-All persistence gets handled in some fashion by toppcloud.  This is
-just so toppcloud knows about it, and so that your app handles what it
-should.
+All persistence gets handled in some fashion by Silver Lining.  This
+is just so Silver Lining knows about it, and so that your app handles
+what it should.
 
 Files
 ~~~~~
 
 *Persistent* (as opposed to temporary) files need to be handled by
-toppcloud.  In your ``app.ini`` put::
+Silver Lining.  In your ``app.ini`` put::
 
     service.files =
 
@@ -118,26 +119,26 @@ Then look for:
 Installing Packages
 ===================
 
-All your packages should be installed by toppcloud.  You can ask for a
-new (Ubuntu) package to be installed by putting this into your
+All your packages should be installed by Silver Lining.  You can ask
+for a new (Ubuntu) package to be installed by putting this into your
 ``app.ini``::
 
     packages = package1
                package2
 
-This makes toppcloud run ``apt-get install package1 package2`` every
-time your application is update (conveniently if the packages are
-already installed then ``apt-get`` is fast and does nothing).
+This makes Silver Lining run ``apt-get install package1 package2``
+every time your application is update (conveniently if the packages
+are already installed then ``apt-get`` is fast and does nothing).
 
 Local/Development Configuration
 ============================================================
 
-This all applies to local development (using ``toppcloud serve``), but
-toppcloud does not actually setup any of this.  It's up to you to
+This all applies to local development (using ``silver serve``), but
+Silver Lining does not actually setup any of this.  It's up to you to
 install the necessary servers, create the databases, etc.
 
 You can do this however you want, and effect the configuration using
-``~/.toppcloud.conf`` -- each of these services looks for
+``~/.silverlining.conf`` -- each of these services looks for
 configuration overrides here.  You should put this configuration in a
 section ``[devel]`` or ``[devel:APP_NAME]`` if you want to override a
 value just for one application (instead of all applications).  You

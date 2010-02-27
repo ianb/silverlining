@@ -1,6 +1,6 @@
 """Script to update /etc/hosts
 
-This is called by toppcloud.etchosts.set_etc_hosts.  It's a separate
+This is called by silverlining.etchosts.set_etc_hosts.  It's a separate
 script because this is called with sudo and runs as root.
 """
 

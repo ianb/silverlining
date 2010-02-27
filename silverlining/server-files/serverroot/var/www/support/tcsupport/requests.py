@@ -21,7 +21,7 @@ def make_internal_request(app, instance_name, hostname,
         'wsgi.multiprocess': False,
         'wsgi.run_once': True,
         'wsgi.url_scheme': 'http',
-        'toppcloud.internal': True,
+        'silverlining.internal': True,
         }
     if body:
         basic_environ['wsgi.input'] = StringIO(body)

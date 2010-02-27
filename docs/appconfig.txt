@@ -1,5 +1,5 @@
 Application Configuration
-----------------------------------------
+-------------------------
 
 You application is configured with a file ``app.ini``.  It's really
 recommended that you put this file in your source code repository and
@@ -26,17 +26,17 @@ symlink it into its location at the root of the app directory.
 ``update_fetch``:
     This option gives one (or more) URLs that should be fetched
     every time the application is updated.  It is also fetched *every
-    time* your development server is started (with ``toppcloud
+    time* your development server is started (with ``silver
     serve``).  (Maybe this last bit should be changed.)
 
     These can setup tables, create directories, etc.  You can check
-    ``environ['toppcloud.update']`` to be sure this is an internal
+    ``environ['silverlining.update']`` to be sure this is an internal
     update request.  If you want multiple URLs, put each on its own
     line (in ``.ini`` files you can use indentation on subsequent
     lines to continue a configuration value).
 
 ``default_host``:
-    This is a default for ``toppcloud update --host``, so you don't
+    This is a default for ``silver update --host``, so you don't
     have to enter that option each time you update.
 
 ``service.*``

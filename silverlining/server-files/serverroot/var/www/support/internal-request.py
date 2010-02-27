@@ -68,7 +68,7 @@ def run_update(instance_name, hostname):
             app = create_app(instance_name)
             status, headers, body = make_internal_request(
                 app, instance_name, hostname,
-                url, environ={'toppcloud.update': True})
+                url, environ={'silverlining.update': True})
             if not status.startswith('200'):
                 sys.stdout.write(status+'\n')
                 sys.stdout.flush()

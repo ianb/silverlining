@@ -18,7 +18,7 @@ def main():
             for r in rest]
     path = os.path.join(app_dir, 'bin', command)
     ns = {'__file__': path, '__name__': '__main__'}
-    os.environ['TOPPCLOUD'] = 'toppcloud/0.0'
+    os.environ['SILVER_VERSION'] = 'silverlining/0.0'
     activate_dir(app_dir)
     app_name = os.path.basename(app_dir)
     for service, config in sorted(

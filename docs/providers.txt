@@ -7,36 +7,36 @@ Rackspace Cloud
 ---------------
 
 `Rackspace Cloud <http://rackspacecloud.com>`_ is the first (and
-currently only) provider supported by toppcloud.
+currently only) provider supported by Silver Lining.
 
-To use toppcloud you must sign up for an account through their
+To use Silver Lining you must sign up for an account through their
 website.  You should sign up for "Cloud Servers" and "Cloud Files".
-There's no initial fee, and the cost for experimenting with toppcloud
-will be less than a dollar as long as you don't forget to take down
-the servers you create to experiment.  You'll have to have a credit
-card, and Rackspace Cloud will call you to confirm your account before
-you can use it.
+There's no initial fee, and the cost for experimenting with Silver
+Lining will be less than a dollar as long as you don't forget to take
+down the servers you create to experiment.  You'll have to have a
+credit card, and Rackspace Cloud will call you to confirm your account
+before you can use it.
 
-If you sign up for Rackspace Cloud to try toppcloud, please use our
-reference code **REF-TOPP** -- this throws a couple bucks to `The Open
-Planning Project <http://openplans.org>`_ for each signup.
+If you sign up for Rackspace Cloud to try Silver Lining, please use
+our reference code **REF-IANBICKING** -- this throws a couple bucks to
+me for each signup.
 
 Once you have logged in go to **Your Account > API Access** to view or
-create your API key.  toppcloud needs to know your username and API
-key, which it will ask you for when you first start the command.
+create your API key.  Silver Lining needs to know your username and
+API key, which it will ask you for when you first start the command.
 
 Host It Yourself
 ----------------
 
-You don't *need* to use commands like ``toppcloud create-node`` to
-make use of toppcloud.  If you have a machine with a fresh install of
-Ubuntu Jaunty (or Karmic) then you can use ``toppcloud setup-node`` to
-configure the machine and ``toppcloud update`` to deploy
-applications.  It's harder to test things without the ability to
-create and destroy servers on demand, but the basic infrastructure is
-not really dependent on that.
+You don't *need* to use commands like ``silver create-node`` to make
+use of Silver Lining.  If you have a machine with a fresh install of
+Ubuntu Jaunty (or Karmic) then you can use ``silver setup-node`` to
+configure the machine and ``silver update`` to deploy applications.
+It's harder to test things without the ability to create and destroy
+servers on demand, but the basic infrastructure is not really
+dependent on that.
 
-**Don't use this on a server you want to keep!**  ``toppcloud
+**Don't use this on a server you want to keep!**  ``silver
 setup-node`` is not aggressive in modifying the server, but it doesn't
 particularly keep track of what it does, nor is there any reason it
 should.  Also if you have local modifications on the server, those
@@ -46,9 +46,9 @@ that it's being given a bare Ubuntu installation to work with.
 Other Providers
 ---------------
 
-toppcloud is built on `libcloud <http://libcloud.org>`_.  libcloud
+Silver Lining is built on `libcloud <http://libcloud.org>`_.  libcloud
 abstracts over the API of quite a few cloud providers.  Any of these
-providers should be a possible platform for toppcloud; the basic
+providers should be a possible platform for Silver Lining; the basic
 abstractions already exist, it just needs some testing.  The only
 thing that's currently really Rackspace-specific is that on node
 creation some files are uploaded -- not a complete set, mostly just
@@ -56,11 +56,11 @@ creation some files are uploaded -- not a complete set, mostly just
 (e.g., I believe EC2 node creation automatically sets up
 authorized_keys).  It would require a bit of abstraction as a result.
 
-The best way to try a new provider is to fork the toppcloud
+The best way to try a new provider is to fork the Silver Lining
 repository, try it out, and make what patches are necessary --
-probably to the routine that creates ``~/.toppcloud.conf``
-(:mod:`toppcloud.createconf`), ``toppcloud create-node``
-(:mod:`toppcloud.commands.create_node`), and *maybe* ``toppcloud
-setup-node`` (:mod:`toppcloud.commands.setup_node`) -- though I expect
-setup-node will be fine.
+probably to the routine that creates ``~/.silverlining.conf``
+(:mod:`silverlining.createconf`), ``silver create-node``
+(:mod:`silverlining.commands.create_node`), and *maybe* ``silver
+setup-node`` (:mod:`silverlining.commands.setup_node`) -- though I
+expect setup-node will be fine.
 

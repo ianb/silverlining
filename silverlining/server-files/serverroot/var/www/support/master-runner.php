@@ -3,14 +3,14 @@
   This command is like master_runner.py, and runs at the beginning of
   every PHP request.
    */
-$topp_base = "/var/www/{$_SERVER[SITE]}";
-$topp_app_ini = "$topp_base/app.ini";
-$topp_app_config = parse_ini_file($topp_app_ini, true);
-$topp_runner = $topp_app_config['production']['runner'];
+$silver_base = "/var/www/{$_SERVER[SITE]}";
+$silver_app_ini = "$silver_base/app.ini";
+$silver_app_config = parse_ini_file($silver_app_ini, true);
+$silver_runner = $silver_app_config['production']['runner'];
 
-function topp_load_services() {
-    global $topp_app_config;   
-    foreach ($topp_app_config as $name => $value) {
+function silver_load_services() {
+    global $silver_app_config;   
+    foreach ($silver_app_config as $name => $value) {
         if (substr($value, 0, 8) == 'service.') {  
             $name = substr($value, 8);
             if ($name != 'php') {
@@ -20,8 +20,8 @@ function topp_load_services() {
     }
 }
  
-topp_load_services();
+silver_load_services();
 
-include("{$topp_base}/{$topp_runner}");
+include("{$silver_base}/{$silver_runner}");
 
 ?>

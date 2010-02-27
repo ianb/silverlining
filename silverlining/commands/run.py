@@ -4,7 +4,6 @@ from cStringIO import StringIO
 import zipfile
 import subprocess
 from cmdutils import CommandError
-from toppcloud.runner import App
 
 _tmp_re = re.compile(r'tmp="(.*)"')
 

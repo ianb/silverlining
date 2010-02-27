@@ -1,7 +1,7 @@
 PHP Support
 -----------
 
-PHP support in toppcloud is experimental.  Meaning, I'm not sure
+PHP support in Silver Lining is experimental.  Meaning, I'm not sure
 exactly *how* it should work, or if it is working well.  It also adds
 a slightly Pythonesque flare to the request dispatching.
 
@@ -37,7 +37,7 @@ with static files in PHP applications).
 our example).  This PHP file may direct the request wherever it sees
 fit.  If you wish to simply pass it on, you may do so, like::
 
-    include("{$topp_base}/site/{$SCRIPT_NAME}");
+    include("{$silver_base}/site/{$SCRIPT_NAME}");
 
 Note that ``.htaccess`` files will not work, so if you need that kind
 of functionality you'll need to implement it directly in your runner.

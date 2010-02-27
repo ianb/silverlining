@@ -1,8 +1,8 @@
 import re
 import subprocess
-from toppcloud import renderscripts
+from silverlining import renderscripts
 from cmdutils import CommandError
-from toppcloud.etchosts import set_etc_hosts
+from silverlining.etchosts import set_etc_hosts
 import time
 
 ESTIMATED_TIME = 60
@@ -37,7 +37,7 @@ def command_create_node(config):
         config.logger.notify('Waiting %s seconds for full boot'
                              % AFTER_PING_WAIT)
         time.sleep(AFTER_PING_WAIT)
-        from toppcloud.commands.setup_node import command_setup_node
+        from silverlining.commands.setup_node import command_setup_node
         config.args.node = node_hostname
         config.logger.notify('Setting up server')
         command_setup_node(config)

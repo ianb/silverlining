@@ -1,10 +1,10 @@
-Running Examples Of toppcloud Apps
-==================================
+Running Examples Of Silver Lining Apps
+======================================
 
 This lists running examples of apps that other people can clone, look
 at, and even deploy if they want.  If you have another example, email
 me or do a pull request on patch to `this document
-<http://bitbucket.org/ianb/toppcloud/src/tip/docs/examples.txt>`_.
+<http://bitbucket.org/ianb/silverlining/src/tip/docs/examples.txt>`_.
 
 Neighborly
 ----------
@@ -33,13 +33,13 @@ bbdocs
 application (just plain WebOb without a framework) for getting commit
 events from `bitbucket <http://bitbucket.org>`_ and using that to
 regenerate documentation or other files.  It's what builds
-http://toppcloud.colorstudy.com and the `zip files
-<http://toppcloud.colorstudy.com/zip/>`_.
+http://cloudsilverlining.org and the `zip files
+<http://cloudsilverlining.org/zip/>`_.
 
 PylonsHQ
 --------
 
-The `Pylons <http://pylonshq.com/>`_ site runs on toppcloud, including
-Trac instances.  Ben Bangert `described what he did
+The `Pylons <http://pylonshq.com/>`_ site runs on Siler Lining,
+including Trac instances.  Ben Bangert `described what he did
 <http://be.groovie.org/post/321827504/deploying-python-web-apps-with-toppcloud>`_.
 I don't believe the actual code is in a public repository right now.

@@ -1,5 +1,5 @@
-TOPP Cloud
-==========
+Silver Lining
+=============
 
 .. contents::
 
@@ -20,10 +20,10 @@ TOPP Cloud
     todo
     comparisons
     dns
-    devel-toppcloud
+    devel-silverlining
     license
-    Repository <http://bitbucket.org/ianb/toppcloud>
-    Pre-built zip files <http://toppcloud.colorstudy.com/zip/>
+    Repository <http://bitbucket.org/ianb/silverlining>
+    Pre-built zip files <http://cloudsilverlining.org/zip/>
 
 This is a script and server layout to manage Python-based web
 applications.  And PHP.
@@ -33,14 +33,14 @@ Author, license, etc
 
 This is written by `Ian Bicking <http://ianbicking.org>`_; you might
 `email him <mailto:ianb@colorstudy.com>`_ with feedback, or `open a
-ticket <http://bitbucket.org/ianb/toppcloud/issues/>`_, or maybe head
-on over to FreeNode, #pythonpaste.  There's a `bitbucket repository
-<http://bitbucket.org/ianb/toppcloud>`_.  It was written with support
-by `The Open Planning Project <http://openplans.org>`_.
+ticket <http://bitbucket.org/ianb/silverlining/issues/>`_, or maybe
+head on over to FreeNode, #pythonpaste.  There's a `bitbucket
+repository <http://bitbucket.org/ianb/silverlining>`_.  It was written
+with support by `The Open Planning Project <http://openplans.org>`_.
 
 It's under the `GPL <license.html>`_, though that **does not** imply
 anything with respect to the licensing on applications that use this
-for deployment.  All files in ``toppcloud/server-files/support``
+for deployment.  All files in ``silverlining/server-files/support``
 should be considered to be MIT-licensed (these files actually come
 close to coexisting with deployed files, though even those don't come
 very close).
@@ -61,17 +61,17 @@ very close).
    program being under the GPL, then I guess you want to make
    proprietary extensions to it, then eh, I'm not really interested.
 
-Who Should Use toppcloud
-------------------------
+Who Should Use Silver Lining
+----------------------------
 
-Maybe not you!  toppcloud is not a supported product.  If you want to
-use toppcloud, then toppcloud is not for you.  If you want to help
-develop toppcloud, then maybe toppcloud is for you.  If you want to
-fix problems, provide patches, and collaborate on the project, then
-great.  Maybe at a later date this will be a more usable, reliable
-tool; but that time is not right now.
+Maybe not you!  Silver Lining is not a supported product.  If you want
+to use Silver Lining, then Silver Lining is not for you.  If you want
+to help develop Silver Lining, then maybe Silver Lining is for you.
+If you want to fix problems, provide patches, and collaborate on the
+project, then great.  Maybe at a later date this will be a more
+usable, reliable tool; but that time is not right now.
 
-To repeat: toppcloud is for collaborators, not users!
+To repeat: Silver Lining is for collaborators, not users!
 
 What Does It Do?
 ----------------
@@ -92,12 +92,12 @@ point.  Instead, let us ask: what does the application look like?
 The Application
 ---------------
 
-toppcloud is inspired by Google App Engine in this respect; an
+Silver Lining is inspired by Google App Engine in this respect; an
 application is a bunch of files that are uploaded to the server.  You
 don't "build" an application on the server.  To upload or update an
 application, you run::
 
-    $ toppcloud update path/to/app/ --host=myapp.com
+    $ silver update path/to/app/ --host=myapp.com
 
 This uploads your files, makes sure requests to myapp.com go to your
 new application.  Your application has a file ``app.ini`` (located, in
@@ -116,15 +116,15 @@ should connect to.  (What each service adds to the environment is
 covered in the `services <services>`_ document.)
 
 You might also ask: what about binary packages?  For instance, `lxml
-<http://codespeak.net/lxml/>`_.  With toppcloud only *portable* files
-can go in your application directory; typically ``.py`` files,
+<http://codespeak.net/lxml/>`_.  With Silver Lining only *portable*
+files can go in your application directory; typically ``.py`` files,
 templates, and other plain-text data files.  So if you want lxml you
 have to have the Ubuntu package installed; you'd add (to ``app.ini``)
 the configuration ``packages = lxml``.
 
 A lot of this is covered in `application configuration <appconfig>`_.
 
-And what kind of frameworks can you use with toppcloud?  Anything
+And what kind of frameworks can you use with Silver Lining?  Anything
 really.  The only real exception is Zope 2, which has strict Python
 version requirements, lots of C extensions, and all sorts of other
 complexities.  `Repoze <http://repoze.org/>`_ will work fine though,
@@ -176,7 +176,7 @@ node/server).  The use of the files extension is minimal at this point
 without that.  If you are signing up for an account, you can throw a
 few bucks my way with the reference code ``REF-IANBICKING``.
 
-toppcloud uses `libcloud`_, which is a library abstracting several
+Silver Lining uses `libcloud`_, which is a library abstracting several
 provider APIs.  It should be usable with other providers, but it's
 only been tried with Rackspace, expect bumps with other services.
 
@@ -198,7 +198,7 @@ Installing
 
 First, grab the newest zip file snapshot from `the zip/ directory </zip/>`_.
 
-Unpack the zip file, and run ``toppcloud.py``.  You can't move this
+Unpack the zip file, and run ``silver.py``.  You can't move this
 file out of the directory with the other library files, but you can
 alias it or something.
 
@@ -207,18 +207,18 @@ is if someone volunteers to maintain the Windows support.  Individual
 patches won't be accepted until that time -- it would only be a
 disappointment to Windows users to get a half-working and unsupported client.
 
-If you don't want to install from the zip file, you can install
-toppcloud into a virtualenv environment pretty easily too:
+If you don't want to install from the zip file, you can install Silver
+Lining into a virtualenv environment pretty easily too:
 
 First get `virtualenv <http://virtualenv.openplans.org>`_, which also
 gives you `pip <http://pip.openplans.org>`_.  Also be sure you have
 Mercurial (``hg``) and Subversion (``svn``) installed.  Then run::
 
-    $ virtualenv -p python2.6 topp
-    $ topp/bin/pip install -r http://bitbucket.org/ianb/toppcloud/raw/tip/requirements.txt
+    $ virtualenv -p python2.6 silver
+    $ silver/bin/pip install -r http://bitbucket.org/ianb/silverlining/raw/tip/requirements.txt
 
 This installs a bunch of stuff, most importantly
-``topp/bin/toppcloud``.
+``silver/bin/silver``.
 
 Cloud Server Management
 -----------------------
@@ -229,26 +229,26 @@ These are really just frontends to what libcloud provides.
 Each "node" has a hostname, which is the name of the node, and also
 the hostname setup in ``/etc/hosts``.
 
-``toppcloud list-images``: 
+``silver list-images``: 
     Lists all the images available (these are starter systems that can
     be cloned).
 
-``toppcloud list-sizes``:
+``silver list-sizes``:
     Lists all the sizes (plans) you can get for your server (a
     combination of RAM/disk and sometimes bandwidth).
 
-``toppcloud create-node``:
+``silver create-node``:
     Creates a new node (aka server).
 
-``toppcloud destroy-node``:
+``silver destroy-node``:
     Deletes a node. It is advisable to remove the node from
     ``~/.ssh/known_hosts`` after destroying it to avoid SSH warnings
     in future.
 
-``toppcloud default-node``:
-    This sets the default node, so you can do ``toppcloud update
+``silver default-node``:
+    This sets the default node, so you can do ``silver update
     myapp/`` without a ``--node=hostname`` option (instead using this
     default).
 
-``toppcloud setup-node``:
+``silver setup-node``:
     This takes a bare Ubuntu Jaunty system and sets it up.

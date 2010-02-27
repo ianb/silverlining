@@ -1,9 +1,10 @@
-Developing Using toppcloud
-==========================
+Developing Using Silver Lining
+==============================
 
-This document discusses how development looks when using toppcloud.
-Not `how you develop toppcloud itself <devel-toppcloud.html>`_, but
-how application development with toppcloud can work.
+This document discusses how development looks when using Silver
+Lining.  Not `how you develop Silver Lining itself
+<devel-silverlining.html>`_, but how application development with
+Silver Lining can work.
 
 Creating a Project/Layout
 -------------------------
@@ -11,7 +12,7 @@ Creating a Project/Layout
 The first thing you'll have to do is setup a code layout.  An initial
 layout can be created like this::
 
-    toppcloud init myapp-app
+    silver init myapp-app
 
 This is a `virtualenv <http://virtualenv.openplans.org>`_ environment
 with some added stuff.  Here's what the layout looks like::
@@ -25,7 +26,7 @@ with some added stuff.  Here's what the layout looks like::
                      running your application)
 
                      You can also run *Python* scripts from here on
-                     the production server by using "toppcloud run".
+                     the production server by using "silver run".
 
       pip            Use this to install things
 
@@ -66,7 +67,7 @@ with some added stuff.  Here's what the layout looks like::
                      install foobar, then there will be
                      lib/python/foobar/
 
-      toppcustomize.py
+      silvercustomize.py
                      This file doesn't exist to start, but you can add
                      it to customize the setup, for instance to set
                      os.environ['DJANGO_SETTINGS_MODULE'].
@@ -103,13 +104,13 @@ You might want to put ``app.ini`` into your application (and into
 version control), and then turn it into a symlink, like::
 
     $ cd myapp-app
-    $ ln -s src/myapp/toppcloud-app.ini app.ini
+    $ ln -s src/myapp/silver-app.ini app.ini
 
 You have to define your "runner", which is the script or config file
 that starts your application.  You need a line like this in
 ``app.ini``::
 
-    runner = src/myapp/toppcloud-runner.py
+    runner = src/myapp/silver-runner.py
 
 If you have a ``.py`` file then it must define ``application``, a WSGI
 application.  If you have an ``.ini`` file then it is treated as a
@@ -138,14 +139,14 @@ like::
 
 This puts all the items in ``bin/`` into version control, *except*
 those things created automatically by virtualenv (and so automatically
-created by ``toppcloud init``).
+created by ``silver init``).
 
 Customizing Your Environment
 ----------------------------
 
-If you put in a file ``lib/python/toppcloud.py`` this module will be
-loaded everytime you start the environment.  This is a great place to
-do things like::
+If you put in a file ``lib/python/silvercustomize.py`` this module
+will be loaded everytime you start the environment.  This is a great
+place to do things like::
 
     import os
     os.environ['DJANGO_SETTINGS_MODULE'] = 'myapp.settings'
@@ -159,8 +160,9 @@ Creating a Build Script
 
 A nice way to setup an application is to have a script to build the
 layout for your application.  This helps other developers work on the
-project.  Since toppcloud only works on Posix-style (and not Windows)
-systems you can just make a shell script.  Here's an example::
+project.  Since Silver Lining only works on Posix-style (and not
+Windows) systems you can just make a shell script.  Here's an
+example::
 
     #!/usr/bin/env bash
 
@@ -170,8 +172,8 @@ systems you can just make a shell script.  Here's an example::
         exit 2
     fi
 
-    if ! which toppcloud ; then
-        echo "You must install toppcloud and have it on \$PATH"
+    if ! which silver ; then
+        echo "You must install silver and have it on \$PATH"
         exit 3
     fi
 
@@ -182,14 +184,14 @@ systems you can just make a shell script.  Here's an example::
         fi
     done
 
-    toppcloud init $DIR
+    silver init $DIR
     pushd $DIR
     # Obviously check it out with whatever is appropriate:
     if [ ! -e src/myapp/.hg ] ; then
         hg clone http://blahblah/myapp src/myapp
     fi
     if [ ! -e lib/python/.hg ] ; then
-        # We have to delete it first because toppcloud init creates
+        # We have to delete it first because silver init creates
         # this directory:
         rm -rf lib/python
         hg clone http://blahblah/myapp-lib lib/python
@@ -197,7 +199,7 @@ systems you can just make a shell script.  Here's an example::
 
     if [ ! -L app.ini ] ; then
         rm -f app.ini
-        ln -s src/myapp/toppcloud-app.ini app.ini
+        ln -s src/myapp/silver-app.ini app.ini
     fi
     
     if [ ! -L bin ] ; then

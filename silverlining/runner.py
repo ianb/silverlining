@@ -1,8 +1,8 @@
-"""toppcloud interface
+"""silverlining interface
 
-This implements the command-line interface of toppcloud.  It includes
+This implements the command-line interface of silverlining.  It includes
 all the commands and their options, though the implementation of the
-commands are in toppcloud.commands.*
+commands are in silverlining.commands.*
 
 There are also a few shared objects implemented here, specifically
 `Config` and `App`
@@ -20,7 +20,7 @@ from cmdutils.arg import add_verbose, create_logger
 from cmdutils import CommandError
 from libcloud.types import Provider
 from libcloud.providers import get_driver as libcloud_get_driver
-from toppcloud import createconf
+from silverlining import createconf
 
 ## The long description of how this command works:
 description = """\
@@ -34,7 +34,7 @@ parser = argparse.ArgumentParser(
 parser.add_argument(
     '-p', '--provider',
     metavar='NAME',
-    help="The [provider:NAME] section from ~/.toppcloud.conf to use (default [provider:default])",
+    help="The [provider:NAME] section from ~/.silverlining.conf to use (default [provider:default])",
     default="default")
 
 parser.add_argument(
@@ -174,7 +174,7 @@ parser_serve.add_argument(
     metavar='APP_DIR',
     help='Directory holding app')
 
-## We can't handle toppcloud run well with a subparser, because
+## We can't handle silverlining run well with a subparser, because
 ## there's a bug in subparsers that they can't ignore arguments they
 ## don't understand.  Because there will be arguments passed to the
 ## remote command we need that, so instead we create an entirely
@@ -188,7 +188,7 @@ Run a command for an application; this runs a script in bin/ on the
 remote server.
 
 Use it like:
-    toppcloud run import-something --option-for-import-something
+    silver run import-something --option-for-import-something
 
 Note any arguments that point to existing files or directories will
 cause those files/directories to be uploaded, and substituted with the
@@ -198,7 +198,7 @@ location of the remote name.
 parser_run.add_argument(
     '-p', '--provider',
     metavar='NAME',
-    help="The [provider:NAME] section from ~/.toppcloud.conf to use (default [provider:default])",
+    help="The [provider:NAME] section from ~/.silverlining.conf to use (default [provider:default])",
     default="default")
 
 parser_run.add_argument(
@@ -283,12 +283,12 @@ def catch_error(func):
 
 @catch_error
 def main():
-    if not os.path.exists(createconf.toppcloud_conf):
-        print "%s doesn't exists; let's create it" % createconf.toppcloud_conf
+    if not os.path.exists(createconf.silverlining_conf):
+        print "%s doesn't exists; let's create it" % createconf.silverlining_conf
         createconf.create_conf()
         return
     if len(sys.argv) > 1 and sys.argv[1] == 'run':
-        # Special case for toppcloud run:
+        # Special case for silver run:
         args, unknown_args = parser_run.parse_known_args(sys.argv[2:])
         args.unknown_args = unknown_args
         args.command = 'run'
@@ -296,10 +296,10 @@ def main():
         args = parser.parse_args()
     create_logger(args)
     config = Config.from_config_file(
-        createconf.toppcloud_conf, 'provider:'+args.provider,
+        createconf.silverlining_conf, 'provider:'+args.provider,
         args)
     name = args.command.replace('-', '_')
-    mod_name = 'toppcloud.commands.%s' % name
+    mod_name = 'silverlining.commands.%s' % name
     __import__(mod_name)
     mod = sys.modules[mod_name]
     func = getattr(mod, 'command_%s' % name)
@@ -408,14 +408,14 @@ class Config(UserDict):
 
     def set_default_node(self, node_name):
         parser = ConfigParser()
-        parser.read([createconf.toppcloud_conf])
+        parser.read([createconf.silverlining_conf])
         parser.set(self['section_name'],
                    'default_node', node_name)
-        fp = open(createconf.toppcloud_conf, 'w')
+        fp = open(createconf.silverlining_conf, 'w')
         parser.write(fp)
         fp.close()
         self.logger.notify('Set default_node in %s to %s'
-                           % (createconf.toppcloud_conf,
+                           % (createconf.silverlining_conf,
                               node_name))
 
     def ask(self, query):

@@ -1,11 +1,11 @@
 #!/bin/sh
 
-for ZIP in /var/topp/build-files/build-*.zip ; do
+for ZIP in /var/silverlining/build-files/build-*.zip ; do
     DIR="$(dirname $ZIP)/$(basename $ZIP .zip)"
     mkdir $DIR
     cd $DIR
     unzip $ZIP && rm $ZIP
-    LOG="/var/log/topp-setup/build-$(date +%Y-%m-%dT%H:%M:%S).log"
+    LOG="/var/log/silverlining-setup/build-$(date +%Y-%m-%dT%H:%M:%S).log"
     echo "Running build from $DIR" >> $LOG
     chmod +x build
     ./build 2>&1 >> $LOG

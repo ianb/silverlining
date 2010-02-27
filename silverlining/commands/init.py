@@ -77,7 +77,7 @@ home = <sys.prefix>
 
 _distutils_init = """\
 
-# Patch by toppcloud:
+# Patch by silverlining:
 old_parse_config_files = dist.Distribution.parse_config_files
 def parse_config_files(self, filenames=None):
     old_parse_config_files(self, filenames)
@@ -93,7 +93,7 @@ dist.Distribution.parse_config_files = parse_config_files
 
 _activate_this = """\
 
-# Added by toppcloud:
+# Added by silverlining:
 # This is some extra code to make activate_this.py run sitecustomize:
 sitecustomize = os.path.abspath(os.path.join(__file__, '../../lib/python%s/sitecustomize.py' % sys.version[:3]))
 if os.path.exists(sitecustomize):

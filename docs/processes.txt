@@ -6,11 +6,12 @@ Processes
    I'm pretty sure my understanding of the process model is actually
    incorrect, and this document isn't correct.
 
-This document explains the process model of toppcloud.
+This document explains the process model of Silver Lining.
 
-toppcloud runs under `mod_wsgi <http://code.google.com/p/modwsgi/>`_,
-but mod_wsgi itself is configurable, and toppcloud configures it a
-specific way.  The result works like this:
+Silver Lining runs under `mod_wsgi
+<http://code.google.com/p/modwsgi/>`_, but mod_wsgi itself is
+configurable, and Silver Lining configures it a specific way.  The
+result works like this:
 
 * Each application instance runs in its own processes.  So if you
   upload multiple applications (that are all live simultaneously) then

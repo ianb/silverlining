@@ -1,11 +1,11 @@
 Design Decisions
 ----------------
 
-This document describes some of the design decisions made for
-toppcloud.  It should help you understand some of "why", and if you
-don't see something in this document, it may be "unintentional
-design"; that is, not something deliberate but just expedient or not a
-committed decision.
+This document describes some of the design decisions made for Silver
+Lining.  It should help you understand some of "why", and if you don't
+see something in this document, it may be "unintentional design"; that
+is, not something deliberate but just expedient or not a committed
+decision.
 
 VCS integration
 ===============
@@ -15,14 +15,15 @@ integrate directly with a VCS system, such as git or Mercurial.  In
 these systems you push to a particular destination, and that triggers
 a deployment.
 
-toppcloud doesn't do this, and the more I think about it the more I
-think about this it's a bad idea to do VCS integration.  Some reasons:
+Silver Lining doesn't do this, and the more I think about it the more
+I think about this it's a bad idea to do VCS integration.  Some
+reasons:
 
 1. It's simply not necessary.  What's the real advantage of ``git
-   push`` over ``toppcloud update``?  You need an explicit command in
+   push`` over ``silver update``?  You need an explicit command in
    all cases, because commits don't map one-to-one to deployments.
 
-2. You need a separate tool regardless.  ``toppcloud update`` does
+2. You need a separate tool regardless.  ``silver update`` does
    stuff like updating ``/etc/hosts``, and actually a bunch of other
    things, all of which is easy enough in a separate tool.  It's not
    the kind of thing that is reasonable to do in a post-commit hook; I
@@ -30,7 +31,7 @@ think about this it's a bad idea to do VCS integration.  Some reasons:
 
 3. You have to choose a VCS.  I like Mercurial.  Other people like
    git.  Some people even like bzr and svn.  None of this relates to
-   what toppcloud does, it doesn't need to enter that battle.
+   what Silver Lining does, it doesn't need to enter that battle.
 
 4. Applications are *assemblies* of code.  This is a big one;
    applications are generally made up of stuff from several
@@ -53,7 +54,7 @@ think about this it's a bad idea to do VCS integration.  Some reasons:
    likely to be problematic.  It's nice to test these things with a
    real deployment before actually committing the work.  So long as
    "commit" isn't part of the workflow, this is easy: you call
-   ``toppcloud update``, and it doesn't care if you haven't actually
+   ``silver update``, and it doesn't care if you haven't actually
    committed everything yet.
 
 Declarative Application Setup
@@ -65,21 +66,22 @@ details so far.
 
 It's come up that people have wanted hooks to do things like configure
 a database.  I don't want that to happen in applications; applications
-say what they need, and the toppcloud services give them what they
+say what they need, and the Silver Lining services give them what they
 need.  Applications in this way are declarative.
 
-One of the primary things I want to do with toppcloud is to separate
-"application" from "environment", and have toppcloud manage the
-environment and applications exist as more of a Platonic ideal.
+One of the primary things I want to do with Silver Lining is to
+separate "application" from "environment", and have Silver Lining
+manage the environment and applications exist as more of a Platonic
+ideal.
 
-If you have needs that aren't met by toppcloud, the best way is to
-modify toppcloud itself.  It's a good chance you want to put something
-in ``tcsupport.services.*``.  This isn't perfect, but it has a
-side-effect that there's a collective benefit to these new features
+If you have needs that aren't met by Silver Lining, the best way is to
+modify Silver Lining itself.  It's a good chance you want to put
+something in ``tcsupport.services.*``.  This isn't perfect, but it has
+a side-effect that there's a collective benefit to these new features
 (since it's something reusable), and applications stay a bit simpler.
 Big features (a bunch are listed in the `todo <todo.html>`_ also
-usually belong in toppcloud -- at least some of them, there are also
-of course big features that go right in the application.
+usually belong in Silver Lining -- at least some of them, there are
+also of course big features that go right in the application.
 
 No Build Process On The Server
 ==============================
@@ -108,8 +110,8 @@ have to go onto the server, run a bunch of stuff, handle any failures
 then activate the new build.  This is incredibly un-fun.
 
 There is *absolutely no building* when you deploy an application with
-toppcloud.  Files are copied over.  Maybe your app gets a little
-chance to set itself up (``update_fetch``).  In the future toppcloud
+Silver Lining.  Files are copied over.  Maybe your app gets a little
+chance to set itself up (``update_fetch``).  In the future Silver Lining
 will probably handle backups, simple testing (to see if the app runs
 at all) and reverting the application when there's a failure.  But
 there are no compiler errors.  New hard-coded paths aren't introduced.
@@ -144,13 +146,14 @@ anyway.
 Application API has a small surface area
 ========================================
 
-Exactly *how* toppcloud works will change over time.  There are a lot
-of places to generalize and expand its operation.  As this happens it
-is important that toppcloud applications *not* change very much.
+Exactly *how* Silver Lining works will change over time.  There are a
+lot of places to generalize and expand its operation.  As this happens
+it is important that Silver Lining applications *not* change very
+much.
 
-Right now the API for toppcloud is fairly small (from the perspective
-of an application).  There are some environmental variables, there is
-a small ``app.ini`` configuration file.
+Right now the API for Silver Lining is fairly small (from the
+perspective of an application).  There are some environmental
+variables, there is a small ``app.ini`` configuration file.
 
 While no doubt there are some additions to be made to the application
 API, I want to keep those additions as small as possible.  Building up
@@ -179,13 +182,13 @@ lot...
 `Fabric <http://docs.fabfile.org/>`_ is a library for managing remote
 servers.  It has functions to call remote commands, transfer files,
 etc., typically over ssh.  As such it seems like a no-brainer to use
-for toppcloud, right?
+for Silver Lining, right?
 
-And maybe it is, but when writing toppcloud I did not really want to
-learn a new tool, as it would only distract from what I was trying to
-do (especially at a point in time when I wasn't sure *what* I was trying
-to do).  So I kept things simple, calling out to ssh manually when
-necessary.  And this actually works reasonably well.
+And maybe it is, but when writing Silver Lining I did not really want
+to learn a new tool, as it would only distract from what I was trying
+to do (especially at a point in time when I wasn't sure *what* I was
+trying to do).  So I kept things simple, calling out to ssh manually
+when necessary.  And this actually works reasonably well.
 
 Since then it has gotten a bit more complicated, and there's a bit
 more tunneling happening, and the consistency of the codebase has
@@ -199,14 +202,14 @@ the request is a desire to do ad hoc server manipulations using
 Fabric.  A lot of people have deployment systems using Fabric that
 basically poke around on the server, installing things, configuring
 things, etc, in order to deploy their application.  This is definitely
-**not** how toppcloud should work.  *Internally* toppcloud connects to
-the server and runs commands (though many of the commands it runs are
-scripts hosted on the server).  But individual deployments work at a
-more abstract level.  They should never be making these kinds of
-modifications.  If you are *developing toppcloud itself* then sure,
-you can add new scripts and interactions.  But, as I've noted, it's
-not particularly hard to do these remote interactions with raw ssh
-callouts.
+**not** how Silver Lining should work.  *Internally* Silver Lining
+connects to the server and runs commands (though many of the commands
+it runs are scripts hosted on the server).  But individual deployments
+work at a more abstract level.  They should never be making these
+kinds of modifications.  If you are *developing Silver Lining itself*
+then sure, you can add new scripts and interactions.  But, as I've
+noted, it's not particularly hard to do these remote interactions with
+raw ssh callouts.
 
 So while I am not opposed to Fabric, I am not sure it is necessary or
 worth the extra layer of abstraction.  Also I am a bit worried about
@@ -236,8 +239,8 @@ desire to support flexibility at the sacrifice of consistency.
 Bare Base Systems
 =================
 
-Being based on "cloud" servers, toppcloud prefers a bare server.  Much
-like the Ubuntu decision, this is intentional and provides needed
+Being based on "cloud" servers, Silver Lining prefers a bare server.
+Much like the Ubuntu decision, this is intentional and provides needed
 consistency.  It's not a goal to support existing servers that have
 been setup in eclectic ways.  You don't have to use a "cloud" server
 to get a bare server, of course; but you **do** need a bare server.
@@ -248,9 +251,9 @@ Functionality is added from concrete needs
 I'm trying to avoid implementing things I don't need at the moment.
 Of course, patches from people who have needs-at-the-moment are also
 cool.  I don't want to predict how things should happen based on
-unrealistic ideas of how toppcloud gets used.  I want to react to how
-someone actually wants to use toppcloud, with a problem clearly in
-hand.
+unrealistic ideas of how Silver Lining gets used.  I want to react to
+how someone actually wants to use Silver Lining, with a problem
+clearly in hand.
 
 We see the same bugs, we fix the same bugs
 ==========================================

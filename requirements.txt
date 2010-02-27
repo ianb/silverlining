@@ -1,6 +1,6 @@
 http://bitbucket.org/ianb/cmdutils/get/tip.gz#egg=cmdutils
 http://svn.apache.org/repos/asf/incubator/libcloud/trunk/#egg=libcloud
--e hg+http://bitbucket.org/ianb/toppcloud#egg=toppcloud
+-e hg+http://bitbucket.org/ianb/silverlining#egg=silverlining
 # libcloud doesn't specify this, but causes problems when its not installed:
 simplejson
 # I made a small update to virtualenv, so we need tip:

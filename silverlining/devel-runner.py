@@ -1,7 +1,7 @@
-"""This is the server that is run for toppcloud serve.
+"""This is the server that is run for silver serve.
 
 Note that this is a script, and is run as a script, it is not a
-module.  This allows a server to be run without toppcloud itself on
+module.  This allows a server to be run without silverlining itself on
 sys.path.
 """
 
@@ -25,7 +25,7 @@ from tcsupport.requests import make_internal_request
 from tcsupport.develconfig import load_devel_config
 import mimetypes
 
-toppcloud_conf = os.path.join(os.environ['HOME'], '.toppcloud.conf')
+silverlining_conf = os.path.join(os.environ['HOME'], '.silverlining.conf')
 
 def load_paste_reloader():
     try:
@@ -114,7 +114,7 @@ def get_app(base_path):
                 "No application %s defined in %s"
                 % (runner, spec))
     elif runner.startswith('static'):
-        raise Exception("not supported with toppcloud serve")
+        raise Exception("not supported with silver serve")
     else:
         raise Exception(
             "Unknown kind of runner (%s)" % runner)
@@ -129,7 +129,7 @@ def get_app(base_path):
             print 'Fetching update URL %s' % url
             status, headers, body = make_internal_request(
                 found_app, app_name, 'localhost',
-                url, environ={'toppcloud.update': True})
+                url, environ={'silverlining.update': True})
             if not status.startswith('200'):
                 sys.stdout.write(status+'\n')
                 sys.stdout.flush()
@@ -142,7 +142,7 @@ def get_app(base_path):
     return found_app
 
 class CompoundApp(object):
-    """Application that simulates the Apache configuration of toppcloud
+    """Application that simulates the Apache configuration of silverlining
 
     This basically serves up the normal WSGI application, plus the
     static files.
@@ -153,7 +153,7 @@ class CompoundApp(object):
         self.app = get_app(base_path)
 
     def __call__(self, environ, start_response):
-        environ['toppcloud.devel'] = True
+        environ['silverlining.devel'] = True
         path_info = environ.get('PATH_INFO', '')
         path_info = os.path.normpath(path_info)
         path_info = path_info.replace('\\', '/').lstrip('/')

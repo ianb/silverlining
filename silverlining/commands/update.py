@@ -3,8 +3,8 @@ import os
 from cmdutils import CommandError
 import virtualenv
 ## FIXME: circular import:
-from toppcloud.runner import App
-from toppcloud.etchosts import get_host_ip, set_etc_hosts
+from silverlining.runner import App
+from silverlining.etchosts import get_host_ip, set_etc_hosts
 
 _instance_name_re = re.compile(r'app_dir="(.*?)"')
 

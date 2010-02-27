@@ -1,9 +1,9 @@
 DNS Services
 ------------
 
-toppcloud currently does not handle DNS at all.  But it might be nice
-if it did, don't you think?  With this in mind I've asked around a bit
-about DNS services that include APIs.  So far:
+Silver Lining currently does not handle DNS at all.  But it might be
+nice if it did, don't you think?  With this in mind I've asked around
+a bit about DNS services that include APIs.  So far:
 
 * `DNS Made Easy <http://www.dnsmadeeasy.com/s0306/res/ddnsc.html>`_
 

@@ -1,13 +1,13 @@
 import os
 from ConfigParser import ConfigParser
 
-toppcloud_conf = os.path.join(
-    os.environ['HOME'], '.toppcloud.conf')
+silverlining_conf = os.path.join(
+    os.environ['HOME'], '.silverlining.conf')
 
 def load_devel_config(app_name):
     config = {}
     parser = ConfigParser()
-    parser.read([toppcloud_conf])
+    parser.read([silverlining_conf])
     sections = ['devel', 'devel:%s' % app_name]
     for section in sections:
         if not parser.has_section(section):

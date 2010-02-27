@@ -26,7 +26,7 @@ def application(environ, start_response):
     os.environ['SITE'] = site
     os.environ['CANONICAL_HOST'] = common.canonical_hostname(site) or ''
     ## FIXME: give a real version here...
-    environ['TOPPCLOUD'] = os.environ['TOPPCLOUD'] = 'toppcloud/0.0'
+    environ['SILVER_VERSION'] = os.environ['SILVER_VERSION'] = 'silverlining/0.0'
     
     # Fixup port and ipaddress
     environ['SERVER_PORT'] = '80'

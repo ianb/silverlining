@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# This script creates the zip file that is a runnable version of toppcloud.
+# This script creates the zip file that is a runnable version of silverlining.
 # Usage:
 #   create-zip.sh
 # You may set these environmental variables to control it:
@@ -18,7 +18,7 @@ if [ -z "$BUILD_DIR" ] ; then
 fi
 
 mkdir -p $BUILD_DIR
-BUILD="$BUILD_DIR/toppcloud-$VERSION"
+BUILD="$BUILD_DIR/silverlining-$VERSION"
 
 if [ "$VIRTUALENV" = "" ] ; then
     VIRTUALENV="virtualenv"
@@ -37,8 +37,8 @@ $BUILD/bin/pip install \
   -e .
 $BUILD/bin/python setup.py install --single-version-externally-managed --record $BUILD_DIR/record.txt
 
-cp toppcloud/toppcloud-zip-command.py $BUILD/toppcloud.py
-chmod +x $BUILD/toppcloud.py
+cp silverlining/silverlining-zip-command.py $BUILD/silverlining.py
+chmod +x $BUILD/silverlining.py
 mv $BUILD/lib/python2.6/site-packages $BUILD/lib.tmp
 rm -r $BUILD/lib
 mv $BUILD/lib.tmp $BUILD/lib
@@ -49,8 +49,8 @@ pushd $BUILD_DIR
 if [ -z "$ZIP_DIR" ] ; then
     ZIP_DIR="."
 fi
-F="$ZIP_DIR/toppcloud-${VERSION}.zip"
-zip -r $F toppcloud-${VERSION}
+F="$ZIP_DIR/silverlining-${VERSION}.zip"
+zip -r $F silverlining-${VERSION}
 if [ -d ../dist ] ; then
     mv $F ../dist
 else 

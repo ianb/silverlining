@@ -1,9 +1,9 @@
-toppcloud Terminology
-==============================
+Silver Lining Terminology
+=========================
 
 Provider:
     This is a provider like Rackspace, EC2, etc.  This is generally
-    defined in ~/.toppcloud.conf
+    defined in ~/.silverlining.conf
 
 Node:
     This is a virtual server that has been setup.  It has a name,
@@ -15,8 +15,8 @@ Hostname:
     Node, and can be deployed to.  Over its life a hostname will have
     many application instances deployed to it.  In most cases once a
     hostname has been assigned to a node, you can use the hostname
-    instead of the node name (all toppcloud really cares about is that
-    the nodename is a DNS-or-/etc/hosts-resolvable name, so the
+    instead of the node name (all Silver Lining really cares about is
+    that the nodename is a DNS-or-/etc/hosts-resolvable name, so the
     canonical and the per-site host names are interchangeable).
 
 Application:
