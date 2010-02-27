@@ -96,7 +96,7 @@ def find_package_data(
                 out.setdefault(package, []).append(prefix+name)
     return out
 
-setup(name='toppcloud',
+setup(name='SilverLining',
       version=version,
       description="Library for creating cloud servers",
       long_description="""\
@@ -107,7 +107,7 @@ setup(name='toppcloud',
       author_email='ianb@openplans.org',
       url='',
       license='GPL',
-      packages=['toppcloud', 'toppcloud.commands'],
+      packages=['silverlining', 'silverlining.commands'],
       zip_safe=False,
       install_requires=[
           'CmdUtils',
@@ -120,10 +120,10 @@ setup(name='toppcloud',
       ],
       entry_points="""
       [console_scripts]
-      toppcloud = toppcloud.runner:main
+      silver = silverlining.runner:main
       """,
       package_data=find_package_data(
-          where=os.path.join(os.path.dirname(__file__), 'toppcloud'),
-          package='toppcloud',
-          fake_packages=['tcsupport', 'service']),
+          where=os.path.join(os.path.dirname(__file__), 'silverlining'),
+          package='silverlining',
+          fake_packages=['silverlining', 'service']),
       )

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ "$1" = "-f" ] ; then
-    ssh flow.openplans.org 'ssh acura "~/bin/rsync-toppcloud"'
+    ssh flow.openplans.org 'ssh acura "~/bin/rsync-silverlining"'
     exit
 fi
 
@@ -46,11 +46,11 @@ if [ -z "$DEVEL" ] ; then
 
     source $ENV_PATH/bin/activate
     
-    ./toppcloud/create-zip.sh
+    ./silverlining/create-zip.sh
     cp docs/_static/HEADER.html $ZIP_DIR
     sed -i "s/MOST_RECENT/$VERSION/g" $ZIP_DIR/HEADER.html
     echo "RewriteEngine On
-RewriteRule toppcloud-mostrecent.zip http://%{HTTP_HOST}/zip/toppcloud-$VERSION.zip [R,L]
+RewriteRule silvercloud-mostrecent.zip http://%{HTTP_HOST}/zip/silvercloud-$VERSION.zip [R,L]
 " > $ZIP_DIR/.htaccess
 fi
 

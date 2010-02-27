@@ -174,7 +174,7 @@ the node-creation API that uploads files on the newly created
 node/server).  The use of the files extension is minimal at this point
 (just setting up ``/root/.ssh/authorized_keys``), and it is usable
 without that.  If you are signing up for an account, you can throw a
-few bucks our way with the reference code ``REF-TOPP``.
+few bucks my way with the reference code ``REF-IANBICKING``.
 
 toppcloud uses `libcloud`_, which is a library abstracting several
 provider APIs.  It should be usable with other providers, but it's

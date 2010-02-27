@@ -33,8 +33,8 @@ source_suffix = '.txt'
 master_doc = 'index'
 
 # General substitutions.
-project = 'toppcloud'
-copyright = '2010, The Open Planning Project'
+project = 'Silver Lining'
+copyright = '2010, Ian Bicking'
 
 # The default replacements for |version| and |release|, also used in various
 # other places throughout the built documents.
@@ -110,7 +110,7 @@ html_last_updated_fmt = '%b %d, %Y'
 #html_copy_source = True
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'toppclouddoc'
+htmlhelp_basename = 'silverliningdoc'
 
 
 # Options for LaTeX output
