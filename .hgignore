@@ -16,3 +16,4 @@ zip-build/
 pip-log.txt
 scratch-build
 docs/_build
+tests/functional/test-data
