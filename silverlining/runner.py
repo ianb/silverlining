@@ -469,6 +469,8 @@ class App(object):
     """Represents an app to be uploaded/updated"""
     
     def __init__(self, dir, site_name, host):
+        if not dir.endswith('/'):
+            dir += '/'
         self.dir = dir
         self.host = host
         parser = ConfigParser()
