@@ -39,6 +39,7 @@ if [ -e /etc/apache2/sites-enabled/000-default ] ; then
 fi
 
 ## These are restarted in the background, to make it faster:
+echo "Restarting apache2 and varnish"
 /etc/init.d/apache2 restart &>/dev/null &
 /etc/init.d/varnish restart &>/dev/null &
 
