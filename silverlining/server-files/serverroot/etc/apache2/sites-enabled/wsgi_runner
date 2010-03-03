@@ -124,9 +124,9 @@ RewriteCond %{REQUEST_URI} !\.php$
 RewriteRule . /var/www/%{ENV:SITE}/%{ENV:PHP_ROOT}%{REQUEST_URI} [L]
 
 RewriteCond ${process-types:%{ENV:SITE}} ^debug$
-RewriteRule . - [E=PROCESS_DEBUG:_debug]
+RewriteRule . - [E=PROCESS_GROUP:general_debug]
 RewriteCond ${process-types:%{ENV:SITE}|normal} ^normal$
-RewriteRule . - [E=PROCESS_DEBUG:]
+RewriteRule . - [E=PROCESS_GROUP:general]
 
 # Lastly, we run the actual PHP:
 RewriteCond ${platforms:%{ENV:SITE}} ^php$
@@ -134,7 +134,7 @@ RewriteRule . /var/www/support/master-runner.php [L]
 
 # Lastly, setup the WSGI application:
 WSGIApplicationGroup %{ENV:SITE}
-WSGIProcessGroup general%{ENV:PROCESS_DEBUG}
+WSGIProcessGroup %{ENV:PROCESS_GROUP}
 WSGIDaemonProcess general user=www-data processes=5 threads=1 maximum-requests=200 display-name=wsgi home=/var/www
 WSGIDaemonProcess general_debug user=www-data processes=1 threads=10 maximum-requests=200 display-name=wsgi home=/var/www
 WSGIPassAuthorization On
