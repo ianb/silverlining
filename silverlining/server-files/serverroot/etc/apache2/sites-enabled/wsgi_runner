@@ -60,6 +60,7 @@ RewriteRule (.*) http://%1$1
 RewriteMap platforms txt:/var/www/platforms.txt
 RewriteMap php-roots txt:/var/www/php-roots.txt
 RewriteMap process-types txt:/var/www/process-types.txt
+RewriteMap writable-roots txt:/var/www/writable-roots.txt
 
 # Figure out what "site" to map this request to:
 RewriteMap hostmap txt:/var/www/hostmap.txt 
@@ -90,6 +91,26 @@ RewriteCond /var/www/%{ENV:SITE}/static%{REQUEST_URI}/index.html -f
 RewriteRule . /var/www/%{ENV:SITE}/static%{REQUEST_URI}/index.html [L]
 
 
+## Now do the whole thing over again with dynamic static files
+RewriteCond ${writable-roots:%{ENV:SITE}|none} ^writable$
+RewriteRule . - [E=CONFIG_WRITABLE_ROOT:/var/lib/silverlining/writable-roots/%{ENV:SITE}]
+## Now continue and actually serve the files:
+# Refuse /index.html files (redirect):
+RewriteCond %{ENV:CONFIG_WRITABLE_ROOT}%{REQUEST_URI} -f
+RewriteRule (.*/)index.html $1 [L]
+# Serve up any static files:
+RewriteCond %{ENV:CONFIG_WRITABLE_ROOT}%{REQUEST_URI} -f
+RewriteRule . %{ENV:CONFIG_WRITABLE_ROOT}%{REQUEST_URI} [L]
+# Add a trailing slash when necessary:
+RewriteCond %{ENV:CONFIG_WRITABLE_ROOT}%{REQUEST_URI} -d
+RewriteCond %{REQUEST_URI} [^/]$
+RewriteCond %{ENV:CONFIG_WRITABLE_ROOT}%{REQUEST_URI}/index.html -f
+RewriteRule (.*) $1/ [R]
+# Otherwise serve up index.html:
+RewriteCond %{ENV:CONFIG_WRITABLE_ROOT}%{REQUEST_URI}/index.html -f
+RewriteRule . %{ENV:CONFIG_WRITABLE_ROOT}%{REQUEST_URI}/index.html [L]
+
+
 # Some PHP setup; first allow for a site directory
 # First, we determine the "root" directory of the PHP app...
 RewriteCond ${platforms:%{ENV:SITE}} ^php$
@@ -104,6 +125,8 @@ RewriteRule . /var/www/%{ENV:SITE}/%{ENV:PHP_ROOT}%{REQUEST_URI} [L]
 
 RewriteCond ${process-types:%{ENV:SITE}} ^debug$
 RewriteRule . - [E=PROCESS_DEBUG:_debug]
+RewriteCond ${process-types:%{ENV:SITE}|normal} ^normal$
+RewriteRule . - [E=PROCESS_DEBUG:]
 
 # Lastly, we run the actual PHP:
 RewriteCond ${platforms:%{ENV:SITE}} ^php$
