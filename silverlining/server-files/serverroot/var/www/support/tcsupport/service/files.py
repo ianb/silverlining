@@ -7,9 +7,10 @@ import subprocess
 import shutil
 
 class FileService(object):
-    def __init__(self, root, env_var):
+    def __init__(self, root, env_var, home_name):
         self.root = root
         self.env_var = env_var
+        self.home_name = home_name
 
     def dir_for_instance_name(self, instance_name):
         base = instance_name.split('.')[0]
@@ -34,6 +35,7 @@ class FileService(object):
             environ[self.env_var] = os.path.join(
                 os.environ['HOME'],
                 '.silverlining-app-data',
+                self.home_name,
                 app_name)
             if 'files' in devel_config:
                 environ[self.env_var] = os.path.expanduser(
@@ -65,7 +67,7 @@ class FileService(object):
             shutil.rmtree(p)
 
 service = FileService(
-    '/var/lib/silverlining/apps', 'CONFIG_FILES')
+    '/var/lib/silverlining/apps', 'CONFIG_FILES', 'files')
 install = service.install
 app_setup = service.app_setup
 backup = service.backup

@@ -138,8 +138,13 @@ def get_app(base_path):
                 if not body.endswith('\n'):
                     sys.stdout.write('\n')
                 sys.stdout.flush()
+
+    if parser.has_option('production', 'service.writable_root'):
+        writable_root = os.environ['CONFIG_WRITABLE_ROOT']
+    else:
+        writable_root = None
     
-    return found_app
+    return found_app, writable_root
 
 class CompoundApp(object):
     """Application that simulates the Apache configuration of silverlining
@@ -148,21 +153,24 @@ class CompoundApp(object):
     static files.
     """
 
-    def __init__(self, base_path):
+    def __init__(self, base_path, writable_root=None):
         self.base_path = base_path
-        self.app = get_app(base_path)
+        self.app, self.writable_root = get_app(base_path)
 
     def __call__(self, environ, start_response):
         environ['silverlining.devel'] = True
         path_info = environ.get('PATH_INFO', '')
         path_info = os.path.normpath(path_info)
         path_info = path_info.replace('\\', '/').lstrip('/')
-        path = os.path.join(self.base_path, 'static', path_info)
-        ## FIXME: this should redirect (add / etc) same as wsgi_runner does:
-        if os.path.exists(path) and os.path.isdir(path) and os.path.exists(os.path.join(path, 'index.html')):
-            return self.serve_file(os.path.join(path, 'index.html'), environ, start_response)
-        if os.path.exists(path) and not os.path.isdir(path):
-            return self.serve_file(path, environ, start_response)
+        paths = [os.path.join(self.base_path, 'static', path_info)]
+        if self.writable_root:
+            paths.append(os.path.join(self.writable_root, path_info))
+        for path in paths:
+            ## FIXME: this should redirect (add / etc) same as wsgi_runner does:
+            if os.path.exists(path) and os.path.isdir(path) and os.path.exists(os.path.join(path, 'index.html')):
+                return self.serve_file(os.path.join(path, 'index.html'), environ, start_response)
+            if os.path.exists(path) and not os.path.isdir(path):
+                return self.serve_file(path, environ, start_response)
         return self.app(environ, start_response)
 
     def serve_file(self, path, environ, start_response):
