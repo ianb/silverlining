@@ -38,11 +38,11 @@ def setup_services():
             app_name, config, os.environ, devel=True,
             devel_config=devel_config)
 
-if not os.environ.get('SILVERLINING', '').startswith('silverlining/'):
+if not os.environ.get('SILVER_VERSION', '').startswith('silverlining/'):
     # Not a production environment...
     add_tcsupport()
     setup_services()
-    os.environ.setdefault('SILVERLINING', 'devel/0.0')
+    os.environ.setdefault('SILVER_VERSION', 'devel/0.0')
 
 try:
     import silvercustomize
