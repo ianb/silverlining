@@ -8,6 +8,7 @@ HOSTMAP = '/var/www/hostmap.txt'
 PLATFORM_MAP = '/var/www/platforms.txt'
 PHP_ROOT_MAP = '/var/www/php-roots.txt'
 PROCESS_TYPE_MAP = '/var/www/process-types.txt'
+WRITABLE_ROOT_MAP = '/var/www/writable-roots.txt'
 
 IGNORE_SITES = set(['default-notfound', 'default-disabled'])
 
@@ -131,11 +132,14 @@ def canonical_hostname(appname=None):
         appname = os.environ['SITE']
     names = []
     fp = open(HOSTMAP)
-    for line in HOSTMAP:
+    for i, line in enumerate(fp):
         line = line.strip()
         if not line or line.startswith('#'):
             continue
-        domain, app = line.split(None, 1)
+        try:
+            domain, app = line.split(None, 1)
+        except ValueError:
+            raise ValueError('Bad line %i in %s: %r' % (i+1, HOSTMAP, line))
         if app == appname:
             names.append(domain)
     names.sort(key=lambda x: len(x))
