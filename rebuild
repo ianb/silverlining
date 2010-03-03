@@ -53,6 +53,6 @@ if [ -z "$DEVEL" ] ; then
 RewriteRule silverlining-mostrecent.zip http://%{HTTP_HOST}/zip/silverlining-$VERSION.zip [R,L]
 " > $ZIP_DIR/.htaccess
 
-    mv docs/* "$CONFIG_WRITABLE_ROOT/"
+    mv docs/_build/* "$CONFIG_WRITABLE_ROOT/"
 fi
 
