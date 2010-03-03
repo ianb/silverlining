@@ -25,8 +25,8 @@ if [ ! -e /var/www/hostmap.txt ] ; then
 disabled default-disabled" > /var/www/hostmap.txt
     chown www-mgr:www-mgr /var/www/hostmap.txt
 fi
-touch /var/www/platforms.txt /var/www/php-roots.txt
-chown www-mgr:www-mgr /var/www/platforms.txt /var/www/php-roots.txt
+touch /var/www/platforms.txt /var/www/php-roots.txt /var/www/process-types.txt /var/www/writable-roots.txt
+chown www-mgr:www-mgr /var/www/platforms.txt /var/www/php-roots.txt /var/www/process-types.txt /var/www/writable-roots.txt
 
 ## Now setup Apache.  Ubuntu installs 000-default, which we don't
 ## want, so we delete it, and make sure the necessary modules are

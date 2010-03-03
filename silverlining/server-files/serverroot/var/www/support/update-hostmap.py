@@ -2,6 +2,7 @@
 import sys, os
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from tcsupport.common import update_hostmap, PLATFORM_MAP, PHP_ROOT_MAP, PROCESS_TYPE_MAP
+from tcsupport.common import WRITABLE_ROOT_MAP
 from ConfigParser import ConfigParser
 from optparse import OptionParser
 
@@ -36,6 +37,10 @@ def set_platforms(appname, debug_single_process):
             fp = open(PHP_ROOT_MAP, 'a')
             fp.write('%s %s\n' % (appname, parser.get('production', 'php_root')))
             fp.close()
+    if parser.has_option('production', 'service.writable_root'):
+        fp = open(WRITABLE_ROOT_MAP, 'a')
+        fp.write('%s %s\n' % (appname, 'writable'))
+        fp.close()
     if debug_single_process:
         fp = open(PROCESS_TYPE_MAP, 'a')
         fp.write('%s debug\n' % appname)
