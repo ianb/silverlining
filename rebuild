@@ -53,5 +53,5 @@ if [ -z "$DEVEL" ] ; then
 RewriteRule silverlining-mostrecent.zip http://%{HTTP_HOST}/zip/silverlining-$VERSION.zip [R,L]
 " > $ZIP_DIR/.htaccess
 
-    rsync --delete docs/_build/ "$CONFIG_WRITABLE_ROOT/"
+    rsync -r --delete docs/_build/ "$CONFIG_WRITABLE_ROOT/"
 fi
