@@ -1,8 +1,3 @@
-## This might not be necessary, because we shouldn't really be doing
-## anything related to postgres; but what this does is make all
-## postgres-related commands use the user postgres:
-export PGUSER=postgres
-
 ## Set up a standard user for managing apps (www-mgr)
 if [ ! -e /home/www-mgr ] ; then
     ## --gecos=none suppresses the querying for name, room #, etc.:
@@ -10,12 +5,6 @@ if [ ! -e /home/www-mgr ] ; then
     mkdir -p /home/www-mgr/.ssh
     cp /root/.ssh/authorized_keys /home/www-mgr/.ssh/authorized_keys
     chown -R www-mgr:www-mgr /home/www-mgr/.ssh/
-fi
-
-## rsync won't handle permissions; but probably this shouldn't be
-## necessary as service.postgis handles this:
-if [ -e /etc/init.d/postgresql-8.3 ] ; then
-    chown postgres:postgres /etc/postgresql/8.3/main/pg_hba.conf
 fi
 
 ## This creates the default /var/hostmap.txt, which points to the two

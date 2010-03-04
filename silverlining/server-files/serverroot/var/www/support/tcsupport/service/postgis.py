@@ -1,6 +1,9 @@
 import os
 import subprocess
+import shutil
 
+## Note that PostGIS only works with 8.3, even though 8.4 is the more
+## modern version available on Karmic
 packages = [
     'postgis',
     'postgresql-8.3',
@@ -25,14 +28,32 @@ def install(app_dir, config):
 
     if not os.path.exists('/usr/bin/psql'):
         proc = subprocess.Popen(
+            ['apt-get', '-y', 'install'] + packages,
+            env=env)
+        proc.communicate()
+        # This works around some funky bug about not resolving
+        # localhost that only happens with PostgreSQL (no other
+        # service has a problem):
+        proc = subprocess.Popen(
+            ['sed', '-i',
+             "s@#listen_addresses = 'localhost'@listen_addresses = '127.0.0.1'@",
+             '/etc/postgresql/8.3/main/postgresql.conf'],
+            env=env)
+        proc.communicate()
+        proc = subprocess.Popen(
+            ['dpkg', '--configure', 'postgresql-8.3'],
+            env=env)
+        shutil.copyfile(os.path.join(os.path.dirname(__file__),
+                                     'postgis-pg_hba.conf'),
+                        '/etc/postgresql/8.3/main/pg_hba.conf')
+        proc = subprocess.Popen(
             ['chown', 'postgres:postgres',
              '/etc/postgresql/8.3/main/pg_hba.conf'],
             env=env)
         proc.communicate()
         proc = subprocess.Popen(
-            ['apt-get', '-y', 'install'] + packages,
+            ['/etc/init.d/postgresql-8.3', 'restart'],
             env=env)
-        proc.communicate()
     proc = subprocess.Popen(
         ['psql', '--tuples-only'],
         stdout=subprocess.PIPE, stdin=subprocess.PIPE,
@@ -57,7 +78,9 @@ def install(app_dir, config):
         proc.communicate()
         proc = subprocess.Popen(
             ['psql', 'template_postgis'],
-            env=env, stdin=subprocess.PIPE)
+            env=env, stdin=subprocess.PIPE,
+            # We're not capturing this, the output is just boring:
+            stdout=subprocess.PIPE)
         parts = ['CREATE LANGUAGE plpgsql;\n']
         parts.append("UPDATE pg_database SET datistemplate='true' WHERE datname='template_postgis';")
         for filename in ['lwpostgis.sql', 'lwpostgis_upgrade.sql',
