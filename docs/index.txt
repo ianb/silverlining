@@ -23,6 +23,9 @@ Silver Lining
     devel-silverlining
     license
     Repository <http://bitbucket.org/ianb/silverlining>
+
+.. comment: not working
+
     Pre-built zip files <http://cloudsilverlining.org/zip/>
 
 This is a script and server layout to manage Python-based web
