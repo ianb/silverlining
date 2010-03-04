@@ -51,6 +51,9 @@
 
 ## Python/WSGI setup:
 RewriteEngine on
+## Uncomment if you want to understand what is happening here:
+#RewriteLog /var/log/apache2/rewrite.log
+#RewriteLogLevel 5
 
 # Strip www. from all (non-https) domains:
 RewriteCond %{SERVER_PORT} ^8080$
@@ -74,6 +77,8 @@ RewriteRule . - [E=SITE:${hostmap:disabled|default-disabled}]
 
 RewriteCond %{HTTP_HOST} (.*)
 RewriteRule . - [E=SITE:${hostmap:%1}]
+RewriteCond %{ENV:SITE} ^([^.]*)\.
+RewriteRule . - [E=APP_NAME:%1]
 
 # Refuse /index.html files (redirect):
 RewriteCond /var/www/%{ENV:SITE}/static%{REQUEST_URI} -f
@@ -92,8 +97,10 @@ RewriteRule . /var/www/%{ENV:SITE}/static%{REQUEST_URI}/index.html [L]
 
 
 ## Now do the whole thing over again with dynamic static files
+RewriteCond ${writable-roots:%{ENV:SITE}|none} !^writable$
+RewriteRule . - [E=CONFIG_WRITABLE_ROOT:/dev/null/nothing]
 RewriteCond ${writable-roots:%{ENV:SITE}|none} ^writable$
-RewriteRule . - [E=CONFIG_WRITABLE_ROOT:/var/lib/silverlining/writable-roots/%{ENV:SITE}]
+RewriteRule . - [E=CONFIG_WRITABLE_ROOT:/var/lib/silverlining/writable-roots/%{ENV:APP_NAME}]
 ## Now continue and actually serve the files:
 # Refuse /index.html files (redirect):
 RewriteCond %{ENV:CONFIG_WRITABLE_ROOT}%{REQUEST_URI} -f
