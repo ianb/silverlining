@@ -222,7 +222,11 @@ Mercurial (``hg``) and Subversion (``svn``) installed.  Then run::
     $ silver/bin/pip install -r http://bitbucket.org/ianb/silverlining/raw/tip/requirements.txt
 
 This installs a bunch of stuff, most importantly
-``silver/bin/silver``.
+``silver/bin/silver``.  Your applications will go in a separate
+environment, so you should be sure that ``silver`` works regardless of
+what virtualenv environment is activated.  I recommend::
+
+    $ alias silver="/path/to/silver/bin/silver"
 
 Cloud Server Management
 -----------------------
