@@ -70,6 +70,23 @@ If you want to use SQLite you could simply require the necessary
 packages (``python-sqlite``) and then use this files service to store
 the database.
 
+Writable Root
+~~~~~~~~~~~~~
+
+This is another place you can put files, except *these* files will be
+served up publicly.  This location is essentially like the ``static/``
+directory.  Files in ``static/`` take precedence, but these files take
+precedence over the dynamic application.  To enable use::
+
+    service.writable_root =
+
+Your application gets the variable::
+
+``CONFIG_WRITABLE_ROOT``:
+    Path where you can write these files.
+
+Note ``index.html`` files will work.
+
 PostGIS
 ~~~~~~~
 
@@ -95,6 +112,37 @@ Then look for these environmental variables:
     The port to connect to; an empty string means the default port (5432).
 
 ``CONFIG_PG_SQLALCHEMY``:
+    The complete connection string needed for SQLAlchemy.
+
+Right now it's always local, and there won't be any password or host,
+but in the future that might change.  And in development you can
+configure it however you want.
+
+MySQL
+~~~~~
+
+For MySQL do::
+
+    service.mysql =
+
+Then look for these environmental variables:
+
+``CONFIG_MYSQL_DBNAME``: 
+    The database name.
+
+``CONFIG_MYSQL_USERNAME``: 
+    The username to connect as.
+
+``CONFIG_MYSQL_PASSWORD``: 
+    The password to use (an empty string means no password is required).
+
+``CONFIG_MYSQL_HOST``: 
+    The host to connect to; an empty string means localhost.
+
+``CONFIG_MYSQL_PORT``:
+    The port to connect to; an empty string means the default port.
+
+``CONFIG_MYSQL_SQLALCHEMY``:
     The complete connection string needed for SQLAlchemy.
 
 Right now it's always local, and there won't be any password or host,
