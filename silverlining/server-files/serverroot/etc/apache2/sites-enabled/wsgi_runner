@@ -130,10 +130,9 @@ RewriteCond /var/www/%{ENV:SITE}/%{ENV:PHP_ROOT}%{REQUEST_URI} -f
 RewriteCond %{REQUEST_URI} !\.php$
 RewriteRule . /var/www/%{ENV:SITE}/%{ENV:PHP_ROOT}%{REQUEST_URI} [L]
 
+RewriteRule . - [E=PROCESS_GROUP:general]
 RewriteCond ${process-types:%{ENV:SITE}} ^debug$
 RewriteRule . - [E=PROCESS_GROUP:general_debug]
-RewriteCond ${process-types:%{ENV:SITE}|normal} ^normal$
-RewriteRule . - [E=PROCESS_GROUP:general]
 
 # Lastly, we run the actual PHP:
 RewriteCond ${platforms:%{ENV:SITE}} ^php$
