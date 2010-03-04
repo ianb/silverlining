@@ -34,6 +34,10 @@ def run_test(name):
         assert 'env CONFIG_PG_USER=www-mgr' in result.stdout
         assert 'env CONFIG_WRITABLE_ROOT=/var/lib/silverlining/writable-roots/functest' in result.stdout
         assert 'env SILVER_VERSION=silverlining/' in result.stdout
+        result = env.run('silver --yes update --node=%s --host=%s --debug-single-process "%s"'
+                         % (name, name, os.path.join(here, 'example-app')),
+                         expect_stderr=True)
+        print result
     finally:
         print 'Name used: %s' % name
 

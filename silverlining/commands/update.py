@@ -52,12 +52,18 @@ def command_update(config):
          % dict(instance_name=instance_name),
          ])
 
+    if config.args.debug_single_process:
+        debug_single_process = '--debug-single-process'
+    else:
+        debug_single_process = ''
+
     config.run(
         ['ssh', ssh_host,
-         '/var/www/support/update-hostmap.py %(instance_name)s %(host)s %(version)s.%(host)s; '
+         '/var/www/support/update-hostmap.py %(instance_name)s %(debug_single_process)s %(host)s %(version)s.%(host)s; '
          'sudo -u www-data /var/www/support/internal-request.py --update %(instance_name)s %(host)s; '
          'sudo -u www-data pkill -INT -f -u www-data wsgi; '
          % dict(instance_name=instance_name,
+                debug_single_process=debug_single_process,
                 host=config.args.host,
                 version=app.version),
          ])

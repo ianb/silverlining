@@ -129,6 +129,13 @@ parser_update.add_argument(
     help="Hostname to server off of")
 
 parser_update.add_argument(
+    '--debug-single-process',
+    action='store_true',
+    help="Install as a 'debug' application, running in a single process with "
+    "threads, so the application can be used with weberror or other debug "
+    "tools.")
+
+parser_update.add_argument(
     '--name',
     metavar="NAME",
     help="'Name' of the site; defaults to app_name")
