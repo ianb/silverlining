@@ -31,18 +31,6 @@ def install(app_dir, config):
             ['apt-get', '-y', 'install'] + packages,
             env=env)
         proc.communicate()
-        # This works around some funky bug about not resolving
-        # localhost that only happens with PostgreSQL (no other
-        # service has a problem):
-        proc = subprocess.Popen(
-            ['sed', '-i',
-             "s@#listen_addresses = 'localhost'@listen_addresses = '127.0.0.1'@",
-             '/etc/postgresql/8.3/main/postgresql.conf'],
-            env=env)
-        proc.communicate()
-        proc = subprocess.Popen(
-            ['dpkg', '--configure', 'postgresql-8.3'],
-            env=env)
         shutil.copyfile(os.path.join(os.path.dirname(__file__),
                                      'postgis-pg_hba.conf'),
                         '/etc/postgresql/8.3/main/pg_hba.conf')

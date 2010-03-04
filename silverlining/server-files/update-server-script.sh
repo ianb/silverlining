@@ -7,6 +7,9 @@ if [ ! -e /home/www-mgr ] ; then
     chown -R www-mgr:www-mgr /home/www-mgr/.ssh/
 fi
 
+# For some reason this is only readable by root:
+chmod a+r /etc/hosts
+
 ## This creates the default /var/hostmap.txt, which points to the two
 ## standard notfound/disabled apps:
 if [ ! -e /var/www/hostmap.txt ] ; then
