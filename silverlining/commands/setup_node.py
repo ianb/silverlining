@@ -55,6 +55,7 @@ cat >> /root/.ssh/authorized_keys
         "Updating indexes and setting up rsync")
     proc = subprocess.Popen([
         'ssh', ssh_host, '''
+dpkg --configure -a
 apt-get update -qq
 apt-get -y -q install rsync
 ''',
