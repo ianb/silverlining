@@ -1,6 +1,5 @@
 import re
 import subprocess
-from silverlining import renderscripts
 from cmdutils import CommandError
 from silverlining.etchosts import set_etc_hosts
 import time
@@ -12,7 +11,6 @@ def command_create_node(config):
     config.logger.info('Getting image/size info')
     image = config.select_image(image_id=config.args.image_id)
     size = config.select_size(size_id=config.args.size_id)
-    files = renderscripts.render_files(config=config)
     config.logger.notify('Creating node (image=%s; size=%s)' % (
         image.name, size.name))
     node_hostname = config.node_hostname
@@ -25,7 +23,7 @@ def command_create_node(config):
         name=node_hostname,
         image=image,
         size=size,
-        files=files,
+        files={'/root/.ssh/authorized_keys2': config.get('root_authorized_keys')},
         )
     public_ip = resp.public_ip[0]
     config.logger.notify('Status %s at IP %s' % (

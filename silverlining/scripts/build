@@ -1,6 +1,0 @@
-#!/bin/sh
-
-chmod +x ./setup-root ./setup-user-accounts ./setup-app
-./setup-root
-./setup-user-accounts
-./setup-app
