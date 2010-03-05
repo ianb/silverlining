@@ -616,9 +616,6 @@ Short-term list
 
 Here's what I want to do right away:
 
-* Rename the project
-* Set up mailing list, basic site, etc.
-* Fix up the --debug mode for deployment
 * Revise the terminology
   - Rename what needs renaming
   - Change hostname to location (hostname+path)
@@ -629,7 +626,6 @@ Here's what I want to do right away:
 * Backup/restore
 * Deploy Trac (work out its workflow, basically)
 * Deploy WordPress (fix up PHP)
-  - Get a MySQL service
   - Get a PostgreSQL service (no GIS)
 * Set up DevAuth for admin access
 * Support apps like a log viewer app (w/ DevAuth)
