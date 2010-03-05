@@ -95,7 +95,7 @@ Now that you have a basic environment, either create some code in
 ``myapp-app/src/myapp`` or check out some existing code into that
 location.  If you are using a framework, install it using ``bin/pip``
 (e.g., ``myapp-app/bin/pip install Pylons``).  Install your app itself
-like ``bin/pip install -e src/myapp`` -- this causes any prerequesites
+like ``bin/pip install -e src/myapp`` -- this causes any prerequisites
 listed in ``src/myapp/setup.py`` to also be installed by pip
 (otherwise they might get installed with easy_install, which is *okay*
 but not as graceful).
