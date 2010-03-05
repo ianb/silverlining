@@ -40,3 +40,79 @@ Services:
     These are persistent services that the application will use.  The
     only one written so far is postgis, which sets up a postgis
     database.
+
+
+New Terminology
+---------------
+
+This terminology is not yet implemented, but with a refactoring it
+will be:
+
+
+Provider:
+    This is a provider like Rackspace, EC2, etc.  This is generally
+    defined in ``~/.toppcloud.conf``.  This generally includes account
+    information in addition to the actual provider, so if you are
+    working with multiple accounts you will have multiple providers.
+
+Node:
+    This is a virtual server that has been setup.  It has a name,
+    which is also the domain name it can be accessed by.  The name
+    doesn't have to be in DNS (``/etc/hosts`` is setup for this).
+    Hostnames can be substituted for node names in all cases (but a
+    node that has just been created has no hostnames because no sites
+    have been deployed to it).  Node names and hostnames can overlap.
+
+Location (FIXME: not a great name):
+    This is a hostname, and optionally a path where an application
+    will live.  For example, ``blog.example.com/about/``.  Multiple
+    locations can be mapped to a single application.
+
+Hostname:
+    The host part of a location.
+
+Application Package:
+    This is a codebase that can be run.  It has an app.ini file, and a
+    something to run the application.  It also has a major version
+    (each major version can be deployed as a separate site running
+    concurrently, similarly to App Engine).  FIXME: does this version
+    thing make sense?  I'm pretty sure it doesn't, staging servers are
+    more useful.
+
+Application:
+    This is an application package, ready to deploy.  It also has an
+    application name.  Application Packages specify a default name,
+    but application names are unique on a node; so if a deployment
+    uses a particular application name then it is the identical
+    application and will replace the old application.
+
+Deployment:
+    This is a specific deployment of an application.  It is named
+    based on the application name and a timestamp and unique integer.
+
+Site:
+    This is an arrangement of applications and their locations, and
+    potentially an arrangment of servers to support those applications
+    (if the entire site is not deployed on a single server).
+
+Services:
+    These are persistent services that the application will use.
+
+deb Package:
+    This is unsurprisingly a deb package, installed with apt-get.
+    Generally these will be Ubuntu packages, but you can use other
+    repositories and install packages by other providers.
+
+``app_dir``:
+    This is the directory where Application files have been uploaded
+    on a server, generally ``/var/www/APP_NAME.TIMESTAMP``.
+
+``app_instance``:
+    This is the name of the deployment, e.g., ``APP_NAME.TIMESTAMP``.
+
+``hostname``:
+    This is a host that can be ssh'd to.
+
+``app_name``:
+    This is the name of the app on the server (``APP_NAME``).
+
