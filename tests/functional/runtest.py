@@ -3,6 +3,7 @@
 import os
 import time
 from scripttest import TestFileEnvironment
+import subprocess
 
 here = os.path.dirname(os.path.abspath(__file__))
 
@@ -16,8 +17,10 @@ def run_test(name):
         if not name:
             name = 'functest%s.example.com' % int(time.time())
             print 'Creating and setting up node %s' % name
-            print env.run('silver --yes create-node --image-id=14362 --setup-node %s' % name,
-                          expect_stderr=True)
+            #print env.run('silver --yes create-node --image-id=14362 --setup-node %s' % name,
+            #              expect_stderr=True)
+            proc = subprocess.Popen('silver --yes create-node --image-id=14362 --setup-node %s' % name)
+            proc.communicate()
         print 'Doing update'
         result = env.run('silver --yes update --node=%s --host=%s "%s"'
                          % (name, name, os.path.join(here, 'example-app')),
