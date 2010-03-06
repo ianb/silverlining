@@ -53,6 +53,10 @@ def command_init(config):
     lib_python = os.path.join(dir, 'lib', 'python')
     if not os.path.exists(lib_python):
         os.makedirs(lib_python)
+    #XXX this is a hack around http://bitbucket.org/ianb/silverlining/issue/1/bug-on-running-silver-init-for-the-second
+    distutils_dir = os.path.join(dir,'lib','python2.6','distutils')
+    os.unlink(distutils_dir)
+    os.makedirs(distutils_dir)
     init_copy(
         'sitecustomize.py',
         os.path.join(dir, 'lib', 'python2.6', 'sitecustomize.py'),
