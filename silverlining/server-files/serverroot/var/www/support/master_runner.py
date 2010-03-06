@@ -17,6 +17,11 @@ from tcsupport import common
 import re
 from site import addsitedir
 
+#don't show DeprecationWarning in error.log
+#TODO, make this configurable
+import warnings
+warnings.simplefilter('ignore', DeprecationWarning)
+
 found_app = None
 found_app_site = None
 
