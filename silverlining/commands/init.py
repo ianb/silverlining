@@ -55,14 +55,15 @@ def command_init(config):
         os.makedirs(lib_python)
     #XXX this is a hack around http://bitbucket.org/ianb/silverlining/issue/1/bug-on-running-silver-init-for-the-second
     distutils_dir = os.path.join(dir,'lib','python2.6','distutils')
-    distutils_init = os.path.join(dir, 'lib', 'python2.6', 'distutils', '__init__.py')
-    _distutils_init_content = open(distutils_init).read()
-    os.unlink(distutils_dir)
-    os.makedirs(distutils_dir)
-    init_copystring(
-        _distutils_init_content,
-        distutils_init,
-        config.logger, vars, append=True)
+    if os.path.islink(distutils_dir):
+        distutils_init = os.path.join(dir, 'lib', 'python2.6', 'distutils', '__init__.py')
+        _distutils_init_content = open(distutils_init).read()
+        os.unlink(distutils_dir)
+        os.makedirs(distutils_dir)
+        init_copystring(
+            _distutils_init_content,
+            distutils_init,
+            config.logger, vars, append=True)
 
     
     init_copy(
