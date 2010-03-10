@@ -35,11 +35,6 @@ echo "Restarting apache2 and varnish"
 /etc/init.d/apache2 restart &>/dev/null &
 /etc/init.d/varnish restart &>/dev/null &
 
-## This is probably unnecessary...
-if [ -e /etc/init.d/postgresql-8.3 ] ; then
-    /etc/init.d/postgresql-8.3 restart &>/dev/null &
-fi
-
 ## Make sure some standard directories are in place, ownership is
 ## correct, etc.:
 mkdir -p /var/silverlining/build-files
