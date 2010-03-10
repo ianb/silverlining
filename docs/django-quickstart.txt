@@ -58,6 +58,14 @@ that on the import path more manually with a ``.pth`` file::
 
     $ echo "../../src/sampleapp" > lib/python/sampleapp.pth
 
+That files will cause ``../../src/sampleapp`` (relative to the .pth
+file itself) to be on ``sys.path``, which means when you run ``from
+sampleapp import settings`` (for example) it will know to find it in
+``src/sampleapp/sampleapp/settings.py``.  Not all Django projects are
+setup this way -- applications are often not in a namespace, for
+example.  But I think it's simply good practice to keep code
+partitioned into namespaces.
+
 Also there's the tricky ``$DJANGO_SETTINGS_MODULE`` that you might
 have had problems with before.  We'll use the file
 ``lib/python/silvercustomize.py`` (which is imported everytime Python is
