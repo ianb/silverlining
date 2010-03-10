@@ -55,3 +55,4 @@ RewriteRule silverlining-mostrecent.zip http://%{HTTP_HOST}/zip/silverlining-$VE
 
     rsync -r --delete docs/_build/ "$CONFIG_WRITABLE_ROOT/"
 fi
+
