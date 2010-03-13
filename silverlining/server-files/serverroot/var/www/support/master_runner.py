@@ -48,7 +48,7 @@ def application(environ, start_response):
             "next request had site=%r)" % (found_app_site, site))
         return found_app(environ, start_response)
     # The application group we are running:
-    if not re.search(r'^[a-z0-9._-]+$', site):
+    if not re.search(r'^[A-Za-z0-9._-]+$', site):
         raise Exception("Bad site: %r" % site)
 
     base_path = common.site_dir(site)
