@@ -5,6 +5,10 @@ Provider:
     This is a provider like Rackspace, EC2, etc.  This is generally
     defined in ~/.silverlining.conf
 
+Platform: 
+    This is the development platform the application uses.  Current
+    options are ``python`` (default?) and ``php``.
+
 Node:
     This is a virtual server that has been setup.  It has a name,
     which is also the domain name it can be accessed by.  The name
