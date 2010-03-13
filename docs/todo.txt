@@ -620,15 +620,39 @@ Here's what I want to do right away:
   - Rename what needs renaming
   - Change hostname to location (hostname+path)
 * Switch to Karmic-only (no Jaunty)
+  - Set up default ``--image-id`` for node creation
 * Set up a continuous integration server
-* Maybe write the VM libcloud thing (for testing)
+  - Rackspace account seems all setup and comp'd
+* Write a VirtualBox libcloud driver (for testing)
+  - Will use VBoxManage
 * Make the code a little easier to navigate
+  - ``silverlining/server-files/serverroot/var/www/support/tcsupport`` is too nested
 * Backup/restore
-* Deploy Trac (work out its workflow, basically)
+  - Consider how this interacts with testing
+  - Specifically the Django ``test_*`` databases
+* Setup up deployment for Weave Sync 2.0 API implementation
+  - Set up multi-server deployments
 * Deploy WordPress (fix up PHP)
-  - Get a PostgreSQL service (no GIS)
+* Get a PostgreSQL service (no GIS)
 * Set up DevAuth for admin access
 * Support apps like a log viewer app (w/ DevAuth)
-* Switch things that take URLs to take URLs or scripts (like update_fetch)
-* Think more about multi-server setups.  (Sites need to be named and
-  operable on, for instance)
+* Switch things that take URLs to take URLs or scripts (like ``update_fetch``)
+* Get rid of the ``version`` setting in ``app.ini`` (Using domain
+  names, ``--app-name`` and other options is a more general way of
+  solving this problem)
+* Abstract all the ssh stuff into a seperate library.
+* Move some of the files out of ``/var/www/support`` (maybe into
+  ``/var/lib/silverlining/support``?)
+* Start using a dynamic RewriteMap.
+* Get https working in some fashion.  (Ad hoc https seems to only get
+  harder over time though)
+* Document and be explicit about where all the files go (e.g.,
+  ``/var/log/silverlining/``)
+* Separate out logs more intelligently in a per-app manner.
+* Put host name into apache access logs (since they are hard to
+  separate out otherwise)
+* Look into the Varnish logs (Apache logs aren't that complete,
+  really)
+* Make all the app activation unified
+* Make the instantiated app available in the interactive shell
+
