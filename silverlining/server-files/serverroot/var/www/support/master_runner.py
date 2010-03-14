@@ -82,7 +82,7 @@ def application(environ, start_response):
     
     if not os.path.exists(runner):
         return ErrorApp(
-            "The setting ([production] runner) %s does not exist")(environ, start_response)
+            "The setting ([production] runner) %s does not exist" % runner)(environ, start_response)
 
     if runner.endswith('.ini'):
         from paste.deploy import loadapp
