@@ -7,6 +7,10 @@ if [ ! -e /home/www-mgr ] ; then
     chown -R www-mgr:www-mgr /home/www-mgr/.ssh/
 fi
 
+## Make www-data part of the adm group, which means it can read
+## /var/log/apache2 and other log files
+adduser www-data adm
+
 # For some reason this is only readable by root:
 chmod a+r /etc/hosts
 
