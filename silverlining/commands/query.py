@@ -1,13 +1,12 @@
-import subprocess
 import re
 import fnmatch
+from silverlining.util import ssh
 
 def command_query(config):
-    proc = subprocess.Popen(
-        ['ssh', '%s@%s' % (config['remote_username'], config.node_hostname),
-         'cat /var/www/hostmap.txt; echo "END" ; ls /var/www'],
-        stdout=subprocess.PIPE)
-    stdout, stderr = proc.communicate()
+    stdout, stderr, returncode = ssh(
+        'www-mgr', config.node_hostname,
+        'cat /var/www/hostmap.txt; echo "END" ; ls /var/www',
+        capture_stdout=True)
     hosts = {}
     lines = [line.strip()
              for line in stdout.splitlines()

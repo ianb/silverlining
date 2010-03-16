@@ -1,8 +1,8 @@
 import re
 import subprocess
+import time
 from cmdutils import CommandError
 from silverlining.etchosts import set_etc_hosts
-import time
 
 ESTIMATED_TIME = 60
 AFTER_PING_WAIT = 10

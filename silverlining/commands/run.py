@@ -2,8 +2,8 @@ import os
 import re
 from cStringIO import StringIO
 import zipfile
-import subprocess
 from cmdutils import CommandError
+from silverlining.util import ssh, shell_escape
 
 _tmp_re = re.compile(r'tmp="(.*)"')
 
@@ -41,28 +41,13 @@ def command_run(config):
             translated_args.append(arg)
     zip.close()
     zip_content = out.getvalue()
-    if args.user == 'root':
-        ssh_host = 'root@%s' % args.host
-        cmd_prefix = ''
-    elif args.user == 'www-mgr':
-        ssh_host = 'www-mgr@%s' % args.host
-        cmd_prefix = ''
-    elif args.user == 'www-data':
-        ssh_host = 'www-mgr@%s' % args.host
-        cmd_prefix = 'sudo -H -u www-data '
-    else:
+    if args.user not in ['root', 'www-mgr', 'www-data']:
         raise CommandError(
             "Unknown --user=%s" % args.user)
-    env = os.environ.copy()
-    env['LANG'] = 'C'
     if any_translated:
-        proc = subprocess.Popen(
-            ['ssh', ssh_host,
-             '%s/var/www/support/save-tmp-file.py' % cmd_prefix],
-            env=env,
-            stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE)
-        stdout, stderr = proc.communicate(zip_content)
+        stdout, stderr, returncode = ssh(
+            args.user, args.host, '/var/www/support/save-tmp-file.py',
+            stdin=zip_content, capture_stdout=True, capture_stderr=True)
         match = _tmp_re.search(stdout)
         if not match:
             raise CommandError(
@@ -70,14 +55,11 @@ def command_run(config):
         location = match.group(1)
     else:
         location = 'NONE'
-    proc = subprocess.Popen(
-        ['ssh', ssh_host,
-         '%s/var/www/support/run-command.py %s %s %s %s'
-         % (cmd_prefix, args.host, location, args.script,
-            shell_quoted(translated_args))],
-        env=env)
-    proc.communicate()
-    return proc.returncode
+    stdout, stderr, returncode = ssh(
+        args.user, args.host,
+        '/var/www/support/run-command.py %s %s %s %s' %
+        (args.host, location, args.script, shell_escape(translated_args)))
+    return returncode
 
 def shell_quoted(values):
     result = []

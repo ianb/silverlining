@@ -5,6 +5,7 @@ import virtualenv
 ## FIXME: circular import:
 from silverlining.runner import App
 from silverlining.etchosts import get_host_ip, set_etc_hosts
+from silverlining.util import ssh
 
 _instance_name_re = re.compile(r'app_dir="(.*?)"')
 
@@ -31,12 +32,10 @@ def command_update(config):
             config.args.host = app.config['production']['default_host']
         else:
             config.args.host = config.node_hostname
-    ssh_host = '%s@%s' % (config['remote_username'], config.node_hostname)
-    ssh_root_host = 'root@%s' % config.node_hostname
-    stdout, code = config.run(
-        ['ssh', ssh_host,
-         '/var/www/support/prepare-new-site.py %s %s' % (app.site_name, app.version)],
-        return_stdout=True)
+    stdout, stderr, returncode = ssh(
+        'www-mgr', config.node_hostname,
+        '/var/www/support/prepare-new-site.py %s %s' % (app.site_name, app.version),
+        capture_stdout=True)
     match = _instance_name_re.search(stdout)
     if not match:
         config.logger.fatal("Did not get the new instance_name from prepare-new-site.py")
@@ -44,29 +43,26 @@ def command_update(config):
         raise Exception("Bad instance_name output")
     instance_name = match.group(1)
     assert instance_name.startswith(app.site_name)
-    app.sync(ssh_host, instance_name)
-    config.run(
-        ['ssh', ssh_root_host,
-         'python -m compileall -q /var/www/%(instance_name)s; '
-         '/var/www/support/update-service.py %(instance_name)s'
-         % dict(instance_name=instance_name),
-         ])
+    app.sync('www-mgr@%s' % config.node_hostname, instance_name)
+    ssh('root', config.node_hostname,
+        'python -m compileall -q /var/www/%(instance_name)s; '
+        '/var/www/support/update-service.py %(instance_name)s'
+        % dict(instance_name=instance_name))
 
     if config.args.debug_single_process:
         debug_single_process = '--debug-single-process'
     else:
         debug_single_process = ''
 
-    config.run(
-        ['ssh', ssh_host,
-         '/var/www/support/update-hostmap.py %(instance_name)s %(debug_single_process)s %(host)s %(version)s.%(host)s; '
-         'sudo -u www-data /var/www/support/internal-request.py --update %(instance_name)s %(host)s; '
-         'sudo -u www-data pkill -INT -f -u www-data wsgi; '
-         % dict(instance_name=instance_name,
-                debug_single_process=debug_single_process,
-                host=config.args.host,
-                version=app.version),
-         ])
+    ssh('www-mgr', config.node_hostname,
+        '/var/www/support/update-hostmap.py %(instance_name)s %(debug_single_process)s %(host)s %(version)s.%(host)s; '
+        'sudo -H -u www-data /var/www/support/internal-request.py --update %(instance_name)s %(host)s; '
+        'sudo -H -u www-data pkill -INT -f -u www-data wsgi; '
+        % dict(instance_name=instance_name,
+               debug_single_process=debug_single_process,
+               host=config.args.host,
+               version=app.version),
+        )
 
     ip = get_host_ip(config.node_hostname)
     set_etc_hosts(config, [config.args.host,
