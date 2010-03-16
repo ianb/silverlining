@@ -656,3 +656,48 @@ Here's what I want to do right away:
 * Make all the app activation unified
 * Make the instantiated app available in the interactive shell
 
+Refactor List
+-------------
+
+I'm planning an upcoming refactoring, touching lots of code, and this
+includes these changes:
+
+* Get everything in line with `this terminology
+  </terminology.html#new-terminology>`_
+
+* Allow for paths as well as domains pointing to applications
+
+* Use a script-based RewriteMap instead of the text files.  This will
+  give the needed flexibility for mapping paths, and should just
+  generally cut down on the complexity of application attributes.
+
+* Get rid of "version" from app.ini (I think all the purposes of
+  version can be handled more elegantly with domain names and app
+  names).
+
+* Document the file layout.  Also probably move things around in the
+  process.  ``/var/www/support`` will probably go into
+  ``/var/lib/silverlining/support`` or something like that (maybe
+  technically it should go in ``/usr/local/share``?).  Maybe also make
+  the repo layout a little less deep (at least for these support files
+  in particular)
+
+* Rename ``tcsupport`` to something else (``silversupport``?) -- this
+  is probably the most application-visible change.
+
+* Maybe rename some environmental variables to make them a bit more
+  consistent, though I don't have a strong opinion right now.
+
+* Make all the code in ``master_runner.py``, ``tcsupport.common``,
+  ``sitecustomize.py``, etc., consistent.  There's a lot of repetition
+  and even some copy-and-paste in there right now.
+
+* Make the environment always "active" in all contexts.
+
+* Basic code review on all the scripts.
+
+* *Maybe* try to create some proper domain objects, now that things
+   are a tad more clear.  The weird local/remote parallels make this
+   awkward in places.
+
+* Combine/abstract all calls to ``ssh`` and ``subprocess``.
