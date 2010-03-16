@@ -682,9 +682,6 @@ includes these changes:
   the repo layout a little less deep (at least for these support files
   in particular)
 
-* Rename ``tcsupport`` to something else (``silversupport``?) -- this
-  is probably the most application-visible change.
-
 * Maybe rename some environmental variables to make them a bit more
   consistent, though I don't have a strong opinion right now.
 
@@ -699,5 +696,3 @@ includes these changes:
 * *Maybe* try to create some proper domain objects, now that things
    are a tad more clear.  The weird local/remote parallels make this
    awkward in places.
-
-* Combine/abstract all calls to ``ssh`` and ``subprocess``.
