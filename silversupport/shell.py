@@ -14,7 +14,8 @@ def shell_escape(arg):
     return "'%s'" % arg.replace("'", "'\\''")
 
 def run(command, extra_env=None, stdin=None,
-        capture_stdout=False, capture_stderr=False):
+        capture_stdout=False, capture_stderr=False,
+        cwd=None):
     env = os.environ.copy()
     env['LANG'] = 'C'
     if extra_env:
@@ -26,6 +27,8 @@ def run(command, extra_env=None, stdin=None,
         kw['stdout'] = subprocess.PIPE
     if capture_stderr:
         kw['stderr'] = subprocess.PIPE
+    if cwd:
+        kw['cwd'] = cwd
     proc = subprocess.Popen(
         command, env=env, **kw)
     stdout, stderr = proc.communicate(stdin)

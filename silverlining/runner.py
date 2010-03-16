@@ -15,12 +15,12 @@ import re
 import argparse
 from UserDict import UserDict
 from initools.configparser import ConfigParser
-import subprocess
 from cmdutils.arg import add_verbose, create_logger
 from cmdutils import CommandError
 from libcloud.types import Provider
 from libcloud.providers import get_driver as libcloud_get_driver
 from silverlining import createconf
+from silversupport.shell import run
 
 ## The long description of how this command works:
 description = """\
@@ -444,34 +444,6 @@ class Config(UserDict):
                 return False
             print 'I did not understand the response: %s' % response
 
-    def run(self, command, stdin=None, return_stdout=False,
-            set_env=None, cwd=None):
-        env = os.environ.copy()
-        env['LANG'] = 'C'
-        if set_env:
-            env.update(set_env)
-        def _quote(arg):
-            if ' ' in arg:
-                return "%s" % arg.replace('"', '\\"')
-            return arg
-        command_text = ' '.join(
-            _quote(arg) for arg in command)
-        self.logger.debug("Calling: %s" % command_text)
-        kw = {}
-        if stdin:
-            kw['stdin'] = subprocess.PIPE
-        if return_stdout:
-            kw['stdout'] = subprocess.PIPE
-        if cwd:
-            kw['cwd'] = cwd
-        proc = subprocess.Popen(
-            command, env=env, **kw)
-        stdout, stderr = proc.communicate(stdin)
-        if proc.returncode:
-            self.logger.info('Error calling %s' % command_text)
-            self.logger.info('Return code: %s' % proc.returncode)
-        return stdout, proc.returncode
-
 class App(object):
     """Represents an app to be uploaded/updated"""
     
@@ -508,8 +480,7 @@ class App(object):
                self.dir,
                os.path.join('%s:%s' % (host, dest_dir)),
                ]
-        proc = subprocess.Popen(cmd)
-        proc.communicate()
+        run(cmd)
         
 if __name__ == '__main__':
     main()

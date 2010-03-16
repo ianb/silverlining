@@ -1,20 +1,18 @@
 import os
-import subprocess
 from cmdutils import CommandError
-from silversupport.shell import ssh
+from silversupport.shell import ssh, run
 
 def setup_rsync(config, source, dest):
     cwd = os.path.abspath(os.path.join(__file__, '../../server-files'))
-    proc = subprocess.Popen([
+    stdout, stderr, returncode = run([
         'rsync', '--quiet', '-prvC',
         source, 'root@%s:%s' % (config.args.node, dest)],
-                            cwd=cwd)
+                                     cwd=cwd)
     config.logger.notify(
         "rsyncing %s to %s" % (source, dest))
-    proc.communicate()
-    if proc.returncode:
+    if returncode:
         config.logger.fatal(
-            "An error occurred in rsync (code=%s)" % proc.returncode)
+            "An error occurred in rsync (code=%s)" % returncode)
         response = config.ask(
             "Continue?")
         if not response:

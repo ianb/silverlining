@@ -1,8 +1,8 @@
 import re
-import subprocess
 import time
 from cmdutils import CommandError
 from silverlining.etchosts import set_etc_hosts
+from silversupport.shell import run
 
 ESTIMATED_TIME = 60
 AFTER_PING_WAIT = 10
@@ -68,11 +68,10 @@ def wait_for_node_ready_ping(config, node_hostname):
     time.sleep(ESTIMATED_TIME)
     while 1:
         config.logger.show_progress()
-        proc = subprocess.Popen(
+        stdout, stderr, returncode = run(
             ['ping', '-c 2', '-w', '10', node_hostname],
-            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        proc.communicate()
-        if proc.returncode:
+            capture_stdout=True, capture_stderr=True)
+        if returncode:
             config.logger.debug('Ping did not return successful result')
         else:
             config.logger.end_progress(

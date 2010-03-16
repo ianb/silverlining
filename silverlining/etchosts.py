@@ -8,7 +8,7 @@ sudo to do the actual edit.
 """
 
 import os
-import subprocess
+from silversupport.shell import run
 
 __all__ = ['get_host_ip', 'set_etc_hosts']
 
@@ -72,5 +72,4 @@ def set_etc_hosts(config, hostnames, ip):
     resp = config.ask('Would you like me to set it up? ')
     if resp:
         config.logger.notify('Executing %s' % ' '.join(cmd))
-        proc = subprocess.Popen(cmd)
-        proc.communicate()
+        run(cmd)

@@ -1,7 +1,7 @@
 import os
 import sys
 import virtualenv
-import subprocess
+from silversupport.shell import run
 
 def command_init(config):
     dir = config.args.dir
@@ -34,8 +34,7 @@ def command_init(config):
             cmd = [
                 '/usr/bin/python2.6', virtualenv_file,
                 '--unzip-setuptools', dir]
-        proc = subprocess.Popen(cmd)
-        proc.communicate()
+        run(cmd)
     noforce_vars = vars.copy()
     noforce_vars['force'] = False
     init_copy('README.txt', os.path.join(dir, 'README.txt'), config.logger, noforce_vars)
