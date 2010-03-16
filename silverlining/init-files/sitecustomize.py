@@ -5,7 +5,7 @@ site.addsitedir(os.path.abspath(os.path.join(__file__, '../../python')))
 import warnings
 from ConfigParser import ConfigParser
 
-def add_tcsupport():
+def add_silversupport():
     silverlining_conf = os.path.join(os.environ['HOME'], '.silverlining.conf')
     parser = ConfigParser()
     parser.read([silverlining_conf])
@@ -14,11 +14,10 @@ def add_tcsupport():
         warnings.warn('Problem loading %s: no [environment] silverlining_location setting'
                       % silverlining_conf)
         return
-    # Now we make tcsupport importable:
+    # Now we make silversupport importable:
     silverlining_location = parser.get('environment', 'silverlining_location')
-    tcsupport_location = os.path.join(
-        silverlining_location, 'server-files/serverroot/var/www/support/')
-    sys.path.append(tcsupport_location)
+    silversupport_location = os.path.dirname(silverlining_location)
+    sys.path.append(silversupport_location)
 
 def setup_services():
     base_path = os.path.abspath(
@@ -30,9 +29,9 @@ def setup_services():
             'Could not read %s' % app_ini)
         return
     app_name = parser.get('production', 'app_name')
-    from tcsupport.develconfig import load_devel_config
+    from silversupport.develconfig import load_devel_config
     devel_config = load_devel_config(app_name)
-    from tcsupport import common
+    from silversupport import common
     for service, config in sorted(common.services_config(None, parser=parser).items()):
         common.load_service_module(service).app_setup(
             app_name, config, os.environ, devel=True,
@@ -40,7 +39,7 @@ def setup_services():
 
 if not os.environ.get('SILVER_VERSION', '').startswith('silverlining/'):
     # Not a production environment...
-    add_tcsupport()
+    add_silversupport()
     setup_services()
     os.environ.setdefault('SILVER_VERSION', 'devel/0.0')
 

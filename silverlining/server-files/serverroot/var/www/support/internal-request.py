@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 import sys
+sys.path.insert(0, '/usr/local/share/silverlining/lib')
 import os
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-from tcsupport.requests import make_internal_request, create_app
+from silversupport.requests import make_internal_request, create_app
 from ConfigParser import ConfigParser
 from optparse import OptionParser
 

@@ -45,8 +45,8 @@ def services_config(instance_name, parser=None):
     return services
 
 def load_service_module(service_name):
-    __import__('tcsupport.service.%s' % service_name)
-    mod = sys.modules['tcsupport.service.%s' % service_name]
+    __import__('silversupport.service.%s' % service_name)
+    mod = sys.modules['silversupport.service.%s' % service_name]
     return mod
 
 def app_dir_for_host(hostname):

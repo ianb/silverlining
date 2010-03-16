@@ -1,8 +1,9 @@
 #!/usr/bin/env python
-import sys, os
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-from tcsupport.common import update_hostmap, PLATFORM_MAP, PHP_ROOT_MAP, PROCESS_TYPE_MAP
-from tcsupport.common import WRITABLE_ROOT_MAP
+import sys
+sys.path.insert(0, '/usr/local/share/silverlining/lib')
+import os
+from silversupport.common import update_hostmap, PLATFORM_MAP, PHP_ROOT_MAP, PROCESS_TYPE_MAP
+from silversupport.common import WRITABLE_ROOT_MAP
 from ConfigParser import ConfigParser
 from optparse import OptionParser
 

@@ -5,14 +5,12 @@ module.  This allows a server to be run without silverlining itself on
 sys.path.
 """
 
-# Setup sys.path to include tcsupport:
+# Setup sys.path to include silversupport:
 from site import addsitedir
 import sys
 import os
 from ConfigParser import ConfigParser
-path = os.path.join(
-    os.path.dirname(__file__),
-    'server-files/serverroot/var/www/support')
+path = os.path.dirname(os.path.dirname(__file__))
 sys.path.insert(0, path)
 # The parent directory ends up on sys.path, even though we don't want
 # it to; here we remove it:
@@ -20,9 +18,9 @@ here = os.path.abspath(os.path.dirname(__file__))
 for path in list(sys.path):
     if os.path.abspath(path) == here:
         sys.path.remove(path)
-from tcsupport import common
-from tcsupport.requests import make_internal_request
-from tcsupport.develconfig import load_devel_config
+from silversupport import common
+from silversupport.requests import make_internal_request
+from silversupport.develconfig import load_devel_config
 import mimetypes
 
 silverlining_conf = os.path.join(os.environ['HOME'], '.silverlining.conf')

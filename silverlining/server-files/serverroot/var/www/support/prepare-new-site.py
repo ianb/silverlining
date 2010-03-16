@@ -1,12 +1,11 @@
 #!/usr/bin/env python
-import sys, os
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-import glob
-from tcsupport.common import site_dir, sites
-from optparse import OptionParser
-
-import time
+import sys
+sys.path.insert(0, '/usr/local/share/silverlining/lib')
 import os
+import glob
+import time
+from silversupport.common import site_dir, sites
+from optparse import OptionParser
 
 parser = OptionParser(
     usage="%prog APP_NAME VERSION",

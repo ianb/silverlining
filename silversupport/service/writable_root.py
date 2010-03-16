@@ -1,6 +1,6 @@
 """Gives a persistent location to keep files, that get served"""
 
-from tcsupport.service.files import FileService
+from silversupport.service.files import FileService
 
 service = FileService(
     '/var/lib/silverlining/writable-roots', 'CONFIG_WRITABLE_ROOT', 'writable-root')

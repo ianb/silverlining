@@ -54,8 +54,8 @@ chmod 755 /var/www/support/*.py
 chmod +x /etc/init.d/silverlining-setup
 chmod 0440 /etc/sudoers
 chown www-mgr:www-mgr /var/lib/silverlining
-# This gives unnecessary error-like output, so we're ignore the output
-rcconf --on=silverlining-setup &> /dev/null
+# Make sure the support files are compiled:
+python -m compileall -q /usr/local/share/silverlining/lib/
 
 ## This is just a piece of configuration I (Ian) like:
 sed -i "s/ -backup/-backup/" /etc/joe/jmacsrc

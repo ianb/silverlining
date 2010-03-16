@@ -9,11 +9,13 @@ application.  This loading process only happens once.
 Also for each request the environment is fixed up some to represent
 the request properly after having gone through Varnish.
 """
-import os, sys
+import sys
+sys.path.insert(0, '/usr/local/share/silverlining/lib')
+import os
 # Import these to work around a mod_wsgi problem:
 import time, _strptime
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-from tcsupport import common
+from silversupport import common
 import re
 from site import addsitedir
 
@@ -86,7 +88,7 @@ def application(environ, start_response):
 
     if runner.endswith('.ini'):
         from paste.deploy import loadapp
-        from tcsupport.secret import get_secret
+        from silversupport.secret import get_secret
         runner = 'config:%s' % runner
         global_conf = os.environ.copy()
         global_conf['SECRET'] = get_secret()
