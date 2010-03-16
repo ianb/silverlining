@@ -1,7 +1,7 @@
 import os
 import subprocess
 from cmdutils import CommandError
-from silverlining.util import ssh
+from silversupport.shell import ssh
 
 def setup_rsync(config, source, dest):
     cwd = os.path.abspath(os.path.join(__file__, '../../server-files'))

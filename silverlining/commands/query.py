@@ -1,6 +1,6 @@
 import re
 import fnmatch
-from silverlining.util import ssh
+from silversupport.shell import ssh
 
 def command_query(config):
     stdout, stderr, returncode = ssh(

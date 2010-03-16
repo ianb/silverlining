@@ -5,7 +5,7 @@ import virtualenv
 ## FIXME: circular import:
 from silverlining.runner import App
 from silverlining.etchosts import get_host_ip, set_etc_hosts
-from silverlining.util import ssh
+from silversupport.shell import ssh
 
 _instance_name_re = re.compile(r'app_dir="(.*?)"')
 

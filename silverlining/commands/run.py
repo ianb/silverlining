@@ -3,7 +3,7 @@ import re
 from cStringIO import StringIO
 import zipfile
 from cmdutils import CommandError
-from silverlining.util import ssh, shell_escape
+from silversupport.shell import ssh, shell_escape
 
 _tmp_re = re.compile(r'tmp="(.*)"')
 

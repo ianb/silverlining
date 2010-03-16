@@ -1,4 +1,4 @@
-from silverlining.util import ssh
+from silversupport.shell import ssh
 
 def command_deactivate(config):
     if not config.args.node:

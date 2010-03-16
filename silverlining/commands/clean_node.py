@@ -1,4 +1,4 @@
-from silverlining.util import ssh
+from silversupport.shell import ssh
 
 def command_clean_node(config):
     if config.args.simulate:

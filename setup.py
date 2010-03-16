@@ -107,7 +107,7 @@ setup(name='SilverLining',
       author_email='ianb@openplans.org',
       url='',
       license='GPL',
-      packages=['silverlining', 'silverlining.commands'],
+      packages=['silverlining', 'silverlining.commands', 'silversupport'],
       zip_safe=False,
       install_requires=[
           'CmdUtils',
