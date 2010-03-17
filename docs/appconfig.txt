@@ -8,14 +8,6 @@ symlink it into its location at the root of the app directory.
 ``app_name``:
     The name of the application, a simple identifier.
 
-``version``:
-    This is the "version" of the application.  You only need to
-    increment this for major updates.  When you do so you can (in
-    theory) have both the older version and the newer version active,
-    only accessing the newer version when you use a version-specific
-    URL.  All versions will share the same database servers and other
-    persistence mechanisms.
-
 ``runner``:
     This points to the file that "runs" the application.  This can be
     a ``.py`` file that defines an object ``application``, a WSGI

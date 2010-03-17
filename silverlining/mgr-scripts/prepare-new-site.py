@@ -8,7 +8,7 @@ from silversupport.common import site_dir, sites
 from optparse import OptionParser
 
 parser = OptionParser(
-    usage="%prog APP_NAME VERSION",
+    usage="%prog APP_NAME",
     description="""\
 Prepares a new directory for a new instance to be uploaded.  This
 creates a new unique name, creates a directory, and hardlink/copies
@@ -16,11 +16,11 @@ the directory over to be rsync'd over by the new app.  Finally it
 prints the new app name for the caller to use.
 """)
 
-def prepare_new_site(site_name, version):
+def prepare_new_site(site_name):
     """Creates the new directory and copies it over"""
     n = 0
     date = time.strftime('%Y-%m-%d')
-    app_fn = '/var/www/%s.%s.%s_*' % (site_name, version, date)
+    app_fn = '/var/www/%s.%s_*' % (site_name, date)
     names = list(glob.glob(app_fn))
     if not names:
         n = 1
@@ -28,7 +28,7 @@ def prepare_new_site(site_name, version):
         n = max(
             [int(name.rsplit('_', 1)[1])
              for name in names]) + 1
-    app_dir = '%s.%s.%s_%03i' % (site_name, version, date, n)
+    app_dir = '%s.%s_%03i' % (site_name, date, n)
     other_sites = []
     for name in sites():
         if name.startswith('%s.' % site_name):
@@ -55,6 +55,5 @@ def hardlink_copy(source, dest):
 if __name__ == '__main__':
     options, args = parser.parse_args()
     site_name = args[0]
-    version = args[1]
-    prepare_new_site(site_name, version)
+    prepare_new_site(site_name)
     

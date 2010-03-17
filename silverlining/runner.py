@@ -230,7 +230,7 @@ parser_run.add_argument(
     "Other options are www-mgr and root")
 
 parser_query = subcommands.add_parser(
-    'query', help="See what apps and versions are on a node")
+    'query', help="See what apps are on a node")
 
 parser_query.add_argument(
     '--node',
@@ -255,7 +255,7 @@ parser_activate.add_argument(
 
 parser_activate.add_argument(
     'instance_name',
-    help="The instance name to activate (can also be a version number or \"prev\")")
+    help="The instance name to activate (can also be \"prev\")")
 
 parser_deactivate = subcommands.add_parser(
     'deactivate', help="Deactivate a site (leaving it dangling)")
@@ -456,7 +456,6 @@ class App(object):
         assert parser.read([os.path.join(self.dir, 'app.ini')]), (
             "No %s/app.ini found!" % self.dir)
         self.config = parser.asdict()
-        self.version = int(self.config['production']['version'])
         if not site_name:
             site_name = self.config['production']['app_name']
         self.site_name = site_name

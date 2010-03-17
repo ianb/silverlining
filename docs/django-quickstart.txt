@@ -97,7 +97,6 @@ Lining needs: ``app.ini`` and the runner.  Here's a simple
 
     $ echo '[production]
     app_name = sampleapp
-    version = 1
     runner = src/sampleapp/silver-runner.py
     ' > src/sampleapp/silver-app.ini
     $ rm app.ini

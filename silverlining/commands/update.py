@@ -34,7 +34,7 @@ def command_update(config):
             config.args.host = config.node_hostname
     stdout, stderr, returncode = ssh(
         'www-mgr', config.node_hostname,
-        '/usr/local/share/silverlining/mgr-scripts/prepare-new-site.py %s %s' % (app.site_name, app.version),
+        '/usr/local/share/silverlining/mgr-scripts/prepare-new-site.py %s' % app.site_name,
         capture_stdout=True)
     match = _instance_name_re.search(stdout)
     if not match:
@@ -55,16 +55,14 @@ def command_update(config):
         debug_single_process = ''
 
     ssh('www-mgr', config.node_hostname,
-        '/usr/local/share/silverlining/mgr-scripts/update-hostmap.py %(instance_name)s %(debug_single_process)s %(host)s %(version)s.%(host)s; '
+        '/usr/local/share/silverlining/mgr-scripts/update-hostmap.py %(instance_name)s %(debug_single_process)s %(host)s; '
         'sudo -H -u www-data /usr/local/share/silverlining/mgr-scripts/internal-request.py --update %(instance_name)s %(host)s; '
         'sudo -H -u www-data pkill -INT -f -u www-data wsgi; '
         % dict(instance_name=instance_name,
                debug_single_process=debug_single_process,
-               host=config.args.host,
-               version=app.version),
+               host=config.args.host),
         )
 
     ip = get_host_ip(config.node_hostname)
     set_etc_hosts(config, [config.args.host,
-                           '%s.%s' % (app.version, config.args.host),
                            'prev.' + config.args.host], ip)

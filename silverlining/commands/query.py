@@ -24,19 +24,17 @@ def command_query(config):
         hostname, sitename = line.split(None, 1)
         hosts[hostname] = sitename
     for line in lines:
-        match = re.match(r'^(?:([a-z0-9_.-]+)\.(\d+)\.(.*)|default-[a-z]+)$',
+        match = re.match(r'^(?:([a-z0-9_.-]+)\.(.*)|default-[a-z]+)$',
                          line)
         if not match:
             continue
         if not match.group(1):
             site_name = line
-            version = ''
             release = ''
         else:
             site_name = match.group(1)
-            version = match.group(2)
-            release = match.group(3)
-        site_instances.setdefault(site_name, {})[(version, release)] = line
+            release = match.group(2)
+        site_instances.setdefault(site_name, {})[release] = line
         sites.add(site_name)
         instance_site[line] = site_name
     site_names = getattr(config.args, 'site-name')
@@ -75,7 +73,7 @@ def command_query(config):
             notify('Site: %s' % site)
             config.logger.indent += 2
         try:
-            for (version, release), instance_name in sorted(site_instances[site].items()):
+            for release, instance_name in sorted(site_instances[site].items()):
                 hostnames = []
                 for hostname, inst in hosts.items():
                     if ':' in hostname:

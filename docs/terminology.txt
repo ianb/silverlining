@@ -26,8 +26,6 @@ Hostname:
 Application:
     This is a codebase that can be run.  It has an app.ini file, and a
     main.py or config.ini file for actually running the application.
-    It also has a major version (each major version can be deployed as
-    a separate site running concurrently, similarly to App Engine).
 
 Site:
     This is a deployment of an application.  It has a name (used
@@ -37,7 +35,7 @@ Site:
 Deployment:
     This is a site when it is deployed.  It typically has a name that
     starts with the site name, and looks like
-    "site_name.application_version.date" (maybe with numbers appended
+    "site_name.date" (maybe with numbers appended
     to make the deployment name unique).
 
 Services:
@@ -77,11 +75,7 @@ Hostname:
 
 Application Package:
     This is a codebase that can be run.  It has an app.ini file, and a
-    something to run the application.  It also has a major version
-    (each major version can be deployed as a separate site running
-    concurrently, similarly to App Engine).  FIXME: does this version
-    thing make sense?  I'm pretty sure it doesn't, staging servers are
-    more useful.
+    something to run the application.
 
 Application:
     This is an application package, ready to deploy.  It also has an
