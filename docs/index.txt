@@ -202,11 +202,13 @@ the two supported platforms and *maybe* Java.
 Installing
 ----------
 
-First, grab the newest zip file snapshot from `the zip/ directory </zip/>`_.
+.. comment: broken
 
-Unpack the zip file, and run ``silver.py``.  You can't move this
-file out of the directory with the other library files, but you can
-alias it or something.
+ First, grab the newest zip file snapshot from `the zip/ directory </zip/>`_.
+
+ Unpack the zip file, and run ``silver.py``.  You can't move this
+ file out of the directory with the other library files, but you can
+ alias it or something.
 
 Window clients are not supported.  The only way Windows will be supported
 is if someone volunteers to maintain the Windows support.  Individual
