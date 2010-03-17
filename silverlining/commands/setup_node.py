@@ -84,6 +84,9 @@ apt-get -y -q install rsync
     setup_rsync(config,
                 os.path.abspath(os.path.join(__file__, '../../../silversupport/'))+'/',
                 '/usr/local/share/silverlining/lib/silversupport/')
+    setup_rsync(config,
+                os.path.abspath(os.path.join(__file__, '../../mgr-scripts/'))+'/',
+                '/usr/local/share/silverlining/mgr-scripts/')
     ssh('root', node, 'mv /var/root/* /root/')
     
     # Move over the root files, we do *not* rsync a /root dir because

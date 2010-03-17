@@ -6,4 +6,4 @@ def command_clean_node(config):
     else:
         simulate = ''
     ssh('www-mgr', config.node_hostname,
-        '/var/www/support/cleanup-apps.py %s' % simulate)
+        '/usr/local/share/silverlining/mgr-scripts/cleanup-apps.py %s' % simulate)

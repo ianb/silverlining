@@ -34,7 +34,7 @@ def command_update(config):
             config.args.host = config.node_hostname
     stdout, stderr, returncode = ssh(
         'www-mgr', config.node_hostname,
-        '/var/www/support/prepare-new-site.py %s %s' % (app.site_name, app.version),
+        '/usr/local/share/silverlining/mgr-scripts/prepare-new-site.py %s %s' % (app.site_name, app.version),
         capture_stdout=True)
     match = _instance_name_re.search(stdout)
     if not match:
@@ -46,7 +46,7 @@ def command_update(config):
     app.sync('www-mgr@%s' % config.node_hostname, instance_name)
     ssh('root', config.node_hostname,
         'python -m compileall -q /var/www/%(instance_name)s; '
-        '/var/www/support/update-service.py %(instance_name)s'
+        '/usr/local/share/silverlining/mgr-scripts/update-service.py %(instance_name)s'
         % dict(instance_name=instance_name))
 
     if config.args.debug_single_process:
@@ -55,8 +55,8 @@ def command_update(config):
         debug_single_process = ''
 
     ssh('www-mgr', config.node_hostname,
-        '/var/www/support/update-hostmap.py %(instance_name)s %(debug_single_process)s %(host)s %(version)s.%(host)s; '
-        'sudo -H -u www-data /var/www/support/internal-request.py --update %(instance_name)s %(host)s; '
+        '/usr/local/share/silverlining/mgr-scripts/update-hostmap.py %(instance_name)s %(debug_single_process)s %(host)s %(version)s.%(host)s; '
+        'sudo -H -u www-data /usr/local/share/silverlining/mgr-scripts/internal-request.py --update %(instance_name)s %(host)s; '
         'sudo -H -u www-data pkill -INT -f -u www-data wsgi; '
         % dict(instance_name=instance_name,
                debug_single_process=debug_single_process,

@@ -48,10 +48,9 @@ mkdir -p /var/www
 mkdir -p /var/lib/silverlining
 rm -f /var/www/index.html
 chown www-mgr:www-mgr /var/www
-chown -R root:root /var/www/support
+chown -R root:root /usr/local/share/silverlining/
 # Sometimes it has been reported that the executable bit isn't rsync'd over properly:
-chmod 755 /var/www/support/*.py
-chmod +x /etc/init.d/silverlining-setup
+chmod 755 /usr/local/share/silverlining/mgr-scripts/*.py
 chmod 0440 /etc/sudoers
 chown www-mgr:www-mgr /var/lib/silverlining
 # Make sure the support files are compiled:

@@ -49,7 +49,7 @@ def make_internal_request(app, instance_name, hostname,
 
 def create_app(instance_name):
     os.environ['SITE'] = instance_name
-    fn = '/var/www/support/master_runner.py'
+    fn = '/usr/local/share/silverlining/mgr-scripts/master_runner.py'
     ns = {'__file__': fn,
           '__name__': '__main__'}
     execfile(fn, ns)

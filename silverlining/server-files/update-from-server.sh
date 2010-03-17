@@ -6,8 +6,10 @@ if [ "$SERVER" = "" ] ; then
     exit 2
 fi
 
-echo rsync -r root@$SERVER:/var/www/support .
-rsync -r root@$SERVER:/var/www/support .
+echo rsync -r root@$SERVER:/usr/local/share/silverlining/lib/silversupport/ ../../silversupport/
+rsync -r root@$SERVER:/usr/local/share/silverlining/lib/silversupport/ ../../silversupport/
+echo rsync -r root@$SERVER:/usr/local/share/silverlining/mgr-scripts/ ../mgr-scripts/
+rsync -r root@$SERVER:/usr/local/share/silverlining/mgr-scripts/ ../mgr-scripts/
 echo rsync -r root@$SERVER:/etc/apache2/sites-enabled .
 rsync -r root@$SERVER:/etc/apache2/sites-enabled .
 echo rsync -r root@$SERVER:/root .

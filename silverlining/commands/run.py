@@ -46,7 +46,7 @@ def command_run(config):
             "Unknown --user=%s" % args.user)
     if any_translated:
         stdout, stderr, returncode = ssh(
-            args.user, args.host, '/var/www/support/save-tmp-file.py',
+            args.user, args.host, '/usr/local/share/silverlining/mgr-scripts/save-tmp-file.py',
             stdin=zip_content, capture_stdout=True, capture_stderr=True)
         match = _tmp_re.search(stdout)
         if not match:
@@ -57,7 +57,7 @@ def command_run(config):
         location = 'NONE'
     stdout, stderr, returncode = ssh(
         args.user, args.host,
-        '/var/www/support/run-command.py %s %s %s %s' %
+        '/usr/local/share/silverlining/mgr-scripts/run-command.py %s %s %s %s' %
         (args.host, location, args.script, shell_escape(translated_args)))
     return returncode
 

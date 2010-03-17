@@ -14,7 +14,7 @@ function silver_load_services() {
         if (substr($value, 0, 8) == 'service.') {  
             $name = substr($value, 8);
             if ($name != 'php') {
-                include("/var/www/support/php-services/{$name}.php");
+                include("/usr/local/share/silverlining/lib/silversupport/php-services/{$name}.php");
             }
         }
     }

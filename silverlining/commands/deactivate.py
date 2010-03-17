@@ -6,7 +6,7 @@ def command_deactivate(config):
     if config.args.disable:
         for host in config.args.hosts:
             ssh('www-mgr', config.args.host,
-                '/var/www/support/activate-host.py %s disabled'
+                '/usr/local/share/silverlining/mgr-scripts/activate-host.py %s disabled'
                 % host)
     else:
         if config.args.keep_prev:
@@ -14,5 +14,5 @@ def command_deactivate(config):
         else:
             option = ''
         ssh('www-mgr', config.node_hostname,
-            '/var/www/support/remove-host.py %s %s'
+            '/usr/local/share/silverlining/mgr-scripts/remove-host.py %s %s'
             % (option, ' '.join(config.args.hosts)))
