@@ -2,7 +2,7 @@
 import sys
 sys.path.insert(0, '/usr/local/share/silverlining/lib')
 import optparse
-from silversupport import common
+from silversupport import appdata
 
 parser = optparse.OptionParser(
     usage='%prog HOSTS')
@@ -12,9 +12,17 @@ parser.add_option(
 
 def main():
     options, args = parser.parse_args()
-    for host in args:
-        common.remove_host(host, keep_prev=options.keep_prev)
-        print 'Removed host %s' % host
+    locations = appdata.normalize_locations(args, empty_path=None)
+    for hostname, path in args:
+        removed = appdata.remove_host(hostname, path=path, keep_prev=options.keep_prev)
+        if not removed:
+            print 'No entries found matching %s' % (hostname + (path or ''))
+        elif len(removed) == 1:
+            print 'Removed %s: %s' % (hostname + (path or ''), removed[0].strip())
+        else:
+            print 'Removed %s:' % (hostname + (path or ''))
+            for line in removed:
+                print '  %s' % line.strip()
 
 if __name__ == '__main__':
     main()

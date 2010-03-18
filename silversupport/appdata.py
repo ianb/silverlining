@@ -41,7 +41,7 @@ def rewrite_lines(existing, locations, vars):
         lines.append('%s %s %s\n' % (hostname, path, data))
     return ''.join(lines)
 
-def normalize_locations(locations):
+def normalize_locations(locations, empty_path='/'):
     new = []
     for location in locations:
         if location.startswith('http://'):
@@ -53,6 +53,38 @@ def normalize_locations(locations):
             path = '/' + path
         else:
             hostname = location
-            path = '/'
+            path = empty_path
         new.append((hostname, path))
     return new
+
+def remove_host(hostname, keep_prev=False, path=None):
+    """Updates /var/www/appdata.map to remove the given hostname.
+
+    If `keep_prev` is True, then the prev.* hostname will be left
+    in place, otherwise it will be deleted at the same time.
+
+    If path is given the deletions will be limited to that path
+    (or if it is a list, to those paths).
+
+    This returns the list of lines removed.
+    """
+    new_lines = []
+    fp = open(APPDATA_MAP)
+    if path and isinstance(path, basestring):
+        path = [path]
+    removed = []
+    for line in fp:
+        if not line.strip() or line.strip().startswith('#'):
+            new_lines.append(line)
+            continue
+        line_hostname, line_path, data = line.split(None, 2)
+        if (hostname == line_hostname
+            or (not keep_prev and 'prev.'+hostname == line_hostname)):
+            if not path or line_path in path:
+                removed.append(line)
+                continue
+        new_lines.append(line)
+    fp = open(APPDATA_MAP, 'w')
+    fp.writelines(new_lines)
+    fp.close()
+    return removed

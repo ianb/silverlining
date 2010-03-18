@@ -101,28 +101,5 @@ def update_hostmap(hostname, appname):
     fp.writelines(new_lines)
     fp.close()
 
-def remove_host(hostname, keep_prev):
-    """Updates /var/www/hostmap.txt to remove the given hostname"""
-    if not keep_prev:
-        prev = r'(?:prev\.)?'
-    hostname_re = re.compile(
-        r'^%s(?:www\.)?(?:\d+\.)?%s(?::80)?(?::443)?$' %
-        (prev, re.escape(hostname)),
-        re.I)
-    fp = open(HOSTMAP)
-    lines = list(fp)
-    fp.close()
-    new_lines = []
-    for line in lines:
-        if not line.strip() or line.strip().startswith('#'):
-            new_lines.append(line)
-            continue
-        line_hostname, line_appname = line.strip().split(None, 1)
-        if not hostname_re.search(line_hostname):
-            new_lines.append(line)
-    fp = open(HOSTMAP, 'w')
-    fp.writelines(new_lines)
-    fp.close()
-
 if __name__ == '__main__':
     app_dir = sys.argv[1]
