@@ -667,12 +667,6 @@ includes these changes:
 * Get everything in line with `this terminology
   </terminology.html#new-terminology>`_
 
-* Allow for paths as well as domains pointing to applications
-
-* Use a script-based RewriteMap instead of the text files.  This will
-  give the needed flexibility for mapping paths, and should just
-  generally cut down on the complexity of application attributes.
-
 * Document the file layout.  Also probably move things around in the
   process.  ``/var/www/support`` will probably go into
   ``/var/lib/silverlining/support`` or something like that (maybe

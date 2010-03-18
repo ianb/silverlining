@@ -15,7 +15,7 @@ def install(app_dir, config):
             env=env)
         proc.communicate()
 
-def app_setup(app_dir, config, environ,
+def app_setup(app_config, config, environ,
               devel=False, devel_config=None):
     # PHP doesn't go through this setup routine
     pass

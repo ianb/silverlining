@@ -25,13 +25,13 @@ class FileService(object):
             gid = grp.getgrnam('www-data').gr_gid
             os.chown(dir, uid, gid)
 
-    def app_setup(self, app_dir, config, environ,
+    def app_setup(self, app_config, config, environ,
                   devel=False, devel_config=None):
+        app_name = app_config.app_name
         if not devel:
-            dir = self.dir_for_instance_name(app_dir)
+            dir = self.dir_for_instance_name(app_name)
             environ[self.env_var] = dir
         else:
-            app_name = app_dir.split('.')[0]
             environ[self.env_var] = os.path.join(
                 os.environ['HOME'],
                 '.silverlining-app-data',

@@ -1,6 +1,5 @@
 import os
 import subprocess
-import shutil
 
 packages = [
     'mysql-server-5.1',
@@ -43,9 +42,9 @@ def install(app_dir, config):
             env=env)
         proc.communicate()
 
-def app_setup(app_dir, config, environ,
+def app_setup(app_config, config, environ,
               devel=False, devel_config=None):
-    app_name = app_dir.split('.')[0]
+    app_name = app_config.app_name
     if not devel:
         environ['CONFIG_MYSQL_DBNAME'] = app_name
         environ['CONFIG_MYSQL_USER'] = 'wwwmgr'

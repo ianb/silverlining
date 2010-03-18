@@ -21,6 +21,7 @@ for path in list(sys.path):
 from silversupport import common
 from silversupport.requests import make_internal_request
 from silversupport.develconfig import load_devel_config
+from silversupport.appconfig import AppConfig
 import mimetypes
 
 silverlining_conf = os.path.join(os.environ['HOME'], '.silverlining.conf')
@@ -48,96 +49,37 @@ reloader = load_paste_reloader()
 reloader.install()
 
 def get_app(base_path):
-    site = 'localhost'
-    os.environ['SITE'] = site
+    ## FIXME: is this a reasonable instance_name default?
+    app_config = AppConfig(os.path.join(base_path, 'app.ini'))
+    instance_name = 'localhost'
+    os.environ['INSTANCE_NAME'] = instance_name
     os.environ['CANONICAL_HOST'] = 'localhost:8080'
-    # We add the virtualenv packages, and also run sitecustomize.py
-    # (which isn't automatic unless you start from the virtualenv
-    # itself):
-    lib_path = os.path.join(base_path, 'lib', 'python%s' % sys.version[:3],
-                            'site-packages')
-    if lib_path not in sys.path:
-        addsitedir(lib_path)
-    sitecustomize = os.path.join(base_path, 'lib', 'python%s' % sys.version[:3],
-                                 'sitecustomize.py')
-    if os.path.exists(sitecustomize):
-        ns = {'__file__': sitecustomize, '__name__': 'sitecustomize'}
-        execfile(sitecustomize, ns)
-
-    parser = ConfigParser()
-    app_ini = os.path.join(base_path, 'app.ini')
-    parser.read([app_ini])
-    reloader.watch_file(app_ini)
-    app_name = parser.get('production', 'app_name')
-
+    app_config.activate_path()
+    app_name = app_config.app_name
+    reloader.watch_file(app_config.config_file)
     devel_config = load_devel_config(app_name)
-
-    for service, config in sorted(common.services_config(None, parser=parser).items()):
-        common.load_service_module(service).app_setup(
-            app_name, config, os.environ, devel=True,
-            devel_config=devel_config)
-
-    if not parser.has_option('production', 'runner'):
-        raise Exception(
-            "No option 'runner' in [production]")
-    runner = parser.get('production', 'runner')
-    if '#' in runner:
-        runner, spec = runner.split('#', 1)
-    else:
-        spec = None
-    runner = os.path.join(base_path, runner)
-    if not os.path.exists(runner):
-        raise Exception(
-            "The setting ([production] runner) points to the file %s which does not exist"
-            % runner)
-    reloader.watch_file(runner)
-    ## FIXME: this is copied from master_runner.py, which is lame
-    if runner.endswith('.ini'):
-        from paste.deploy import loadapp
-        runner = 'config:%s' % runner
-        global_conf = os.environ.copy()
-        ## FIXME: less fake?
-        global_conf['SECRET'] = '1234567890'
-        found_app = loadapp(runner, name=spec,
-                            global_conf=global_conf)
-    elif runner.endswith('.py'):
-        ## FIXME: not sure what name to give it
-        ns = {'__file__': runner, '__name__': 'main_py'}
-        execfile(runner, ns)
-        spec = spec or 'application'
-        if spec in ns:
-            found_app = ns[spec]
-        else:
-            raise NameError(
-                "No application %s defined in %s"
-                % (runner, spec))
-    elif runner.startswith('static'):
-        raise Exception("not supported with silver serve")
-    else:
-        raise Exception(
-            "Unknown kind of runner (%s)" % runner)
-
+    app_config.activate_services(os.environ, devel=True, devel_config=devel_config)
+    reloader.watch_file(app_config.runner.split('#')[0])
+    found_app = app_config.get_app_from_runner()
+    
     # This calls the update_fetch URL on every reload/restart, which
     # is... questionable.
-    if parser.has_option('production', 'update_fetch'):
-        urls = parser.get('production', 'update_fetch')
-        urls = [url for url in urls.splitlines()
-                if url.strip() and not url.strip().startswith('#')]
-        for url in urls:
-            print 'Fetching update URL %s' % url
-            status, headers, body = make_internal_request(
-                found_app, app_name, 'localhost',
-                url, environ={'silverlining.update': True})
-            if not status.startswith('200'):
-                sys.stdout.write(status+'\n')
-                sys.stdout.flush()
-            if body:
-                sys.stdout.write(body)
-                if not body.endswith('\n'):
-                    sys.stdout.write('\n')
-                sys.stdout.flush()
+    update_fetch = app_config.update_fetch
+    for url in update_fetch:
+        print 'Fetching update URL %s' % url
+        status, headers, body = make_internal_request(
+            found_app, app_name, 'localhost',
+            url, environ={'silverlining.update': True})
+        if not status.startswith('200'):
+            sys.stdout.write(status+'\n')
+            sys.stdout.flush()
+        if body:
+            sys.stdout.write(body)
+            if not body.endswith('\n'):
+                sys.stdout.write('\n')
+            sys.stdout.flush()
 
-    if parser.has_option('production', 'service.writable_root'):
+    if app_config.writable_root_location:
         writable_root = os.environ['CONFIG_WRITABLE_ROOT']
     else:
         writable_root = None

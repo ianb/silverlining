@@ -19,28 +19,12 @@ def add_silversupport():
     silversupport_location = os.path.dirname(silverlining_location)
     sys.path.append(silversupport_location)
 
-def setup_services():
-    base_path = os.path.abspath(
-        os.path.join(__file__, '../../../'))
-    app_ini = os.path.join(base_path, 'app.ini')
-    parser = ConfigParser()
-    if not parser.read([app_ini]):
-        warnings.warn(
-            'Could not read %s' % app_ini)
-        return
-    app_name = parser.get('production', 'app_name')
-    from silversupport.develconfig import load_devel_config
-    devel_config = load_devel_config(app_name)
-    from silversupport import common
-    for service, config in sorted(common.services_config(None, parser=parser).items()):
-        common.load_service_module(service).app_setup(
-            app_name, config, os.environ, devel=True,
-            devel_config=devel_config)
-
 if not os.environ.get('SILVER_VERSION', '').startswith('silverlining/'):
     # Not a production environment...
     add_silversupport()
-    setup_services()
+    from silversupport.appconfig import AppConfig
+    app_config = AppConfig(os.path.abspath(os.path.join(__file__, '../../../app.ini')))
+    app_config.activate_services(os.environ)
     os.environ.setdefault('SILVER_VERSION', 'devel/0.0')
 
 try:

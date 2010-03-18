@@ -3,7 +3,7 @@
   This command is like master_runner.py, and runs at the beginning of
   every PHP request.
    */
-$silver_base = "/var/www/{$_SERVER[SITE]}";
+$silver_base = "/var/www/{$_SERVER[INSTANCE_NAME]}";
 $silver_app_ini = "$silver_base/app.ini";
 $silver_app_config = parse_ini_file($silver_app_ini, true);
 $silver_runner = $silver_app_config['production']['runner'];

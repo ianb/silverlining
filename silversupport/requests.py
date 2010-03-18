@@ -29,7 +29,7 @@ def make_internal_request(app, instance_name, hostname,
         basic_environ['REQUEST_METHOD'] = 'POST'
     if environ:
         basic_environ.update(environ)
-    basic_environ['SITE'] = instance_name
+    basic_environ['INSTANCE_NAME'] = instance_name
     out = StringIO()
     info = []
     def start_response(status, headers, exc_info=None):

@@ -27,9 +27,9 @@ def install(app_dir, config):
             'curl', '-N', '-s', '-X', 'PUT', 'http://localhost:5984/%s' % app_name], env=env)
     
 
-def app_setup(app_dir, config, environ,
+def app_setup(app_config, config, environ,
               devel=False, devel_config=None):
-    app_name = app_dir.split('.')[0].lower()
+    app_name = app_config.app_name
     environ['CONFIG_COUCHDB_DB'] = app_name
     environ['CONFIG_COUCHDB_HOST'] = '127.0.0.1:5984'
     if devel:

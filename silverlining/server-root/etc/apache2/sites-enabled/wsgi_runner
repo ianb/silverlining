@@ -73,7 +73,7 @@ RewriteRule . /usr/local/share/silverlining/error/routing-error.html [R=500,L,E=
 RewriteCond %{ENV:APP_DATA} (.*)\|(.*)\|(.*)\|(.*)\|(.*)\|(.*)
 RewriteRule . - [E=MATCH_PATH:%1]
 RewriteCond %{ENV:APP_DATA} (.*)\|(.*)\|(.*)\|(.*)\|(.*)\|(.*)
-RewriteRule . - [E=SITE:%2]
+RewriteRule . - [E=INSTANCE_NAME:%2]
 RewriteCond %{ENV:APP_DATA} (.*)\|(.*)\|(.*)\|(.*)\|(.*)\|(.*)
 RewriteRule . - [E=PROCESS_GROUP:%3]
 RewriteCond %{ENV:APP_DATA} (.*)\|(.*)\|(.*)\|(.*)\|(.*)\|(.*)
@@ -83,23 +83,23 @@ RewriteRule . - [E=PLATFORM:%5]
 RewriteCond %{ENV:APP_DATA} (.*)\|(.*)\|(.*)\|(.*)\|(.*)\|(.*)
 RewriteRule . - [E=PHP_ROOT:%6]
 
-RewriteCond %{ENV:SITE} ^([^.]*)\.
+RewriteCond %{ENV:INSTANCE_NAME} ^([^.]*)\.
 RewriteRule . - [E=APP_NAME:%1]
 
 # Refuse /index.html files (redirect):
-RewriteCond /var/www/%{ENV:SITE}/static%{REQUEST_URI} -f
+RewriteCond /var/www/%{ENV:INSTANCE_NAME}/static%{REQUEST_URI} -f
 RewriteRule (.*/)index.html $1 [L]
 # Serve up any static files:
-RewriteCond /var/www/%{ENV:SITE}/static%{REQUEST_URI} -f
-RewriteRule . /var/www/%{ENV:SITE}/static%{REQUEST_URI} [L]
+RewriteCond /var/www/%{ENV:INSTANCE_NAME}/static%{REQUEST_URI} -f
+RewriteRule . /var/www/%{ENV:INSTANCE_NAME}/static%{REQUEST_URI} [L]
 # Add a trailing slash when necessary:
-RewriteCond /var/www/%{ENV:SITE}/static%{REQUEST_URI} -d
+RewriteCond /var/www/%{ENV:INSTANCE_NAME}/static%{REQUEST_URI} -d
 RewriteCond %{REQUEST_URI} [^/]$
-RewriteCond /var/www/%{ENV:SITE}/static%{REQUEST_URI}/index.html -f
+RewriteCond /var/www/%{ENV:INSTANCE_NAME}/static%{REQUEST_URI}/index.html -f
 RewriteRule (.*) $1/ [R=permanent]
 # Otherwise serve up index.html:
-RewriteCond /var/www/%{ENV:SITE}/static%{REQUEST_URI}/index.html -f
-RewriteRule . /var/www/%{ENV:SITE}/static%{REQUEST_URI}/index.html [L]
+RewriteCond /var/www/%{ENV:INSTANCE_NAME}/static%{REQUEST_URI}/index.html -f
+RewriteRule . /var/www/%{ENV:INSTANCE_NAME}/static%{REQUEST_URI}/index.html [L]
 
 ## FIXME: even when there is no writable root, these all get run:
 ## Repeat static serving for writable-root files:
@@ -121,16 +121,16 @@ RewriteRule . %{ENV:CONFIG_WRITABLE_ROOT}%{REQUEST_URI}/index.html [L]
 # Next, if the request points to something that is not a .php file,
 # then serve it up directly...
 RewriteCond %{ENV:PLATFORM} ^php$
-RewriteCond /var/www/%{ENV:SITE}/%{ENV:PHP_ROOT}%{REQUEST_URI} -f
+RewriteCond /var/www/%{ENV:INSTANCE_NAME}/%{ENV:PHP_ROOT}%{REQUEST_URI} -f
 RewriteCond %{REQUEST_URI} !\.php$
-RewriteRule . /var/www/%{ENV:SITE}/%{ENV:PHP_ROOT}%{REQUEST_URI} [L]
+RewriteRule . /var/www/%{ENV:INSTANCE_NAME}/%{ENV:PHP_ROOT}%{REQUEST_URI} [L]
 
 # Lastly, we run the actual PHP:
 RewriteCond %{ENV:PLATFORM} ^php$
 RewriteRule . /usr/local/share/silverlining/mgr-scripts/master-runner.php [L]
 
 # Lastly, setup the WSGI application:
-WSGIApplicationGroup %{ENV:SITE}
+WSGIApplicationGroup %{ENV:INSTANCE_NAME}
 WSGIProcessGroup %{ENV:PROCESS_GROUP}
 WSGIDaemonProcess general user=www-data processes=5 threads=1 maximum-requests=200 display-name=wsgi home=/var/www
 WSGIDaemonProcess general_debug user=www-data processes=1 threads=10 maximum-requests=200 display-name=wsgi home=/var/www
