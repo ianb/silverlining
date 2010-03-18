@@ -667,13 +667,6 @@ includes these changes:
 * Get everything in line with `this terminology
   </terminology.html#new-terminology>`_
 
-* Document the file layout.  Also probably move things around in the
-  process.  ``/var/www/support`` will probably go into
-  ``/var/lib/silverlining/support`` or something like that (maybe
-  technically it should go in ``/usr/local/share``?).  Maybe also make
-  the repo layout a little less deep (at least for these support files
-  in particular)
-
 * Maybe rename some environmental variables to make them a bit more
   consistent, though I don't have a strong opinion right now.
 

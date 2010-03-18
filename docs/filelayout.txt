@@ -1,0 +1,76 @@
+File Layout
+===========
+
+This document describes how files are laid out in the Silver Lining
+code base, and on production servers (and how the two relate).
+
+General Patterns
+----------------
+
+Anything that is a "script" (a file meant to be executed) generally
+has a ``-`` in the name somewhere, to help indicate that it is *not* a
+module (since you cannot import names with dashes).
+
+The Silver Lining Code Base
+---------------------------
+
+Here are some notable features:
+
+* The ``silverlining`` package is basically for *managing* the
+  process.  It is *not* installed on the production servers, nor is it
+  generally importable by applications (nor is there anything worth
+  importing).
+
+* The ``silversupport`` is uploaded to the production server, and also
+  used locally.  Applications may find it useful to import some
+  routines from this library.  There's also simply pieces here that
+  both ``silverlining`` and server management scripts need to use, and
+  this is the one shared codebase for that.
+
+* ``silversupport`` gets uploaded to
+  ``/usr/local/share/silverlining/lib`` (this directory is added to
+  ``sys.path`` to make it importable).
+
+* There are a bunch of scripts that are run *on the server*.  Lots of
+  what Silver Lining does is just ``ssh server "command"``, with the
+  actual code on the server.  All Silver Linings scripts are uploaded
+  *from* ``silverlining/mgr-scripts/`` to
+  ``/usr/local/share/silverlining/mgr-scripts/``.  These are *only*
+  run on the server, not locally.  Each script also adds
+  ``/usr/local/share/silverlining/lib`` to its path at the top of the
+  script.
+
+* Files in ``silverlining/server-files/`` are rsync'd to the server's
+  root.  That is, the file layout under that directory matches the
+  server layout exactly.  ``silversupport`` and ``mgr-scripts`` are
+  rsync'd separately.
+
+* Some of the files used for *setting up* a server are in
+  ``silverlining/server-sync-scripts/``.  This includes the *very
+  important* ``update-from-server.sh`` script, which does most of the
+  configuration of servers.  If there's anything that needs to be done
+  (or checked, or fixed) every time a server is created or updated,
+  that's probably the place to look.  (Per-service tasks, like
+  installing a database configuration file, go in the service code.)
+
+Services
+--------
+
+Services are modules in ``silversupport.services.*``, named after the
+service.  Resource files for services go in that package as well (for
+instance, the ``pg_hba.conf`` that the postgis service uses is in
+``silversupport/services/postgis-pg_hba.conf``).
+
+Server Files
+------------
+
+The files created by ``silver setup-node`` are generally put in
+``/usr/local/share/silverlining/``.
+
+Configuration files get put wherever they belong, e.g.,
+``/etc/apache2/sites-enabled/wsgi_runner``.
+
+Log files go in ``/var/log/silverlining/``.
+
+(Per-application log files, and other kinds of logs, still need to be
+filled out better.)
