@@ -1,12 +1,12 @@
 import os
 import subprocess
 
-def install(app_dir, config):
+def install(app_config, config):
     env = os.environ.copy()
     env['LANG'] = 'C'
     
     # We lower the name because upper-case db names are not allowed in CouchDB
-    app_name = app_dir.split('.')[0].lower()
+    app_name = app_config.app_name
     
     # Ensure that couchdb is installed
     proc = subprocess.Popen(['apt-get', '-y', 'install', 'couchdb', 'python-couchdb'],

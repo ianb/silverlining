@@ -5,7 +5,7 @@ packages = [
     'php5',
     ]
 
-def install(app_dir, config):
+def install(app_config, config):
     env = os.environ.copy()
     env['LANG'] = 'C'
 

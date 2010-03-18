@@ -12,13 +12,11 @@ class FileService(object):
         self.env_var = env_var
         self.home_name = home_name
 
-    def dir_for_instance_name(self, instance_name):
-        base = instance_name.split('.')[0]
-        dir = os.path.join(self.root, base)
-        return dir
+    def dir_for_app_name(self, app_name):
+        return os.path.join(self.root, app_name)
 
-    def install(self, app_dir, config):
-        dir = self.dir_for_instance_name(app_dir)
+    def install(self, app_config, config):
+        dir = self.dir_for_app_name(app_config.app_name)
         if not os.path.exists(dir):
             os.makedirs(dir)
             uid = pwd.getpwnam('www-data').pw_uid
@@ -29,7 +27,7 @@ class FileService(object):
                   devel=False, devel_config=None):
         app_name = app_config.app_name
         if not devel:
-            dir = self.dir_for_instance_name(app_name)
+            dir = self.dir_for_app_name(app_name)
             environ[self.env_var] = dir
         else:
             environ[self.env_var] = os.path.join(

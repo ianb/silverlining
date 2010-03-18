@@ -35,19 +35,5 @@ def site_config(instance_name):
         raise BadSite('No app.ini in %s' % app_ini)
     return parser
 
-def services_config(instance_name, parser=None):
-    if parser is None:
-        parser = site_config(instance_name)
-    services = {}
-    for name in parser.options('production'):
-        if name.startswith('service.'):
-            services[name[len('service.'):]] = parser.get('production', name)
-    return services
-
-def load_service_module(service_name):
-    __import__('silversupport.service.%s' % service_name)
-    mod = sys.modules['silversupport.service.%s' % service_name]
-    return mod
-
 if __name__ == '__main__':
     app_dir = sys.argv[1]

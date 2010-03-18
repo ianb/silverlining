@@ -7,7 +7,7 @@ packages = [
     'python-mysqldb',
     ]
 
-def install(app_dir, config):
+def install(app_config, config):
     env = os.environ.copy()
     env['LANG'] = 'C'
 
@@ -20,7 +20,7 @@ def install(app_dir, config):
             ['/usr/bin/mysql', '-u', 'root',
              '-e', 'CREATE USER wwwmgr'])
     
-    app_name = app_dir.split('.')[0]
+    app_name = app_config.app_name
     proc = subprocess.Popen(
         ['/usr/bin/mysql', '-u', 'root',
          '-e', 'SHOW DATABASES', '--batch', '-s'],

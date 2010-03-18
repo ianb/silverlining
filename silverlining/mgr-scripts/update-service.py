@@ -2,7 +2,7 @@
 import sys
 sys.path.insert(0, '/usr/local/share/silverlining/lib')
 import os
-from silversupport.common import services_config, load_service_module, site_config
+from silversupport.appconfig import AppConfig
 from optparse import OptionParser
 
 parser = OptionParser(
@@ -12,28 +12,21 @@ Runs any setup necessary for the new instance's services.  Also
 apt-get installs any packages listed in app.ini.
 """)
 
-def update_service(app_dir):
+def update_service(instance_name):
     import subprocess
-    for name, config in sorted(services_config(app_dir).items()):
-        mod = load_service_module(name)
-        mod.install(app_dir, config)
-    config = site_config(app_dir)
-    if config.has_option('production', 'packages'):
-        packages = config.get('production', 'packages')
-        packages = [
-            line.strip()
-            for line in packages.splitlines()
-            if line.strip() and not line.strip().startswith('#')]
-        if packages:
-            print 'Confirming packages installed: %s' % ', '.join(packages)
-            env = os.environ.copy()
-            env['LANG'] = 'C'
-            proc = subprocess.Popen(
-                ['apt-get', '-y', '-q', 'install'] + packages,
-                env=env)
-            proc.communicate()
+    app_config = AppConfig.from_appinstance(instance_name)
+    app_config.install_services()
+    packages = app_config.packages
+    if packages:
+        print 'Confirming packages installed: %s' % ', '.join(packages)
+        env = os.environ.copy()
+        env['LANG'] = 'C'
+        proc = subprocess.Popen(
+            ['apt-get', '-y', '-q', 'install'] + packages,
+            env=env)
+        proc.communicate()
 
 if __name__ == '__main__':
     options, args = parser.parse_args()
-    app_dir = args[0]
-    update_service(app_dir)
+    instance_name = args[0]
+    update_service(instance_name)

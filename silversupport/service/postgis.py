@@ -21,7 +21,7 @@ packages = [
     'python-pyproj-data',
     ]
 
-def install(app_dir, config):
+def install(app_config, config):
     env = os.environ.copy()
     env['LANG'] = 'C'
     env['PGUSER'] = 'postgres'
@@ -83,7 +83,7 @@ def install(app_dir, config):
         parts.append("GRANT ALL ON spatial_ref_sys TO PUBLIC;\n")
         proc.communicate(''.join(parts))
     
-    app_name = app_dir.split('.')[0]
+    app_name = app_config.app_name
     proc = subprocess.Popen([
         '/usr/bin/psql', '-U', 'postgres', '-l', '-t', '-A'], 
         stdout=subprocess.PIPE, env=env)

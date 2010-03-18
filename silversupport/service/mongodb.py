@@ -13,11 +13,11 @@ def install_package(packages,env):
     cmd.extend(parts)
     return run(cmd,env)
 
-def install(app_dir, config):
+def install(app_config, config):
     env = os.environ.copy()
     env['LANG'] = 'C'
     
-    app_name = app_dir.split('.')[0]
+    app_name = app_config.app_name
     
     #WARNING, this will only work on ubuntu 9.10
     #since we don't have official ubuntu packages we use 10gen's PPA

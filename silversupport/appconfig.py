@@ -90,9 +90,15 @@ class AppConfig(object):
     def instance_name(self):
         return os.path.basename(os.path.dirname(self.config_file))
 
+    @property
+    def packages(self):
+        return self.parse_lines(self.config['production'].get('packages'))
+
     def parse_lines(self, lines):
         """Parse a configuration value into a series of lines,
         ignoring empty and comment lines"""
+        if not lines:
+            return []
         return [
             line.strip() for line in lines.splitlines()
             if line.strip() and not line.strip().startswith('#')]
@@ -106,6 +112,11 @@ class AppConfig(object):
             mod = self.load_service_module(service)
             mod.app_setup(self, config, environ,
                           devel=devel, devel_config=devel_config)
+
+    def install_services(self):
+        for service, config in sorted(self.services.items()):
+            mod = self.load_service_module(service)
+            mod.install(self, config)
 
     def load_service_module(self, service_name):
         """Load the service module for the given service name"""
