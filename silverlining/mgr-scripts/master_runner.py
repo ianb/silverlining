@@ -49,7 +49,7 @@ def get_app(environ):
     instance_name = environ['SILVER_INSTANCE_NAME']
     os.environ['SILVER_INSTANCE_NAME'] = instance_name
     app_config = AppConfig.from_appinstance(instance_name)
-    os.environ['CANONICAL_HOST'] = app_config.canonical_hostname()
+    os.environ['SILVER_CANONICAL_HOST'] = app_config.canonical_hostname()
     ## FIXME: give a real version here...
     environ['SILVER_VERSION'] = os.environ['SILVER_VERSION'] = 'silverlining/0.0'
     

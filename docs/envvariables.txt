@@ -29,6 +29,13 @@ notice).
     This is the name of the application.  If ``SILVER_INSTANCE_NAME`` is
     ``blog.20100319_004`` then this will probably be ``blog``.
 
+``SILVER_CANONICAL_HOSTNAME``:
+
+    This is what *might* be considered the "canonical" (i.e., main)
+    hostname of the application.  This is calculated as the *shortest*
+    hostname possible.  When only one hostname is mapped to an
+    application this is always correct.
+
 ``CONFIG_*``:
 
     This is the naming convention for all the information coming from

@@ -124,29 +124,5 @@ def remove_host(hostname, keep_prev):
     fp.writelines(new_lines)
     fp.close()
 
-def canonical_hostname(appname=None):
-    """Returns the 'canonical' hostname for the given application
-    name ($SITE in the environ).  The canonical name is the shortest name.
-    """
-    if appname is None:
-        appname = os.environ['SITE']
-    names = []
-    fp = open(HOSTMAP)
-    for i, line in enumerate(fp):
-        line = line.strip()
-        if not line or line.startswith('#'):
-            continue
-        try:
-            domain, app = line.split(None, 1)
-        except ValueError:
-            raise ValueError('Bad line %i in %s: %r' % (i+1, HOSTMAP, line))
-        if app == appname:
-            names.append(domain)
-    names.sort(key=lambda x: len(x))
-    if names:
-        return names[0]
-    else:
-        return None
-
 if __name__ == '__main__':
     app_dir = sys.argv[1]
