@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 import sys
 sys.path.insert(0, '/usr/local/share/silverlining/lib')
-import os
 import optparse
-from silversupport import common
 from silversupport import appdata
 
 parser = optparse.OptionParser(
@@ -27,10 +25,6 @@ def main():
         instance_name, [(hostname, path)],
         debug_single_process=options.debug_single_process)
     print '%s%s mapped to instance %s' % (hostname, path, instance_name)
-
-def find_prev_site(hostname):
-    app_dir = common.app_dir_for_host('prev.' + hostname)
-    return os.path.basename(app_dir)
 
 if __name__ == '__main__':
     sys.exit(main())
