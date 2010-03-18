@@ -3,7 +3,7 @@ from cmdutils import CommandError
 from silversupport.shell import ssh, run
 
 def setup_rsync(config, source, dest):
-    cwd = os.path.abspath(os.path.join(__file__, '../../server-files'))
+    cwd = os.path.abspath(os.path.join(__file__, '../..'))
     stdout, stderr, returncode = run([
         'rsync', '--quiet', '-prvC',
         source, 'root@%s:%s' % (config.args.node, dest)],
@@ -64,7 +64,7 @@ apt-get -y -q install rsync
     config.logger.notify(
         "Running apt-get install on server")
     lines = list(open(os.path.abspath(
-        os.path.join(__file__, '../../server-files/dpkg-query.txt'))))
+        os.path.join(__file__, '../../server-sync-scripts/dpkg-query.txt'))))
     packages = ' '.join(line.strip().split()[0]
                         for line in lines
                         if line.strip())
@@ -80,7 +80,7 @@ apt-get -y -q install rsync
         if not response:
             return 5
     
-    setup_rsync(config, 'serverroot/', '/')
+    setup_rsync(config, 'server-root/', '/')
     setup_rsync(config,
                 os.path.abspath(os.path.join(__file__, '../../../silversupport/'))+'/',
                 '/usr/local/share/silverlining/lib/silversupport/')
@@ -95,7 +95,7 @@ apt-get -y -q install rsync
     
     
     setup_script = open(os.path.abspath(os.path.join(
-        __file__, '../../server-files/update-server-script.sh'))).read()
+        __file__, '../../server-sync-scripts/update-server-script.sh'))).read()
     import getpass
     username = getpass.getuser()
     setup_script = setup_script.replace('__REMOTE_USER__', username)

@@ -114,3 +114,18 @@ deb Package:
 ``app_name``:
     This is the name of the app on the server (``APP_NAME``).
 
+``node``:
+    There are a limited number of times when ``node`` is distinct from
+    ``hostname``: 
+
+    * first, if you provide ``--node`` then that overrides the
+      hostname for ssh, etc.  This can be useful when there is a load
+      balancer in front of the server, or many servers provide the
+      same hostname (e.g., many load-balanced app servers).
+
+    * second, if the hostname is not mapped to anything (it has not
+      been created, it is not in ``/etc/hosts``), then this maps it to
+      a specific host.
+
+    In other cases, hostname and node are equivalent, and if a command
+    includes the hostname it doesn't require an explicit node.

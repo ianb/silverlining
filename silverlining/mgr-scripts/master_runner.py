@@ -28,6 +28,22 @@ found_app = None
 found_app_site = None
 
 def application(environ, start_response):
+    try:
+        get_app(environ)
+    except:
+        import traceback
+        bt = traceback.format_exc()
+        start_response('500 Server Error', [('Content-type', 'text/plain')])
+        lines = ['There was an error loading the application:', bt, '\nEnviron:']
+        for name, value in sorted(environ.items()):
+            try:
+                lines.append('%s=%r' % (name, value))
+            except:
+                lines.append('%s=<error>' % name)
+        return ['\n'.join(lines)]
+    return found_app(environ, start_response)
+
+def get_app(environ):
     global found_app, found_app_site
     site = environ['SITE']
     os.environ['SITE'] = site
@@ -48,7 +64,7 @@ def application(environ, start_response):
         assert found_app_site == site, (
             "second request with unexpected site (first request had site=%r; "
             "next request had site=%r)" % (found_app_site, site))
-        return found_app(environ, start_response)
+        return found_app
     # The application group we are running:
     if not re.search(r'^[A-Za-z0-9._-]+$', site):
         raise Exception("Bad site: %r" % site)
@@ -69,7 +85,7 @@ def application(environ, start_response):
         for service, config in sorted(common.services_config(site).items()):
             common.load_service_module(service).app_setup(site, config, os.environ)
     except common.BadSite, e:
-        return ErrorApp('Error loading services: %s' % e)(environ, start_response)
+        return ErrorApp('Error loading services: %s' % e)
 
     parser = common.site_config(site)
     if parser.has_option('production', 'runner'):
@@ -80,11 +96,11 @@ def application(environ, start_response):
             spec = None
     else:
         return ErrorApp(
-            "app.ini did not define a runner setting")(environ, start_response)
+            "app.ini did not define a runner setting")
     
     if not os.path.exists(runner):
         return ErrorApp(
-            "The setting ([production] runner) %s does not exist" % runner)(environ, start_response)
+            "The setting ([production] runner) %s does not exist" % runner)
 
     if runner.endswith('.ini'):
         from paste.deploy import loadapp
@@ -104,14 +120,14 @@ def application(environ, start_response):
         else:
             return ErrorApp(
                 "No application %s defined in %s"
-                % (runner, spec))(environ, start_response)
+                % (runner, spec))
     elif runner.startswith('static'):
         found_app = NullApplication()
     else:
         return ErrorApp(
-            "Unknown kind of runner (%s)" % runner)(environ, start_response)
+            "Unknown kind of runner (%s)" % runner)
     found_app_site = site
-    return found_app(environ, start_response)
+    return found_app
 
 class ErrorApp(object):
     """Application that simply displays the error message"""

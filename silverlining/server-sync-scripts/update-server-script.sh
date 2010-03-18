@@ -14,15 +14,13 @@ adduser www-data adm
 # For some reason this is only readable by root:
 chmod a+r /etc/hosts
 
-## This creates the default /var/hostmap.txt, which points to the two
-## standard notfound/disabled apps:
-if [ ! -e /var/www/hostmap.txt ] ; then
-    echo "notfound default-notfound
-disabled default-disabled" > /var/www/hostmap.txt
-    chown www-mgr:www-mgr /var/www/hostmap.txt
+
+if [ ! -e /var/www/appdata.map ] ; then
+    echo "not-found / default-notfound|general_debug|/dev/null/|python|
+disabled / default-disabled|general_debug|/dev/null|python|
+" > /var/www/appdata.map
 fi
-touch /var/www/platforms.txt /var/www/php-roots.txt /var/www/process-types.txt /var/www/writable-roots.txt
-chown www-mgr:www-mgr /var/www/platforms.txt /var/www/php-roots.txt /var/www/process-types.txt /var/www/writable-roots.txt
+chown www-mgr:www-mgr /var/www/appdata.map
 
 ## Now setup Apache.  Ubuntu installs 000-default, which we don't
 ## want, so we delete it, and make sure the necessary modules are

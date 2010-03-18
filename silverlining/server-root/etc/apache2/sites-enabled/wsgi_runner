@@ -58,25 +58,31 @@ RewriteEngine on
 # Strip www. from all (non-https) domains:
 RewriteCond %{SERVER_PORT} ^8080$
 RewriteCond %{HTTP_HOST} ^www\.(.*)$
-RewriteRule (.*) http://%1$1
+RewriteRule (.*) http://%1$1 [R=permanent,L]
 
-RewriteMap platforms txt:/var/www/platforms.txt
-RewriteMap php-roots txt:/var/www/php-roots.txt
-RewriteMap process-types txt:/var/www/process-types.txt
-RewriteMap writable-roots txt:/var/www/writable-roots.txt
+# Needed?
+#RewriteLock /var/lock/apache2/rewrite_map.lck
+RewriteMap appdata prg:/usr/local/share/silverlining/mgr-scripts/rewrite-map.py
+RewriteCond ${appdata:%{HTTP_HOST}^%{PATH_INFO}} (.*)
+RewriteRule . - [E=APP_DATA:%1]
+# Special case redirect:
+RewriteCond %{ENV:APP_DATA} ^addslash$
+RewriteRule (.*) $1/ [R=permanent,L]
+RewriteCond %{ENV:APP_DATA} ^error:(.*)$
+RewriteRule . /usr/local/share/silverlining/error/routing-error.html [R=500,L,E=ERROR_MSG:%1]
+RewriteCond %{ENV:APP_DATA} (.*)\|(.*)\|(.*)\|(.*)\|(.*)\|(.*)
+RewriteRule . - [E=MATCH_PATH:%1]
+RewriteCond %{ENV:APP_DATA} (.*)\|(.*)\|(.*)\|(.*)\|(.*)\|(.*)
+RewriteRule . - [E=SITE:%2]
+RewriteCond %{ENV:APP_DATA} (.*)\|(.*)\|(.*)\|(.*)\|(.*)\|(.*)
+RewriteRule . - [E=PROCESS_GROUP:%3]
+RewriteCond %{ENV:APP_DATA} (.*)\|(.*)\|(.*)\|(.*)\|(.*)\|(.*)
+RewriteRule . - [E=CONFIG_WRITABLE_ROOT:%4]
+RewriteCond %{ENV:APP_DATA} (.*)\|(.*)\|(.*)\|(.*)\|(.*)\|(.*)
+RewriteRule . - [E=PLATFORM:%5]
+RewriteCond %{ENV:APP_DATA} (.*)\|(.*)\|(.*)\|(.*)\|(.*)\|(.*)
+RewriteRule . - [E=PHP_ROOT:%6]
 
-# Figure out what "site" to map this request to:
-RewriteMap hostmap txt:/var/www/hostmap.txt 
-
-RewriteCond ${hostmap:%{HTTP_HOST}|__default__} ^__default__$
-RewriteRule . - [E=SITE:${hostmap:notfound|default-notfound}]
-
-# If a hostmap resulted in "disabled" then map that again as a domain
-RewriteCond ${hostmap:%{HTTP_HOST}} ^disabled$
-RewriteRule . - [E=SITE:${hostmap:disabled|default-disabled}]
-
-RewriteCond %{HTTP_HOST} (.*)
-RewriteRule . - [E=SITE:${hostmap:%1}]
 RewriteCond %{ENV:SITE} ^([^.]*)\.
 RewriteRule . - [E=APP_NAME:%1]
 
@@ -90,18 +96,13 @@ RewriteRule . /var/www/%{ENV:SITE}/static%{REQUEST_URI} [L]
 RewriteCond /var/www/%{ENV:SITE}/static%{REQUEST_URI} -d
 RewriteCond %{REQUEST_URI} [^/]$
 RewriteCond /var/www/%{ENV:SITE}/static%{REQUEST_URI}/index.html -f
-RewriteRule (.*) $1/ [R]
+RewriteRule (.*) $1/ [R=permanent]
 # Otherwise serve up index.html:
 RewriteCond /var/www/%{ENV:SITE}/static%{REQUEST_URI}/index.html -f
 RewriteRule . /var/www/%{ENV:SITE}/static%{REQUEST_URI}/index.html [L]
 
-
-## Now do the whole thing over again with dynamic static files
-RewriteCond ${writable-roots:%{ENV:SITE}|none} !^writable$
-RewriteRule . - [E=CONFIG_WRITABLE_ROOT:/dev/null/nothing]
-RewriteCond ${writable-roots:%{ENV:SITE}|none} ^writable$
-RewriteRule . - [E=CONFIG_WRITABLE_ROOT:/var/lib/silverlining/writable-roots/%{ENV:APP_NAME}]
-## Now continue and actually serve the files:
+## FIXME: even when there is no writable root, these all get run:
+## Repeat static serving for writable-root files:
 # Refuse /index.html files (redirect):
 RewriteCond %{ENV:CONFIG_WRITABLE_ROOT}%{REQUEST_URI} -f
 RewriteRule (.*/)index.html $1 [L]
@@ -117,26 +118,16 @@ RewriteRule (.*) $1/ [R]
 RewriteCond %{ENV:CONFIG_WRITABLE_ROOT}%{REQUEST_URI}/index.html -f
 RewriteRule . %{ENV:CONFIG_WRITABLE_ROOT}%{REQUEST_URI}/index.html [L]
 
-
-# Some PHP setup; first allow for a site directory
-# First, we determine the "root" directory of the PHP app...
-RewriteCond ${platforms:%{ENV:SITE}} ^php$
-RewriteRule . - [E=PHP_ROOT:${php-roots:%{ENV:SITE}|site}]
-
 # Next, if the request points to something that is not a .php file,
 # then serve it up directly...
-RewriteCond ${platforms:%{ENV:SITE}} ^php$
+RewriteCond %{ENV:PLATFORM} ^php$
 RewriteCond /var/www/%{ENV:SITE}/%{ENV:PHP_ROOT}%{REQUEST_URI} -f
 RewriteCond %{REQUEST_URI} !\.php$
 RewriteRule . /var/www/%{ENV:SITE}/%{ENV:PHP_ROOT}%{REQUEST_URI} [L]
 
-RewriteRule . - [E=PROCESS_GROUP:general]
-RewriteCond ${process-types:%{ENV:SITE}} ^debug$
-RewriteRule . - [E=PROCESS_GROUP:general_debug]
-
 # Lastly, we run the actual PHP:
-RewriteCond ${platforms:%{ENV:SITE}} ^php$
-RewriteRule . /var/www/support/master-runner.php [L]
+RewriteCond %{ENV:PLATFORM} ^php$
+RewriteRule . /usr/local/share/silverlining/mgr-scripts/master-runner.php [L]
 
 # Lastly, setup the WSGI application:
 WSGIApplicationGroup %{ENV:SITE}
@@ -145,7 +136,7 @@ WSGIDaemonProcess general user=www-data processes=5 threads=1 maximum-requests=2
 WSGIDaemonProcess general_debug user=www-data processes=1 threads=10 maximum-requests=200 display-name=wsgi home=/var/www
 WSGIPassAuthorization On
 
-WSGIScriptAlias / /var/www/support/master_runner.py
+WSGIScriptAlias / /usr/local/share/silverlining/mgr-scripts/master_runner.py
 
 </VirtualHost>
 
