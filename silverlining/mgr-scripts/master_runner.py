@@ -2,7 +2,7 @@
 
 This defines application(), which is a WSGI application that mod_wsgi looks for.
 
-It uses $INSTANCE_NAME to figure out who to send the request to, then
+It uses $SILVER_INSTANCE_NAME to figure out who to send the request to, then
 configures all services, and then passes the request on to the new
 application.  This loading process only happens once.
 
@@ -45,8 +45,9 @@ def application(environ, start_response):
 
 def get_app(environ):
     global found_app, found_app_instance_name
-    instance_name = environ['INSTANCE_NAME']
-    os.environ['INSTANCE_NAME'] = instance_name
+    delete_boring_vars(environ)
+    instance_name = environ['SILVER_INSTANCE_NAME']
+    os.environ['SILVER_INSTANCE_NAME'] = instance_name
     app_config = AppConfig.from_appinstance(instance_name)
     os.environ['CANONICAL_HOST'] = app_config.canonical_hostname()
     ## FIXME: give a real version here...
@@ -94,4 +95,15 @@ class ErrorApp(object):
     def __call__(self, environ, start_response):
         start_response('500 Server Error', [('Content-type', 'text/plain')])
         return [self.message]
+
+# These are variables set in Apache/wsgi_runner, that are often quite
+# dull but used internally; we'll delete them for cleanliness:
+BORING_VARS = [
+    'SILVER_APP_DATA', 'SILVER_PROCESS_GROUP', 'SILVER_PLATFORM',
+    'SILVER_PHP_ROOT']
+
+def delete_boring_vars(environ):
+    for name in BORING_VARS:
+        if name in environ:
+            del environ[name]
 

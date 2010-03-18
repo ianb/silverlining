@@ -19,7 +19,7 @@ def command_serve(config):
                dir]
     ## FIXME: should cut down the environ significantly
     environ = os.environ.copy()
-    environ['INSTANCE_NAME'] = 'localhost'
+    environ['SILVER_INSTANCE_NAME'] = 'localhost'
     proc = None
     try:
         try:

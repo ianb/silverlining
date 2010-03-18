@@ -1,0 +1,36 @@
+Environmental Variables
+=======================
+
+This document describes all the environmental variables that Silver
+Lining creates, that an application might want to use (or just might
+notice).
+
+``SILVER_VERSION``:
+
+    This gives the version in the form ``context/version``, like
+    ``silverlining/0.0`` or ``devel/0.0``.  Having not had a release,
+    there is no real version information yet, but this can be used to
+    detect the difference between production and development
+    environments.  (Also ``silversupport.env.is_production()`` does
+    this.)
+
+``SILVER_INSTANCE_NAME``:
+
+    This is the name of the instance/deployment.
+
+``SILVER_MATCH_PATH``:
+
+    This is the portion of the path that was matched during dispatch.
+    For instance if you upload an app to ``site.example.com/blog``
+    then ``SILVER_MATCH_PATH`` will be ``/blog``.
+
+``SILVER_APP_NAME``:
+
+    This is the name of the application.  If ``SILVER_INSTANCE_NAME`` is
+    ``blog.20100319_004`` then this will probably be ``blog``.
+
+``CONFIG_*``:
+
+    This is the naming convention for all the information coming from
+    services.
+

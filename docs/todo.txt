@@ -667,9 +667,6 @@ includes these changes:
 * Get everything in line with `this terminology
   </terminology.html#new-terminology>`_
 
-* Maybe rename some environmental variables to make them a bit more
-  consistent, though I don't have a strong opinion right now.
-
 * Make all the code in ``master_runner.py``, ``tcsupport.common``,
   ``sitecustomize.py``, etc., consistent.  There's a lot of repetition
   and even some copy-and-paste in there right now.

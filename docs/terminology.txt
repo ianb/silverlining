@@ -75,18 +75,22 @@ Hostname:
 
 Application Package:
     This is a codebase that can be run.  It has an app.ini file, and a
-    something to run the application.
+    runner for the application.
 
 Application:
     This is an application package, ready to deploy.  It also has an
     application name.  Application Packages specify a default name,
     but application names are unique on a node; so if a deployment
     uses a particular application name then it is the identical
-    application and will replace the old application.
+    application and will replace the old application.  If, for
+    instance, you want to install two distinct versions of the same
+    application package -- e.g., two versions of a blog product --
+    then you must give them two separate application names.
 
 Deployment:
     This is a specific deployment of an application.  It is named
     based on the application name and a timestamp and unique integer.
+    The name is referred to as ``instance_name``.
 
 Site:
     This is an arrangement of applications and their locations, and
@@ -105,7 +109,7 @@ deb Package:
     This is the directory where Application files have been uploaded
     on a server, generally ``/var/www/APP_NAME.TIMESTAMP``.
 
-``app_instance``:
+``instance_name``:
     This is the name of the deployment, e.g., ``APP_NAME.TIMESTAMP``.
 
 ``hostname``:
@@ -124,8 +128,8 @@ deb Package:
       same hostname (e.g., many load-balanced app servers).
 
     * second, if the hostname is not mapped to anything (it has not
-      been created, it is not in ``/etc/hosts``), then this maps it to
-      a specific host.
+      been created, it is not in ``/etc/hosts``), then this lets the
+      hostname be mapped to a specific node/server.
 
     In other cases, hostname and node are equivalent, and if a command
     includes the hostname it doesn't require an explicit node.

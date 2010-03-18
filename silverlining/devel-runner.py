@@ -52,7 +52,7 @@ def get_app(base_path):
     ## FIXME: is this a reasonable instance_name default?
     app_config = AppConfig(os.path.join(base_path, 'app.ini'))
     instance_name = 'localhost'
-    os.environ['INSTANCE_NAME'] = instance_name
+    os.environ['SILVER_INSTANCE_NAME'] = instance_name
     os.environ['CANONICAL_HOST'] = 'localhost:8080'
     app_config.activate_path()
     app_name = app_config.app_name
