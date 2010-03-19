@@ -1,8 +1,9 @@
 """Get a secret key"""
 import os
 from ConfigParser import ConfigParser
+from silversupport.env import is_production
 
-if os.environ.get('SILVER_VERSION', '').startswith('silverlining/'):
+if is_production():
     secret_file = '/var/lib/silverlining/secret.txt'
     key_file = '/var/lib/silverlining/keys.ini'
 else:
