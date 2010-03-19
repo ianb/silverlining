@@ -5,7 +5,7 @@ from silversupport.shell import ssh
 def command_query(config):
     stdout, stderr, returncode = ssh(
         'www-mgr', config.node_hostname,
-        'cat /var/www/hostmap.txt; echo "END" ; ls /var/www',
+        'cat /var/www/appdata.map; echo "END" ; ls /var/www',
         capture_stdout=True)
     hosts = {}
     lines = [line.strip()
@@ -21,8 +21,9 @@ def command_query(config):
         line = lines.pop(0)
         if line == 'END':
             break
-        hostname, sitename = line.split(None, 1)
-        hosts[hostname] = sitename
+        hostname, path, data = line.split(None, 2)
+        instance_name = data.split('|')[0]
+        hosts[hostname+path] = instance_name
     for line in lines:
         match = re.match(r'^(?:([a-z0-9_.-]+)\.(.*)|default-[a-z]+)$',
                          line)

@@ -74,10 +74,7 @@ def get_app(environ):
     site_dir = app_config.app_dir
     app_config.activate_path()
 
-    try:
-        app_config.activate_services(os.environ)
-    except common.BadSite, e:
-        return ErrorApp('Error loading services: %s' % e)
+    app_config.activate_services(os.environ)
 
     try:
         found_app = app_config.get_app_from_runner()
