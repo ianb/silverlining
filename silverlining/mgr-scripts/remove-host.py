@@ -34,6 +34,7 @@ def main():
                     if (hostname_match.match(ex_hostname)
                         and (path_match is None or path_match.search(ex_path))):
                         locations.append((ex_hostname, ex_path))
+                        break
         else:
             locations.append((hostname, path))
 
@@ -42,11 +43,11 @@ def main():
         if not removed:
             print 'No entries found matching %s' % (hostname + (path or ''))
         elif len(removed) == 1:
-            print 'Removed %s: %s' % (hostname + (path or ''), removed[0].strip())
+            print 'Removed %s: %s' % (hostname + (path or ''), removed[0].split('|')[0])
         else:
             print 'Removed %s:' % (hostname + (path or ''))
             for line in removed:
-                print '  %s' % line.strip()
+                print '  %s' % line.split('|')[0]
 
 if __name__ == '__main__':
     main()
