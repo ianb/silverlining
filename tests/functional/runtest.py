@@ -3,17 +3,20 @@
 import os
 import time
 from scripttest import TestFileEnvironment
-import subprocess
 
 here = os.path.dirname(os.path.abspath(__file__))
+
 
 def get_environment():
     env = TestFileEnvironment(os.path.join(here, 'test-data'))
     return env
 
-stage_seq = ['create-node', 'setup-node', 'update', 'query']
+stage_seq = ['create-node', 'setup-node', 'clean', 'update', 'query']
+
+
 def run_stage(name, match):
     return match in stage_seq[stage_seq.index(name):]
+
 
 def run_test(name, stage=None):
     try:
@@ -32,6 +35,9 @@ def run_test(name, stage=None):
             print 'Setting up node %s' % name
             print env.run('silver --yes setup-node %s' % name,
                           expect_stderr=True)
+        if run_stage(stage, 'clean'):
+            print env.run('silver --yes deactivate --node=%s "*"' % name)
+            print env.run('silver --yes clean-node %s' % name)
         if run_stage(stage, 'update'):
             print 'Doing update'
             result = env.run('silver --yes update --node=%s --host=%s "%s"'
