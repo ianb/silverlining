@@ -30,15 +30,16 @@ def command_create_node(config):
         resp.state, public_ip))
     set_etc_hosts(config, [node_hostname], public_ip)
 
-    if config.args.setup_node:
+    if config.args.setup_node or config.args.wait:
         wait_for_node_ready_ping(config, public_ip)
         config.logger.notify('Waiting %s seconds for full boot'
                              % AFTER_PING_WAIT)
         time.sleep(AFTER_PING_WAIT)
-        from silverlining.commands.setup_node import command_setup_node
-        config.args.node = node_hostname
-        config.logger.notify('Setting up server')
-        command_setup_node(config)
+        if config.args.setup_node:
+            from silverlining.commands.setup_node import command_setup_node
+            config.args.node = node_hostname
+            config.logger.notify('Setting up server')
+            command_setup_node(config)
        
 def wait_for_node_ready(config, node_name):
     config.logger.start_progress('Waiting for server to be ready...')

@@ -87,6 +87,11 @@ parser_create.add_argument(
     "sits for a couple minutes) and then set up the server.  It is suggested "
     "you also use --yes with this option.")
 
+parser_create.add_argument(
+    '--wait', action='store_true',
+    help="Wait for the node to be created, but don't setup (like "
+    "--setup-node that just quits before it actually sets up the node)")
+
 parser_default = subcommands.add_parser(
     'default-node', help="Set a node as the default node")
 
