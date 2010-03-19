@@ -1,3 +1,4 @@
+"""Creates a new server/node"""
 import re
 import time
 from cmdutils import CommandError
@@ -6,6 +7,7 @@ from silversupport.shell import run
 
 ESTIMATED_TIME = 60
 AFTER_PING_WAIT = 10
+
 
 def command_create_node(config):
     config.logger.info('Getting image/size info')
@@ -40,8 +42,11 @@ def command_create_node(config):
             config.args.node = node_hostname
             config.logger.notify('Setting up server')
             command_setup_node(config)
-       
+
+
 def wait_for_node_ready(config, node_name):
+    """Polls the server until it is ready"""
+    ## FIXME: the Rackspace API is too slow to use this technique
     config.logger.start_progress('Waiting for server to be ready...')
     config.logger.debug('Waiting an initial %s seconds' % ESTIMATED_TIME)
     time.sleep(ESTIMATED_TIME)
@@ -62,7 +67,9 @@ def wait_for_node_ready(config, node_name):
         time.sleep(10)
     config.logger.end_progress('server active.')
 
+
 def wait_for_node_ready_ping(config, node_hostname):
+    """Poll a server via ping until it is ready"""
     start = time.time()
     config.logger.start_progress('Waiting for server to be ready...')
     config.logger.debug('Waiting an initial %s seconds' % ESTIMATED_TIME)
@@ -79,6 +86,6 @@ def wait_for_node_ready_ping(config, node_hostname):
                 "Server created (%s to create)" % format_time(time.time()-start))
             break
 
+
 def format_time(secs):
     return '%i:%02i' % (int(secs/60), int(secs)%60)
-

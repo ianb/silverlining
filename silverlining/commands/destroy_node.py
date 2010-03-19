@@ -1,3 +1,6 @@
+"""Destroy a server/node"""
+
+
 def command_destroy_node(config):
     ## FIXME: This doesn't work at all, wtf?
     for node_hostname in config.args.nodes:

@@ -5,6 +5,7 @@ site.addsitedir(os.path.abspath(os.path.join(__file__, '../../python')))
 import warnings
 from ConfigParser import ConfigParser
 
+
 def add_silversupport():
     silverlining_conf = os.path.join(os.environ['HOME'], '.silverlining.conf')
     parser = ConfigParser()
@@ -31,4 +32,3 @@ try:
     import silvercustomize
 except ImportError:
     pass
-

@@ -31,6 +31,7 @@ def get_host_ip(hostname):
     finally:
         fp.close()
 
+
 def set_etc_hosts(config, hostnames, ip):
     """Sets a line in /etc/hosts to assign the hostname to the ip
 

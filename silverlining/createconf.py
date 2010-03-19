@@ -12,7 +12,9 @@ template = tempita.Template.from_filename(
 
 silverlining_conf = os.path.join(os.environ['HOME'], '.silverlining.conf')
 
+
 def create_conf():
+    """Create a brand-new ~/.silverlining.conf"""
     print 'Creating %s' % silverlining_conf
     username = raw_input('Your service-provider username: ')
     api_key = raw_input('Your service-provider API key: ')
@@ -35,4 +37,3 @@ def create_conf():
     fp = open(silverlining_conf, 'w')
     fp.write(content)
     fp.close()
-    

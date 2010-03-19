@@ -1,6 +1,8 @@
+"""Setup a new server/node"""
 import os
 from cmdutils import CommandError
 from silversupport.shell import ssh, run
+
 
 def setup_rsync(config, source, dest, delete=False):
     cwd = os.path.abspath(os.path.join(__file__, '../..'))
@@ -22,12 +24,13 @@ def setup_rsync(config, source, dest, delete=False):
             raise CommandError(
                 "Aborting due to failure")
 
+
 def command_setup_node(config):
     os.environ['LANG'] = 'C'
     node = config.args.node
     config.logger.notify(
         'Setting up authentication on server...')
-    
+
     for path in ['id_rsa.pub', 'id_dsa.pub']:
         pubkey_path = os.path.join(os.environ['HOME'], '.ssh', path)
         if os.path.exists(pubkey_path):
@@ -82,7 +85,7 @@ apt-get -y -q=2 install rsync
             "Continue?")
         if not response:
             return 5
-    
+
     setup_rsync(config, 'server-root/', '/')
     setup_rsync(config,
                 os.path.abspath(os.path.join(__file__, '../../../silversupport/'))+'/',
@@ -91,12 +94,11 @@ apt-get -y -q=2 install rsync
                 os.path.abspath(os.path.join(__file__, '../../mgr-scripts/'))+'/',
                 '/usr/local/share/silverlining/mgr-scripts/')
     ssh('root', node, 'mv /var/root/* /root/')
-    
+
     # Move over the root files, we do *not* rsync a /root dir because
     # that would copy the wrong permissions for the /root directorty
     # which results in ssh key auth no longer working
-    
-    
+
     setup_script = open(os.path.abspath(os.path.join(
         __file__, '../../server-sync-scripts/update-server-script.sh'))).read()
     import getpass

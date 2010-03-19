@@ -1,7 +1,9 @@
+"""Set up a new silver/virtualenv environment"""
 import os
 import sys
 import virtualenv
 from silversupport.shell import run
+
 
 def command_init(config):
     dir = config.args.dir
@@ -53,7 +55,7 @@ def command_init(config):
     if not os.path.exists(lib_python):
         os.makedirs(lib_python)
     #XXX this is a hack around http://bitbucket.org/ianb/silverlining/issue/1/bug-on-running-silver-init-for-the-second
-    distutils_dir = os.path.join(dir,'lib','python2.6','distutils')
+    distutils_dir = os.path.join(dir, 'lib', 'python2.6', 'distutils')
     if os.path.islink(distutils_dir):
         distutils_init = os.path.join(dir, 'lib', 'python2.6', 'distutils', '__init__.py')
         _distutils_init_content = open(distutils_init).read()
@@ -64,7 +66,6 @@ def command_init(config):
             distutils_init,
             config.logger, vars, append=True)
 
-    
     init_copy(
         'sitecustomize.py',
         os.path.join(dir, 'lib', 'python2.6', 'sitecustomize.py'),
@@ -112,6 +113,7 @@ if os.path.exists(sitecustomize):
     execfile(sitecustomize, dict(__file__=sitecustomize, __name__='sitecustomize'))
 """
 
+
 def init_copy(source, dest, logger, vars, append=False):
     import tempita
     source = os.path.join(
@@ -128,6 +130,7 @@ def init_copy(source, dest, logger, vars, append=False):
         fp.close()
     init_copystring(source_content, dest, logger, vars,
                     append=append)
+
 
 def init_copystring(source_content, dest, logger, vars,
                     append=False):

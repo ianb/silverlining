@@ -1,3 +1,6 @@
+"""List available images"""
+
+
 def command_list_images(config):
     images = config.driver.list_images()
     try:

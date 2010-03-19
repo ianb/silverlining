@@ -1,6 +1,8 @@
+"""Query a server for its active instances"""
 import re
 import fnmatch
 from silversupport.shell import ssh
+
 
 def command_query(config):
     stdout, stderr, returncode = ssh(
@@ -63,7 +65,6 @@ def command_query(config):
         site_instances = new_site_instances
         instance_site = new_instance_site
         sites = new_sites
-    info = config.logger.info
     notify = config.logger.notify
     special_hosts = {}
     for hostname, site in hosts.items():

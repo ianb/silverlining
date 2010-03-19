@@ -1,3 +1,6 @@
+"""List available sizes"""
+
+
 def command_list_sizes(config):
     sizes = config.driver.list_sizes()
     try:

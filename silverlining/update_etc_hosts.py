@@ -6,6 +6,7 @@ script because this is called with sudo and runs as root.
 
 import time
 
+
 def update_hosts(filename, ip, hostname):
     """Add the hostname->ip relation to the given file (typically /etc/hosts)
     """
@@ -46,4 +47,3 @@ if __name__ == '__main__':
     hostnames = sys.argv[3:]
     for hostname in hostnames:
         update_hosts(filename, ip, hostname)
-    

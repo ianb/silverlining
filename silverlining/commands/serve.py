@@ -1,7 +1,9 @@
+"""Serve an app locally/for development"""
 import os
 import sys
 import subprocess
 from cmdutils import CommandError
+
 
 def command_serve(config):
     dir = os.path.abspath(config.args.dir)
@@ -43,6 +45,7 @@ def command_serve(config):
     except KeyboardInterrupt:
         print 'Terminating'
 
+
 def _turn_sigterm_into_systemexit():
     """
     Attempts to turn a SIGTERM exception into a SystemExit exception.
@@ -51,6 +54,7 @@ def _turn_sigterm_into_systemexit():
         import signal
     except ImportError:
         return
+
     def handle_term(signo, frame):
         raise SystemExit
     signal.signal(signal.SIGTERM, handle_term)

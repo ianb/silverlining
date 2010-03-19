@@ -1,4 +1,6 @@
+"""Remove an instance from a location"""
 from silversupport.shell import ssh
+
 
 def command_deactivate(config):
     if not config.args.node:

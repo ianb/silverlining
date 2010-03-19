@@ -2,7 +2,7 @@
 
 This implements the command-line interface of silverlining.  It includes
 all the commands and their options, though the implementation of the
-commands are in silverlining.commands.*
+commands are in ``silverlining.commands.*``
 
 There are also a few shared objects implemented here, specifically
 `Config` and `App`
@@ -21,6 +21,9 @@ from libcloud.types import Provider
 from libcloud.providers import get_driver as libcloud_get_driver
 from silverlining import createconf
 from silversupport.shell import run
+
+
+## Following is a HUGE BLOCK of argument definitions:
 
 ## The long description of how this command works:
 description = """\
@@ -176,7 +179,7 @@ parser_init.add_argument(
 parser_init.add_argument(
     '--main',
     action='store_true',
-    help="Use main.py (not config.ini)")    
+    help="Use main.py (not config.ini)")
 
 parser_serve = subcommands.add_parser(
     'serve', help="Serve up an application for development")
@@ -186,12 +189,12 @@ parser_serve.add_argument(
     metavar='APP_DIR',
     help='Directory holding app')
 
-## We can't handle silverlining run well with a subparser, because
-## there's a bug in subparsers that they can't ignore arguments they
-## don't understand.  Because there will be arguments passed to the
-## remote command we need that, so instead we create an entirely
-## separate parser, and we'll do a little checking to see if the run
-## command is given:
+## We can't handle "silver run" well with a subparser, because there's
+## a bug in subparsers that they can't ignore arguments they don't
+## understand.  Because there will be arguments passed to the remote
+## command we need that, so instead we create an entirely separate
+## parser, and we'll do a little checking to see if the run command is
+## given:
 
 parser_run = argparse.ArgumentParser(
     add_help=False,
@@ -283,6 +286,7 @@ parser_deactivate.add_argument(
     '--keep-prev', action='store_true',
     help="Keep the prev.* host activate (by default it is deleted)")
 
+
 def catch_error(func):
     """Catch CommandError and turn it into an error message"""
     def decorated(*args, **kw):
@@ -292,6 +296,7 @@ def catch_error(func):
             print e
             sys.exit(2)
     return decorated
+
 
 @catch_error
 def main():
@@ -317,6 +322,7 @@ def main():
     func = getattr(mod, 'command_%s' % name)
     return func(config)
 
+
 class Config(UserDict):
     """Represents the configuration, command-line arguments, and
     provider.
@@ -328,7 +334,7 @@ class Config(UserDict):
     ## FIXME: the one and only default configuration; this should be
     ## converted to be hardcoded:
     defaults = dict(remote_username='www-mgr')
-    
+
     def __init__(self, config_dict, args=None):
         self.data = config_dict
         for name, value in self.defaults.iteritems():
@@ -449,9 +455,10 @@ class Config(UserDict):
                 return False
             print 'I did not understand the response: %s' % response
 
+
 class App(object):
     """Represents an app to be uploaded/updated"""
-    
+
     def __init__(self, dir, site_name, host):
         if not dir.endswith('/'):
             dir += '/'
@@ -470,22 +477,21 @@ class App(object):
         exclude_from = os.path.join(os.path.dirname(__file__), 'rsync-exclude.txt')
         cmd = ['rsync',
                '--recursive',
-               '--links',         # Copy over symlinks as symlinks
-               '--safe-links',    # Don't copy over links that are outside of dir
-               '--executability', # Copy +x modes
-               '--times',         # Copy timestamp
-               '--rsh=ssh',       # Use ssh
-               '--delete',        # Delete files thta aren't in the source dir
+               '--links',          # Copy over symlinks as symlinks
+               '--safe-links',     # Don't copy over links that are outside of dir
+               '--executability',  # Copy +x modes
+               '--times',          # Copy timestamp
+               '--rsh=ssh',        # Use ssh
+               '--delete',         # Delete files thta aren't in the source dir
                '--compress',
                #'--skip-compress=.zip,.egg', # Skip some already-compressed files
                '--exclude-from=%s' % exclude_from,
-               '--progress',
+               '--progress',       # I don't think this does anything given --quiet
                '--quiet',
                self.dir,
                os.path.join('%s:%s' % (host, dest_dir)),
                ]
         run(cmd)
-        
+
 if __name__ == '__main__':
     main()
-

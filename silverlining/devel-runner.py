@@ -23,6 +23,7 @@ import mimetypes
 
 silverlining_conf = os.path.join(os.environ['HOME'], '.silverlining.conf')
 
+
 def load_paste_reloader():
     try:
         from paste import reloader
@@ -45,6 +46,7 @@ def load_paste_reloader():
 reloader = load_paste_reloader()
 reloader.install()
 
+
 def get_app(base_path):
     ## FIXME: is this a reasonable instance_name default?
     app_config = AppConfig(os.path.join(base_path, 'app.ini'))
@@ -58,7 +60,7 @@ def get_app(base_path):
     app_config.activate_services(os.environ, devel=True, devel_config=devel_config)
     reloader.watch_file(app_config.runner.split('#')[0])
     found_app = app_config.get_app_from_runner()
-    
+
     # This calls the update_fetch URL on every reload/restart, which
     # is... questionable.
     update_fetch = app_config.update_fetch
@@ -80,8 +82,9 @@ def get_app(base_path):
         writable_root = os.environ['CONFIG_WRITABLE_ROOT']
     else:
         writable_root = None
-    
+
     return found_app, writable_root
+
 
 class CompoundApp(object):
     """Application that simulates the Apache configuration of silverlining
@@ -122,6 +125,7 @@ class CompoundApp(object):
         type, encoding = mimetypes.guess_type(path)
         if not type:
             type = 'application/octet-stream'
+
         def iterator():
             fp = open(path, 'rb')
             while 1:
@@ -134,6 +138,7 @@ class CompoundApp(object):
             ('Content-type', type),
             ('Content-length', str(length))])
         return iterator()
+
 
 def main(base_path):
     app = CompoundApp(base_path)

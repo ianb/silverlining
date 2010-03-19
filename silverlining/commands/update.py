@@ -1,3 +1,4 @@
+"""Update/deploy an application"""
 import re
 import os
 from cmdutils import CommandError
@@ -8,6 +9,7 @@ from silverlining.etchosts import get_host_ip, set_etc_hosts
 from silversupport.shell import ssh
 
 _instance_name_re = re.compile(r'instance_name="(.*?)"')
+
 
 def command_update(config):
     if not os.path.exists(config.args.dir):

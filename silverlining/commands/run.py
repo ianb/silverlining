@@ -1,3 +1,4 @@
+"""Run a remote command"""
 import os
 import re
 from cStringIO import StringIO
@@ -6,6 +7,7 @@ from cmdutils import CommandError
 from silversupport.shell import ssh, shell_escape
 
 _tmp_re = re.compile(r'tmp="(.*)"')
+
 
 def command_run(config):
     args = config.args
@@ -60,14 +62,3 @@ def command_run(config):
         '/usr/local/share/silverlining/mgr-scripts/run-command.py %s %s %s %s' %
         (args.host, location, args.script, shell_escape(translated_args)))
     return returncode
-
-def shell_quoted(values):
-    result = []
-    for value in values:
-        result.append("\"'\"".join(
-            "'%s'" % v
-            for v in value.split("'")))
-    return ' '.join(result)
-
-    
-

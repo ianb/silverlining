@@ -1,4 +1,6 @@
+"""List active nodes"""
 from cmdutils import CommandError
+
 
 def command_list_nodes(config):
     try:
