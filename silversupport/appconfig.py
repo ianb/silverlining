@@ -6,6 +6,7 @@ import warnings
 from site import addsitedir
 from ConfigParser import ConfigParser
 from silversupport.env import is_production
+from silversupport.shell import run
 
 __all__ = ['AppConfig']
 
@@ -218,3 +219,28 @@ class AppConfig(object):
             return hostnames[0]
         else:
             return None
+
+    def sync(self, host, instance_name):
+        """Synchronize this application (locally) with a remove server
+        at the given host.
+        """
+        assert not is_production()
+        dest_dir = os.path.join('/var/www', instance_name)
+        exclude_from = os.path.join(os.path.dirname(__file__), 'rsync-exclude.txt')
+        cmd = ['rsync',
+               '--recursive',
+               '--links',          # Copy over symlinks as symlinks
+               '--safe-links',     # Don't copy over links that are outside of dir
+               '--executability',  # Copy +x modes
+               '--times',          # Copy timestamp
+               '--rsh=ssh',        # Use ssh
+               '--delete',         # Delete files thta aren't in the source dir
+               '--compress',
+               #'--skip-compress=.zip,.egg', # Skip some already-compressed files
+               '--exclude-from=%s' % exclude_from,
+               '--progress',       # I don't think this does anything given --quiet
+               '--quiet',
+               self.app_dir,
+               os.path.join('%s:%s' % (host, dest_dir)),
+               ]
+        run(cmd)

@@ -3,24 +3,15 @@
 This implements the command-line interface of silverlining.  It includes
 all the commands and their options, though the implementation of the
 commands are in ``silverlining.commands.*``
-
-There are also a few shared objects implemented here, specifically
-`Config` and `App`
 """
 
 import os
 import sys
-import fnmatch
-import re
 import argparse
-from UserDict import UserDict
-from initools.configparser import ConfigParser
 from cmdutils.arg import add_verbose, create_logger
 from cmdutils import CommandError
-from libcloud.types import Provider
-from libcloud.providers import get_driver as libcloud_get_driver
 from silverlining import createconf
-from silversupport.shell import run
+from silverlining.config import Config
 
 
 ## Following is a HUGE BLOCK of argument definitions:
@@ -322,176 +313,6 @@ def main():
     func = getattr(mod, 'command_%s' % name)
     return func(config)
 
-
-class Config(UserDict):
-    """Represents the configuration, command-line arguments, and
-    provider.
-
-    Kind of a holder for all the runtime bits.
-    """
-    ## FIXME: refactoring this (and App) would be excellent
-
-    ## FIXME: the one and only default configuration; this should be
-    ## converted to be hardcoded:
-    defaults = dict(remote_username='www-mgr')
-
-    def __init__(self, config_dict, args=None):
-        self.data = config_dict
-        for name, value in self.defaults.iteritems():
-            self.data.setdefault(name, value)
-        self._driver = None
-        self.args = args
-        if args:
-            self.logger = args.logger
-
-    @classmethod
-    def from_config_file(cls, filename, section, args):
-        """Instantiate from a configuration file"""
-        parser = ConfigParser()
-        parser.read([filename])
-        full_config = parser.asdict()
-        if section not in full_config:
-            args.logger.fatal('No section [%s]' % section)
-            args.logger.fatal('Available sections in %s:' % filename)
-            for name in full_config:
-                if name.startswith('provider:'):
-                    args.logger.fatal('  [%s] (--provider=%s)'
-                                 % (name, name[len('provider:'):]))
-            raise CommandError("Bad --provider=%s"
-                               % section[len('provider:'):])
-        config = full_config[section]
-        config['section_name'] = section
-        return cls(config, args=args)
-
-    @property
-    def driver(self):
-        if self._driver is None:
-            provider = self['provider']
-            DriverClass = libcloud_get_driver(getattr(Provider, provider.upper()))
-            self._driver = DriverClass(self['username'], self['secret'])
-        return self._driver
-
-    @property
-    def node_hostname(self):
-        if getattr(self.args, 'node', None):
-            return self.args.node
-        if self.get('default_node'):
-            return self['default_node']
-        raise CommandError(
-            "You must give a --node option or set default-node")
-
-    def select_image(self, images=None, image_id=None):
-        if images is None:
-            images = self.driver.list_images()
-        if image_id or self.get('image_id'):
-            image_id = image_id or self['image_id']
-            for image in images:
-                if image.id == image_id:
-                    return image
-            else:
-                raise LookupError(
-                    "No image with the id %s" % self['image_id'])
-        elif self.get('image_name'):
-            image_name = self['image_name']
-            if '*' in image_name:
-                regex = re.compile(fnmatch.translate(image_name))
-                images = sorted(
-                    [image for image in images
-                     if regex.match(image.name)],
-                    key=lambda i: i.name)
-                if not images:
-                    raise LookupError(
-                        "No image matches the pattern %s" % image_name)
-                return images[-1]
-            else:
-                for image in images:
-                    if image.name == image_name:
-                        return image
-                else:
-                    raise LookupError(
-                        "No image with the name %s" % image_name)
-        else:
-            raise LookupError(
-                "No config for image_id or image_name")
-
-    def select_size(self, sizes=None, size_id=None):
-        if sizes is None:
-            sizes = self.driver.list_sizes()
-        size_id = size_id or self.get('size_id', '').strip()
-        for size in sizes:
-            if size.id == size_id:
-                return size
-        raise LookupError("Cannot find any size by the id %r"
-                          % size_id)
-
-    def set_default_node(self, node_name):
-        parser = ConfigParser()
-        parser.read([createconf.silverlining_conf])
-        parser.set(self['section_name'],
-                   'default_node', node_name)
-        fp = open(createconf.silverlining_conf, 'w')
-        parser.write(fp)
-        fp.close()
-        self.logger.notify('Set default_node in %s to %s'
-                           % (createconf.silverlining_conf,
-                              node_name))
-
-    def ask(self, query):
-        if getattr(self.args, 'yes', False):
-            self.logger.warn(
-                "%s YES [auto]" % query)
-            return True
-        while 1:
-            response = raw_input(query+" [y/n] ")
-            response = response.strip().lower()
-            if not response:
-                continue
-            if 'all' in response and response[0] == 'y':
-                self.args.yes = True
-                return True
-            if response[0] == 'y':
-                return True
-            if response[0] == 'n':
-                return False
-            print 'I did not understand the response: %s' % response
-
-
-class App(object):
-    """Represents an app to be uploaded/updated"""
-
-    def __init__(self, dir, site_name, host):
-        if not dir.endswith('/'):
-            dir += '/'
-        self.dir = dir
-        self.host = host
-        parser = ConfigParser()
-        assert parser.read([os.path.join(self.dir, 'app.ini')]), (
-            "No %s/app.ini found!" % self.dir)
-        self.config = parser.asdict()
-        if not site_name:
-            site_name = self.config['production']['app_name']
-        self.site_name = site_name
-
-    def sync(self, host, instance_name):
-        dest_dir = os.path.join('/var/www', instance_name)
-        exclude_from = os.path.join(os.path.dirname(__file__), 'rsync-exclude.txt')
-        cmd = ['rsync',
-               '--recursive',
-               '--links',          # Copy over symlinks as symlinks
-               '--safe-links',     # Don't copy over links that are outside of dir
-               '--executability',  # Copy +x modes
-               '--times',          # Copy timestamp
-               '--rsh=ssh',        # Use ssh
-               '--delete',         # Delete files thta aren't in the source dir
-               '--compress',
-               #'--skip-compress=.zip,.egg', # Skip some already-compressed files
-               '--exclude-from=%s' % exclude_from,
-               '--progress',       # I don't think this does anything given --quiet
-               '--quiet',
-               self.dir,
-               os.path.join('%s:%s' % (host, dest_dir)),
-               ]
-        run(cmd)
 
 if __name__ == '__main__':
     main()

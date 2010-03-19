@@ -3,10 +3,9 @@ import re
 import os
 from cmdutils import CommandError
 import virtualenv
-## FIXME: circular import:
-from silverlining.runner import App
 from silverlining.etchosts import get_host_ip, set_etc_hosts
 from silversupport.shell import ssh
+from silversupport.appconfig import AppConfig
 
 _instance_name_re = re.compile(r'instance_name="(.*?)"')
 
@@ -28,15 +27,16 @@ def command_update(config):
     finally:
         config.logger.indent -= 2
         config.logger.level_adjust -= -1
-    app = App(config.args.dir, config.args.name, config.args.host)
+    app = AppConfig(os.path.join(config.args.dir, 'app.ini'),
+                    app_name=config.args.name or None)
     if not config.args.host:
-        if app.config['production'].get('default_host'):
-            config.args.host = app.config['production']['default_host']
+        if app.default_location:
+            config.args.host = app.default_location
         else:
             config.args.host = config.node_hostname
     stdout, stderr, returncode = ssh(
         'www-mgr', config.node_hostname,
-        '/usr/local/share/silverlining/mgr-scripts/prepare-new-site.py %s' % app.site_name,
+        '/usr/local/share/silverlining/mgr-scripts/prepare-new-site.py %s' % app.app_name,
         capture_stdout=True, capture_stderr=True)
     match = _instance_name_re.search(stdout)
     if not match:
@@ -44,7 +44,7 @@ def command_update(config):
         config.logger.fatal("Output: %s (stderr: %s)" % (stdout, stderr))
         raise Exception("Bad instance_name output")
     instance_name = match.group(1)
-    assert instance_name.startswith(app.site_name)
+    assert instance_name.startswith(app.app_name)
     app.sync('www-mgr@%s' % config.node_hostname, instance_name)
     ssh('root', config.node_hostname,
         'python -m compileall -q /var/www/%(instance_name)s; '
