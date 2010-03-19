@@ -115,3 +115,37 @@ def instance_for_location(hostname, path='/'):
             return instance_name
     return None
 
+def all_app_instances():
+    """Returns a dictionary of all app instances.
+
+    The dictionary is {instance_name: [(hostname, path), ...]}
+
+    Instances that have no active mappings will also be returned,
+    with empty lists."""
+    results = {}
+    for instance_name in list_instances():
+        results[instance_name] = []
+    for line in appdata_lines():
+        if not line.strip() or line.strip().startswith('#'):
+            continue
+        hostname, path, data = line.split(None, 2)
+        instance_name = data.split('|')[0]
+        results[instance_name].append((hostname, path))
+    return results
+
+def list_instances():
+    """Returns a list of all instance names"""
+    base_dir = '/var/www'
+    results = []
+    for name in os.listdir(base_dir):
+        if name.startswith('.'):
+            continue
+        if not os.path.isdir(os.path.join(base_dir, name)):
+            continue
+        if name == 'support':
+            # We're not using this now, but have in the past
+            continue
+        results.append(name)
+    return results
+
+    

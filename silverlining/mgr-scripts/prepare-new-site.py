@@ -4,8 +4,8 @@ sys.path.insert(0, '/usr/local/share/silverlining/lib')
 import os
 import glob
 import time
-from silversupport.common import site_dir, sites
 from optparse import OptionParser
+from silversupport import appdata
 
 parser = OptionParser(
     usage="%prog APP_NAME",
@@ -16,29 +16,29 @@ the directory over to be rsync'd over by the new app.  Finally it
 prints the new app name for the caller to use.
 """)
 
-def prepare_new_site(site_name):
+def prepare_new_site(app_name):
     """Creates the new directory and copies it over"""
     n = 0
     date = time.strftime('%Y-%m-%d')
-    app_fn = '/var/www/%s.%s_*' % (site_name, date)
-    names = list(glob.glob(app_fn))
+    app_dirs = '/var/www/%s.%s_*' % (app_name, date)
+    names = list(glob.glob(app_dirs))
     if not names:
         n = 1
     else:
         n = max(
             [int(name.rsplit('_', 1)[1])
              for name in names]) + 1
-    app_dir = '%s.%s_%03i' % (site_name, date, n)
-    other_sites = []
-    for name in sites():
-        if name.startswith('%s.' % site_name):
-            other_sites.append(name)
-    if other_sites:
-        copy_site = sorted(other_sites)[-1]
-        hardlink_copy(site_dir(copy_site), site_dir(app_dir))
+    app_dir = '%s.%s_%03i' % (app_name, date, n)
+    other_instances = []
+    for instance_name in appdata.list_instances():
+        if instance_name.startswith('%s.' % app_name):
+            other_instances.append(instance_name)
+    if other_instances:
+        copy_instance = sorted(other_instances)[-1]
+        hardlink_copy(os.path.join('/var/www', copy_instance, app_dir))
     else:
-        os.mkdir(site_dir(app_dir))
-    print 'app_dir="%s"' % app_dir
+        os.mkdir(app_dir)
+    print 'instance_name="%s"' % app_dir
 
 def hardlink_copy(source, dest):
     """Copies over a tree, using hard links"""
@@ -54,6 +54,6 @@ def hardlink_copy(source, dest):
 
 if __name__ == '__main__':
     options, args = parser.parse_args()
-    site_name = args[0]
-    prepare_new_site(site_name)
+    app_name = args[0]
+    prepare_new_site(app_name)
     

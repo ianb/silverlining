@@ -667,12 +667,6 @@ includes these changes:
 * Get everything in line with `this terminology
   </terminology.html#new-terminology>`_
 
-* Make all the code in ``master_runner.py``, ``tcsupport.common``,
-  ``sitecustomize.py``, etc., consistent.  There's a lot of repetition
-  and even some copy-and-paste in there right now.
-
-* Make the environment always "active" in all contexts.
-
 * Basic code review on all the scripts.
 
 * *Maybe* try to create some proper domain objects, now that things

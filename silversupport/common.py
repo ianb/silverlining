@@ -1,7 +1,5 @@
 import os
 import sys
-import re
-from ConfigParser import ConfigParser
 
 SITE_DIR = '/var/www'
 HOSTMAP = '/var/www/hostmap.txt'
@@ -24,16 +22,6 @@ def sites(exclude_ignored=False):
             and os.path.isdir(os.path.join(SITE_DIR, name))):
             sites.append(name)
     return sites
-
-def site_dir(site_name):
-    return os.path.join(SITE_DIR, site_name)
-
-def site_config(instance_name):
-    app_ini = os.path.join(site_dir(instance_name), 'app.ini')
-    parser = ConfigParser()
-    if not parser.read([app_ini]):
-        raise BadSite('No app.ini in %s' % app_ini)
-    return parser
 
 if __name__ == '__main__':
     app_dir = sys.argv[1]
