@@ -50,6 +50,7 @@ def rewrite_lines(existing, locations, add_prev, vars):
                 elif hostname == ex_hostname and path == ex_path:
                     # Rewrite matching lines to prev.
                     lines.append('prev.' + line)
+                    break
             else:
                 if hostname == ex_hostname and path == ex_path:
                     # Overwrite!
