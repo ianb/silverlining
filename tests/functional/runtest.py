@@ -57,8 +57,9 @@ def run_test(name, stage=None):
             print 'Doing query'
             result = env.run('silver --yes query --node %s' % name)
             print result
-            result.mustcontain('Site: default-disabled',
-                               'default-disabled: disabled/')
+            assert 'Site: default-disabled' in result.stdout
+            assert 'default-disabled: disabled/' in result.stdout
+            assert 'functest' in result.stdout
     finally:
         print 'Name used: %s' % name
 
