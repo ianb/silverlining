@@ -32,7 +32,7 @@ def run_test(name, stage=None):
             print 'Setting up node %s' % name
             print env.run('silver --yes setup-node %s' % name,
                           expect_stderr=True)
-        if run_stage(stage, 'create-node'):
+        if run_stage(stage, 'update'):
             print 'Doing update'
             result = env.run('silver --yes update --node=%s --host=%s "%s"'
                              % (name, name, os.path.join(here, 'example-app')),
@@ -57,6 +57,8 @@ def run_test(name, stage=None):
             print 'Doing query'
             result = env.run('silver --yes query --node %s' % name)
             print result
+            result.mustcontain('Site: default-disabled',
+                               'default-disabled: disabled/')
     finally:
         print 'Name used: %s' % name
 
@@ -67,4 +69,3 @@ if __name__ == '__main__':
     parser.add_option('--stage')
     options, args = parser.parse_args()
     run_test(options.name, options.stage or None)
-    

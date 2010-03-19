@@ -27,6 +27,8 @@ def command_query(config):
         instance_name = data.split('|')[0]
         hosts[hostname+path] = instance_name
     for line in lines:
+        if line == 'appdata.map':
+            continue
         match = re.match(r'^(?:([a-z0-9_.-]+)\.(.*)|default-[a-z]+)$',
                          line)
         if not match:

@@ -1,6 +1,6 @@
 import os
 import shutil
-from silversupport import run, apt_install
+from silversupport.shell import run, apt_install
 
 ## Note that PostGIS only works with 8.3, even though 8.4 is the more
 ## modern version available on Karmic
@@ -33,17 +33,18 @@ def install(app_config, config):
         run(['/etc/init.d/postgresql-8.3', 'restart'])
 
     stdout, stderr, returncode = run(
-        ['psql', '--tuples-only'],
+        ['psql', '-U', 'postgres', '--tuples-only'],
         capture_stdout=True, capture_stderr=True,
         stdin="select r.rolname from pg_catalog.pg_roles as r;")
     if 'www-mgr' not in stdout:
-        run(['createuser', '--no-superuser', '--no-createdb',
+        run(['createuser', '-U', 'postgres',
+             '--no-superuser', '--no-createdb',
              '--no-createrole', 'www-mgr'])
 
     stdout, stderr, returncode = run(
-        ['psql', '-l'], capture_stdout=True)
+        ['psql', '-U', 'postgres', '-l'], capture_stdout=True)
     if 'template_postgis' not in stdout:
-        run(['createdb', 'template_postgis'])
+        run(['createdb', '-U', 'postgres', 'template_postgis'])
         parts = ['CREATE LANGUAGE plpgsql;\n']
         parts.append("UPDATE pg_database SET datistemplate='true' WHERE datname='template_postgis';")
         for filename in ['lwpostgis.sql', 'lwpostgis_upgrade.sql',
@@ -56,7 +57,7 @@ def install(app_config, config):
             fp.close()
         parts.append("GRANT ALL ON geometry_columns TO PUBLIC;\n")
         parts.append("GRANT ALL ON spatial_ref_sys TO PUBLIC;\n")
-        run(['psql', 'template_postgis'], capture_stdout=True,
+        run(['psql', '-U', 'postgres', 'template_postgis'],
             stdin=''.join(parts))
 
     app_name = app_config.app_name
@@ -68,7 +69,7 @@ def install(app_config, config):
         print 'Database %s already exists' % app_name
     else:
         print 'Database %s does not exist; creating.' % app_name
-        run(['createdb', '-O', 'www-mgr', '-T', 'template_postgis',
+        run(['createdb', '-U', 'postgres', '-O', 'www-mgr', '-T', 'template_postgis',
              app_name])
 
 

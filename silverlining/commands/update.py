@@ -44,7 +44,7 @@ def command_update(config):
         config.logger.fatal("Output: %s (stderr: %s)" % (stdout, stderr))
         raise Exception("Bad instance_name output")
     instance_name = match.group(1)
-    assert instance_name.startswith(app.app_name)
+    assert instance_name.startswith(app.app_name), instance_name
     app.sync('www-mgr@%s' % config.node_hostname, instance_name)
     ssh('root', config.node_hostname,
         'python -m compileall -q /var/www/%(instance_name)s; '

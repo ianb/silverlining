@@ -227,6 +227,9 @@ class AppConfig(object):
         assert not is_production()
         dest_dir = os.path.join('/var/www', instance_name)
         exclude_from = os.path.join(os.path.dirname(__file__), 'rsync-exclude.txt')
+        app_dir = self.app_dir
+        if not app_dir.endswith('/'):
+            app_dir += '/'
         cmd = ['rsync',
                '--recursive',
                '--links',          # Copy over symlinks as symlinks
@@ -240,7 +243,7 @@ class AppConfig(object):
                '--exclude-from=%s' % exclude_from,
                '--progress',       # I don't think this does anything given --quiet
                '--quiet',
-               self.app_dir,
+               app_dir,
                os.path.join('%s:%s' % (host, dest_dir)),
                ]
         run(cmd)

@@ -4,7 +4,7 @@ import os
 import pwd
 import grp
 import shutil
-from silversupport import run
+from silversupport.shell import run
 
 
 class FileService(object):

@@ -16,6 +16,7 @@ the directory over to be rsync'd over by the new app.  Finally it
 prints the new app name for the caller to use.
 """)
 
+
 def prepare_new_site(app_name):
     """Creates the new directory and copies it over"""
     n = 0
@@ -30,6 +31,7 @@ def prepare_new_site(app_name):
              for name in names]) + 1
     app_dir = '%s.%s_%03i' % (app_name, date, n)
     other_instances = []
+    print appdata.list_instances()
     for instance_name in appdata.list_instances():
         if instance_name.startswith('%s.' % app_name):
             other_instances.append(instance_name)
@@ -37,8 +39,9 @@ def prepare_new_site(app_name):
         copy_instance = sorted(other_instances)[-1]
         hardlink_copy(os.path.join('/var/www', copy_instance), app_dir)
     else:
-        os.mkdir(app_dir)
+        os.mkdir(os.path.join('/var/www', app_dir))
     print 'instance_name="%s"' % app_dir
+
 
 def hardlink_copy(source, dest):
     """Copies over a tree, using hard links"""
@@ -56,4 +59,3 @@ if __name__ == '__main__':
     options, args = parser.parse_args()
     app_name = args[0]
     prepare_new_site(app_name)
-    
