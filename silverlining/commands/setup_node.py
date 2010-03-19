@@ -2,12 +2,15 @@ import os
 from cmdutils import CommandError
 from silversupport.shell import ssh, run
 
-def setup_rsync(config, source, dest):
+def setup_rsync(config, source, dest, delete=False):
     cwd = os.path.abspath(os.path.join(__file__, '../..'))
-    stdout, stderr, returncode = run([
-        'rsync', '--quiet', '-prvC',
-        source, 'root@%s:%s' % (config.args.node, dest)],
-                                     cwd=cwd)
+    options = ['--quiet', '-prvC']
+    if delete:
+        options.append('--delete')
+    stdout, stderr, returncode = run(
+        ['rsync'] + options +
+        [source, 'root@%s:%s' % (config.args.node, dest)],
+        cwd=cwd)
     config.logger.notify(
         "rsyncing %s to %s" % (source, dest))
     if returncode:
@@ -51,7 +54,7 @@ cat >> /root/.ssh/authorized_keys
         'root', node, '''
 dpkg --configure -a
 apt-get update -qq
-apt-get -y -q install rsync
+apt-get -y -q=2 install rsync
 ''')
     if returncode:
         config.logger.fatal(

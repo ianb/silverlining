@@ -1,4 +1,5 @@
 """Routines for handling /var/www/appdata.map"""
+import os
 from silversupport.appconfig import AppConfig
 
 APPDATA_MAP = '/var/www/appdata.map'
@@ -11,7 +12,7 @@ def set_appdata(instance_name, locations, debug_single_process=False,
     else:
         process_group = 'general'
     locations = normalize_locations(locations)
-    new_lines = rewrite_lines(appdata_lines(), locations, add_prev=True, dict(
+    new_lines = rewrite_lines(appdata_lines(), locations, add_prev, dict(
         instance_name=instance_name, platform=app_config.platform,
         process_group=process_group, php_root=app_config.php_root,
         write_root=app_config.writable_root_location))

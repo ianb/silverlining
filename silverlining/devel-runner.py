@@ -6,10 +6,8 @@ sys.path.
 """
 
 # Setup sys.path to include silversupport:
-from site import addsitedir
 import sys
 import os
-from ConfigParser import ConfigParser
 path = os.path.dirname(os.path.dirname(__file__))
 sys.path.insert(0, path)
 # The parent directory ends up on sys.path, even though we don't want
@@ -18,7 +16,6 @@ here = os.path.abspath(os.path.dirname(__file__))
 for path in list(sys.path):
     if os.path.abspath(path) == here:
         sys.path.remove(path)
-from silversupport import common
 from silversupport.requests import make_internal_request
 from silversupport.develconfig import load_devel_config
 from silversupport.appconfig import AppConfig

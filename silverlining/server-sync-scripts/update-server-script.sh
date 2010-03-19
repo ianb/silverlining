@@ -9,7 +9,7 @@ fi
 
 ## Make www-data part of the adm group, which means it can read
 ## /var/log/apache2 and other log files
-adduser www-data adm
+adduser www-data adm > /dev/null # output is boring
 
 # For some reason this is only readable by root:
 chmod a+r /etc/hosts
@@ -25,9 +25,9 @@ chown www-mgr:www-mgr /var/www/appdata.map
 ## Now setup Apache.  Ubuntu installs 000-default, which we don't
 ## want, so we delete it, and make sure the necessary modules are
 ## enabled:
-a2enmod rewrite
-a2enmod headers
-a2enmod deflate
+a2enmod rewrite > /dev/null
+a2enmod headers > /dev/null
+a2enmod deflate > /dev/null
 if [ -e /etc/apache2/sites-enabled/000-default ] ; then
     rm /etc/apache2/sites-enabled/000-default
 fi
@@ -53,6 +53,7 @@ chmod 0440 /etc/sudoers
 chown www-mgr:www-mgr /var/lib/silverlining
 # Make sure the support files are compiled:
 python -m compileall -q /usr/local/share/silverlining/lib/
+python -m compileall -q /usr/local/share/silverlining/mgr-scripts/
 
 ## This is just a piece of configuration I (Ian) like:
 sed -i "s/ -backup/-backup/" /etc/joe/jmacsrc

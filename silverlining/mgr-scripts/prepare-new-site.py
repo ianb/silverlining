@@ -35,7 +35,7 @@ def prepare_new_site(app_name):
             other_instances.append(instance_name)
     if other_instances:
         copy_instance = sorted(other_instances)[-1]
-        hardlink_copy(os.path.join('/var/www', copy_instance, app_dir))
+        hardlink_copy(os.path.join('/var/www', copy_instance), app_dir)
     else:
         os.mkdir(app_dir)
     print 'instance_name="%s"' % app_dir

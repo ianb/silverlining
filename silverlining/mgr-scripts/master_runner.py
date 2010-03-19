@@ -15,7 +15,6 @@ import os
 # Import these to work around a mod_wsgi problem:
 import time, _strptime
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-from silversupport import common
 from silversupport.appconfig import AppConfig
 import re
 
