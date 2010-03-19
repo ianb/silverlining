@@ -12,9 +12,9 @@ def command_deactivate(config):
                 % host)
     else:
         if config.args.keep_prev:
-            option = '--keep-prev'
+            option = ['--keep-prev']
         else:
-            option = ''
+            option = []
         ssh('www-mgr', config.node_hostname,
-            '/usr/local/share/silverlining/mgr-scripts/remove-host.py %s %s'
-            % (option, ' '.join(config.args.hosts)))
+            ['/usr/local/share/silverlining/mgr-scripts/remove-host.py']
+            + option + config.args.hosts)

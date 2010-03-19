@@ -267,7 +267,7 @@ parser_deactivate.add_argument(
 parser_deactivate.add_argument(
     'hosts', nargs='+',
     help="The hostname to act on; if you give more than one, "
-    "they must all be on the same node")
+    "they must all be on the same node.  Can be a wildcard.")
 
 parser_deactivate.add_argument(
     '--disable', action='store_true',
