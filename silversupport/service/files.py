@@ -3,10 +3,13 @@
 import os
 import pwd
 import grp
-import subprocess
 import shutil
+from silversupport import run
+
 
 class FileService(object):
+    """Abstract class that can be used for internal and public files"""
+
     def __init__(self, root, env_var, home_name):
         self.root = root
         self.env_var = env_var
@@ -46,17 +49,13 @@ class FileService(object):
         path = environ[self.env_var]
         ## FIXME: should this be compressed, or just rely on that to
         ## happen at a higher level?
-        proc = subprocess.Popen(
-            ['tar', 'fc', os.path.join(output_dir, 'files.tar'), '.'],
+        run(['tar', 'fc', os.path.join(output_dir, 'files.tar'), '.'],
             cwd=path)
-        proc.communicate()
 
     def restore(self, app_dir, config, environ, input_dir):
         path = environ[self.env_var]
-        proc = subprocess.Popen(
-            ['tar', 'fx', os.path.join(input_dir, 'files.tar')],
+        run(['tar', 'fx', os.path.join(input_dir, 'files.tar')],
             cwd=path)
-        proc.communicate()
 
     def clear(self, app_dir, config, environ):
         path = environ[self.env_var]

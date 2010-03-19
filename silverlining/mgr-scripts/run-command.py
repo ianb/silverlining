@@ -5,9 +5,10 @@ import os
 from silversupport import appdata
 from silversupport.appconfig import AppConfig
 
+
 def main():
     args = sys.argv[1:]
-    hostname, path = appdata.normalize_locations([args[0]])[0]
+    hostname, path = appdata.normalize_location(args[0])
     tmp_dir = args[1]
     command = args[2]
     rest = args[3:]
@@ -15,8 +16,8 @@ def main():
     if not instance_name:
         print 'No instance found attached to %s%s' % (hostname, path)
         return 1
-    app_config = AppConfig.from_appinstance(instance_name)
-    
+    app_config = AppConfig.from_instance_name(instance_name)
+
     if tmp_dir and tmp_dir != 'NONE':
         rest = [
             r.replace('$TMP', tmp_dir)
@@ -35,4 +36,3 @@ def main():
 
 if __name__ == '__main__':
     sys.exit(main())
-    

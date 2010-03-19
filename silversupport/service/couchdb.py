@@ -1,31 +1,28 @@
-import os
-import subprocess
+"""CouchDB service support"""
+
+from json import loads
+from silversupport.shell import run, apt_install
+
 
 def install(app_config, config):
-    env = os.environ.copy()
-    env['LANG'] = 'C'
-    
     # We lower the name because upper-case db names are not allowed in CouchDB
-    app_name = app_config.app_name
-    
+    app_name = app_config.app_name.lower()
+
     # Ensure that couchdb is installed
-    proc = subprocess.Popen(['apt-get', '-y', 'install', 'couchdb', 'python-couchdb'],
-                            env=env)
-    proc.communicate()
-    
+    apt_install(['couchdb', 'python-couchdb'])
+
     # Check to see if the database is present
-    proc = subprocess.Popen(['curl', '-s', '-N', 'http://localhost:5984/_all_dbs'],
-                            stdout=subprocess.PIPE, env=env)
-    stdout, stderr = proc.communicate()
-    dbs = eval(stdout)
-    
+    stdout, stderr, returncode = run(
+        ['curl', '-s', '-N', 'http://localhost:5984/_all_dbs'],
+        capture_stdout=True)
+    dbs = loads(stdout)
+
     if app_name in dbs:
         print 'Database %s already exists' % app_name
     else:
         print 'Database %s does not exist; created.' % app_name
-        subprocess.Popen([
-            'curl', '-N', '-s', '-X', 'PUT', 'http://localhost:5984/%s' % app_name], env=env)
-    
+        run(['curl', '-N', '-s', '-X', 'PUT', 'http://localhost:5984/%s' % app_name])
+
 
 def app_setup(app_config, config, environ,
               devel=False, devel_config=None):

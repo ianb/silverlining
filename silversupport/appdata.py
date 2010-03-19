@@ -4,14 +4,25 @@ from silversupport.appconfig import AppConfig
 
 APPDATA_MAP = '/var/www/appdata.map'
 
-def set_appdata(instance_name, locations, debug_single_process=False,
+__all__ = ['add_appdata', 'normalize_location',
+           'remove_host', 'instance_for_location', 'all_app_instances',
+           'list_instances']
+
+
+def add_appdata(instance_name, locations, debug_single_process=False,
                 add_prev=True):
-    app_config = AppConfig.from_appinstance(instance_name)
+    """Adds new application deployment to appdata.map
+
+    This adds the given instance name for all the given locations.  If
+    `add_prev` is true then any old instances at these locations will
+    be moved to a prev.* hostname
+    """
+    app_config = AppConfig.from_instance_name(instance_name)
     if debug_single_process:
         process_group = 'general_debug'
     else:
         process_group = 'general'
-    locations = normalize_locations(locations)
+    locations = [normalize_location(l) for l in locations]
     new_lines = rewrite_lines(appdata_lines(), locations, add_prev, dict(
         instance_name=instance_name, platform=app_config.platform,
         process_group=process_group, php_root=app_config.php_root,
@@ -20,7 +31,9 @@ def set_appdata(instance_name, locations, debug_single_process=False,
     fp.writelines(new_lines)
     fp.close()
 
+
 def rewrite_lines(existing, locations, add_prev, vars):
+    """Rewrite the lines in appdata.map"""
     if isinstance(existing, basestring):
         existing = existing.splitlines(True)
     lines = []
@@ -48,21 +61,26 @@ def rewrite_lines(existing, locations, add_prev, vars):
         lines.append('%s %s %s\n' % (hostname, path, data))
     return ''.join(lines)
 
-def normalize_locations(locations, empty_path='/'):
-    new = []
-    for location in locations:
-        if location.startswith('http://'):
-            location = location[len('http://'):]
-        if location.startswith('https://'):
-            location = location[len('https://'):]
-        if '/' in location:
-            hostname, path = location.split('/', 1)
-            path = '/' + path
-        else:
-            hostname = location
-            path = empty_path
-        new.append((hostname, path))
-    return new
+
+def normalize_location(location, empty_path='/'):
+    """Normalize a string location into (hostname, path).
+
+    In most cases if no path is given, then ``/`` is implied, but some
+    commands may want to distinguish this and so can use
+    ``empty_path=None`` to note the difference
+    """
+    if location.startswith('http://'):
+        location = location[len('http://'):]
+    if location.startswith('https://'):
+        location = location[len('https://'):]
+    if '/' in location:
+        hostname, path = location.split('/', 1)
+        path = '/' + path
+    else:
+        hostname = location
+        path = empty_path
+    return hostname, path
+
 
 def remove_host(hostname, keep_prev=False, path=None):
     """Updates /var/www/appdata.map to remove the given hostname.
@@ -95,6 +113,7 @@ def remove_host(hostname, keep_prev=False, path=None):
     fp.close()
     return removed
 
+
 def appdata_lines():
     """Returns all lines in /var/www/appdata.map"""
     fp = open(APPDATA_MAP)
@@ -102,6 +121,7 @@ def appdata_lines():
         return fp.readlines()
     finally:
         fp.close()
+
 
 def instance_for_location(hostname, path='/'):
     """Returns the instance name for the given hostname/path.
@@ -115,6 +135,7 @@ def instance_for_location(hostname, path='/'):
             instance_name = data.split('|')[0]
             return instance_name
     return None
+
 
 def all_app_instances():
     """Returns a dictionary of all app instances.
@@ -134,6 +155,7 @@ def all_app_instances():
         results[instance_name].append((hostname, path))
     return results
 
+
 def list_instances():
     """Returns a list of all instance names"""
     base_dir = '/var/www'
@@ -148,5 +170,3 @@ def list_instances():
             continue
         results.append(name)
     return results
-
-    

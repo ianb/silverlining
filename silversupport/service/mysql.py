@@ -1,5 +1,7 @@
+"""MySQL support"""
+
 import os
-import subprocess
+from silversupport.shell import apt_install, run
 
 packages = [
     'mysql-server-5.1',
@@ -7,40 +9,28 @@ packages = [
     'python-mysqldb',
     ]
 
-def install(app_config, config):
-    env = os.environ.copy()
-    env['LANG'] = 'C'
 
+def install(app_config, config):
     if not os.path.exists('/usr/bin/mysqld_multi'):
-        proc = subprocess.Popen(
-            ['apt-get', '-y', 'install'] + packages,
-            env=env)
-        proc.communicate()
-        proc = subprocess.Popen(
-            ['/usr/bin/mysql', '-u', 'root',
+        apt_install(packages)
+        run(['/usr/bin/mysql', '-u', 'root',
              '-e', 'CREATE USER wwwmgr'])
-    
+
     app_name = app_config.app_name
-    proc = subprocess.Popen(
+    stdout, stderr, returncode = run(
         ['/usr/bin/mysql', '-u', 'root',
          '-e', 'SHOW DATABASES', '--batch', '-s'],
-        stdout=subprocess.PIPE, env=env)
-    stdout, stderr = proc.communicate()
+        capture_stdout=True)
     databases = [l.strip() for l in stdout.splitlines() if l.strip()]
     if app_name in databases:
         print 'Database %s already exists' % app_name
     else:
         print 'Database %s does not exist; creating.' % app_name
-        proc = subprocess.Popen(
-            ['/usr/bin/mysql', '-u', 'root',
-             '-e', 'CREATE DATABASE %s' % app_name,],
-            env=env)
-        proc.communicate()
-        proc = subprocess.Popen(
-            ['/usr/bin/mysql', '-u', 'root',
-             '-e', "GRANT ALL ON %s.* TO 'wwwmgr'@'localhost'" % app_name],
-            env=env)
-        proc.communicate()
+        run(['/usr/bin/mysql', '-u', 'root',
+             '-e', 'CREATE DATABASE %s' % app_name])
+        run(['/usr/bin/mysql', '-u', 'root',
+             '-e', "GRANT ALL ON %s.* TO 'wwwmgr'@'localhost'" % app_name])
+
 
 def app_setup(app_config, config, environ,
               devel=False, devel_config=None):
@@ -75,7 +65,8 @@ def app_setup(app_config, config, environ,
             sa += ':' + environ['CONFIG_MYSQL_PORT']
         sa += '/' + environ['CONFIG_MYSQL_DBNAME']
         environ['CONFIG_MYSQL_SQLALCHEMY'] = sa
-                
+
+
 def backup(app_dir, config, environ, output_dir):
     raise NotImplemented
 
@@ -83,9 +74,10 @@ BACKUP_README = """\
 FIXME
 """
 
+
 def restore(app_dir, config, environ, input_dir):
     raise NotImplemented
 
+
 def clear(app_dir, config, environ):
     raise NotImplemented
-    

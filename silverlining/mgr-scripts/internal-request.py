@@ -2,7 +2,7 @@
 import sys
 sys.path.insert(0, '/usr/local/share/silverlining/lib')
 import os
-from silversupport.requests import make_internal_request, create_app
+from silversupport.requests import make_internal_request, create_wsgi_app
 from ConfigParser import ConfigParser
 from optparse import OptionParser
 
@@ -39,7 +39,7 @@ def run():
         for arg in args[4:]:
             name, value = arg.split('=', 1)
             environ[name] = value
-    app = create_app(instance_name)
+    app = create_wsgi_app(instance_name)
     status, headers, body = make_internal_request(
         app, instance_name, hostname,
         path, body=body, environ=environ)
@@ -65,7 +65,7 @@ def run_update(instance_name, hostname):
                 if url.strip() and not url.strip().startswith('#')]
         for url in urls:
             print 'Fetching update URL %s' % url
-            app = create_app(instance_name)
+            app = create_wsgi_app(instance_name)
             status, headers, body = make_internal_request(
                 app, instance_name, hostname,
                 url, environ={'silverlining.update': True})

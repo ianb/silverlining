@@ -10,10 +10,11 @@ parser.add_option(
     '--keep-prev', action='store_true',
     help='Keep the prev.* host')
 
+
 def main():
     options, args = parser.parse_args()
-    locations = appdata.normalize_locations(args, empty_path=None)
-    for hostname, path in args:
+    locations = [appdata.normalize_location(l, empty_path=None) for l in args]
+    for hostname, path in locations:
         removed = appdata.remove_host(hostname, path=path, keep_prev=options.keep_prev)
         if not removed:
             print 'No entries found matching %s' % (hostname + (path or ''))
@@ -26,4 +27,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-    

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import sys
 sys.path.insert(0, '/usr/local/share/silverlining/lib')
-from silversupport.appdata import set_appdata
+from silversupport.appdata import add_appdata
 from optparse import OptionParser
 
 parser = OptionParser(
@@ -20,4 +20,4 @@ parser.add_option(
 if __name__ == '__main__':
     options, args = parser.parse_args()
     instance_name = args[0]
-    set_appdata(instance_name, args[1:], debug_single_process=options.debug_single_process)
+    add_appdata(instance_name, args[1:], debug_single_process=options.debug_single_process)

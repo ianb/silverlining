@@ -1,3 +1,5 @@
+"""Application configuration object"""
+
 import os
 import sys
 import warnings
@@ -5,7 +7,12 @@ from site import addsitedir
 from ConfigParser import ConfigParser
 from silversupport.env import is_production
 
+__all__ = ['AppConfig']
+
+
 class AppConfig(object):
+    """This represents an application's configuration file, and by
+    extension represents the application itself"""
 
     def __init__(self, config_file, app_name=None):
         if not os.path.exists(config_file):
@@ -31,31 +38,41 @@ class AppConfig(object):
         self.app_name = app_name
 
     @classmethod
-    def from_appinstance(cls, instance_name):
+    def from_instance_name(cls, instance_name):
+        """Loads an instance given its name; only valid in production"""
         return cls(os.path.join('/var/www', instance_name, 'app.ini'))
 
     @property
     def platform(self):
+        """The platform of the application.
+
+        Current valid values are ``'python'`` and ``'php'``
+        """
         return self.config['production'].get('platform', 'python')
 
     @property
     def runner(self):
+        """The filename of the runner for this application"""
         filename = self.config['production']['runner']
         return os.path.join(os.path.dirname(self.config_file), filename)
 
     @property
     def update_fetch(self):
+        """A list (possibly empty) of all URLs to fetch on update"""
         places = self.config['production'].get('update_fetch')
         if not places:
             return []
-        return self.parse_lines(places)
+        return self._parse_lines(places)
 
     @property
     def default_location(self):
+        """The default location to upload this application to"""
         return self.config['production'].get('default_location')
 
     @property
     def services(self):
+        """A dictionary of configured services (keys=service name,
+        value=any configuration)"""
         services = {}
         c = self.config['production']
         for name in c:
@@ -65,10 +82,18 @@ class AppConfig(object):
 
     @property
     def php_root(self):
-        return self.config['production'].get('php_root', '/dev/null')
+        """The php_root location (or ``/dev/null`` if none given)"""
+        return os.path.join(
+            self.app_dir,
+            self.config['production'].get('php_root', '/dev/null'))
 
     @property
     def writable_root_location(self):
+        """The writable-root location, if it is available.
+
+        If not configured, ``/dev/null`` in production and ``''`` in
+        development
+        """
         if 'service.writable_root' in self.config['production']:
             ## FIXME: do development too
             return os.path.join('/var/lib/silverlining/writable-roots', self.app_name)
@@ -80,21 +105,25 @@ class AppConfig(object):
 
     @property
     def app_dir(self):
+        """The directory the application lives in"""
         return os.path.dirname(self.config_file)
 
     @property
     def static_dir(self):
+        """The location of static files"""
         return os.path.join(self.app_dir, 'static')
 
     @property
     def instance_name(self):
+        """The name of the instance (APP_NAME.TIMESTAMP)"""
         return os.path.basename(os.path.dirname(self.config_file))
 
     @property
     def packages(self):
-        return self.parse_lines(self.config['production'].get('packages'))
+        """A list of packages that should be installed for this application"""
+        return self._parse_lines(self.config['production'].get('packages'))
 
-    def parse_lines(self, lines):
+    def _parse_lines(self, lines):
         """Parse a configuration value into a series of lines,
         ignoring empty and comment lines"""
         if not lines:
@@ -114,6 +143,9 @@ class AppConfig(object):
                           devel=devel, devel_config=devel_config)
 
     def install_services(self):
+        """Installs all the services for this application.
+
+        This is run on deployment"""
         for service, config in sorted(self.services.items()):
             mod = self.load_service_module(service)
             mod.install(self, config)
@@ -123,7 +155,7 @@ class AppConfig(object):
         __import__('silversupport.service.%s' % service_name)
         mod = sys.modules['silversupport.service.%s' % service_name]
         return mod
-        
+
     def activate_path(self):
         """Adds any necessary entries to sys.path for this app"""
         lib_path = os.path.join(
@@ -163,7 +195,7 @@ class AppConfig(object):
                                 % (spec, runner))
         else:
             raise Exception("Unknown kind of runner (%s)" % runner)
-        
+
     def canonical_hostname(self):
         """Returns the 'canonical' hostname for this application.
 

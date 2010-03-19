@@ -2,6 +2,9 @@
 
 import os
 
+__all__ = ['is_production']
+
+
 def is_production():
     """Returns true if this is a production environment.  False if it
     is development or unknown"""

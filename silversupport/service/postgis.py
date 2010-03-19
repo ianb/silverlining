@@ -1,6 +1,6 @@
 import os
-import subprocess
 import shutil
+from silversupport import run, apt_install
 
 ## Note that PostGIS only works with 8.3, even though 8.4 is the more
 ## modern version available on Karmic
@@ -21,54 +21,29 @@ packages = [
     'python-pyproj-data',
     ]
 
-def install(app_config, config):
-    env = os.environ.copy()
-    env['LANG'] = 'C'
-    env['PGUSER'] = 'postgres'
 
+def install(app_config, config):
     if not os.path.exists('/usr/bin/psql'):
-        proc = subprocess.Popen(
-            ['apt-get', '-y', 'install'] + packages,
-            env=env)
-        proc.communicate()
+        apt_install(packages)
         shutil.copyfile(os.path.join(os.path.dirname(__file__),
                                      'postgis-pg_hba.conf'),
                         '/etc/postgresql/8.3/main/pg_hba.conf')
-        proc = subprocess.Popen(
-            ['chown', 'postgres:postgres',
-             '/etc/postgresql/8.3/main/pg_hba.conf'],
-            env=env)
-        proc.communicate()
-        proc = subprocess.Popen(
-            ['/etc/init.d/postgresql-8.3', 'restart'],
-            env=env)
-    proc = subprocess.Popen(
+        run(['chown', 'postgres:postgres',
+             '/etc/postgresql/8.3/main/pg_hba.conf'])
+        run(['/etc/init.d/postgresql-8.3', 'restart'])
+
+    stdout, stderr, returncode = run(
         ['psql', '--tuples-only'],
-        stdout=subprocess.PIPE, stdin=subprocess.PIPE,
-        env=env)
-    stdout, stderr = proc.communicate("""
-    select r.rolname from pg_catalog.pg_roles as r;
-    """)
+        capture_stdout=True, capture_stderr=True,
+        stdin="select r.rolname from pg_catalog.pg_roles as r;")
     if 'www-mgr' not in stdout:
-        proc = subprocess.Popen(
-            ['createuser', '--no-superuser', '--no-createdb',
-             '--no-createrole', 'www-mgr'], env=env)
-        proc.communicate()
-        
-    proc = subprocess.Popen(
-        ['psql', '-l'], stdout=subprocess.PIPE,
-        env=env)
-    stdout, stderr = proc.communicate()
+        run(['createuser', '--no-superuser', '--no-createdb',
+             '--no-createrole', 'www-mgr'])
+
+    stdout, stderr, returncode = run(
+        ['psql', '-l'], capture_stdout=True)
     if 'template_postgis' not in stdout:
-        proc = subprocess.Popen(
-            ['createdb', 'template_postgis'],
-            env=env)
-        proc.communicate()
-        proc = subprocess.Popen(
-            ['psql', 'template_postgis'],
-            env=env, stdin=subprocess.PIPE,
-            # We're not capturing this, the output is just boring:
-            stdout=subprocess.PIPE)
+        run(['createdb', 'template_postgis'])
         parts = ['CREATE LANGUAGE plpgsql;\n']
         parts.append("UPDATE pg_database SET datistemplate='true' WHERE datname='template_postgis';")
         for filename in ['lwpostgis.sql', 'lwpostgis_upgrade.sql',
@@ -81,22 +56,21 @@ def install(app_config, config):
             fp.close()
         parts.append("GRANT ALL ON geometry_columns TO PUBLIC;\n")
         parts.append("GRANT ALL ON spatial_ref_sys TO PUBLIC;\n")
-        proc.communicate(''.join(parts))
-    
+        run(['psql', 'template_postgis'], capture_stdout=True,
+            stdin=''.join(parts))
+
     app_name = app_config.app_name
-    proc = subprocess.Popen([
-        '/usr/bin/psql', '-U', 'postgres', '-l', '-t', '-A'], 
-        stdout=subprocess.PIPE, env=env)
-    stdout, stderr = proc.communicate()
+    stdout, stderr, returncode = run(
+        ['/usr/bin/psql', '-U', 'postgres', '-l', '-t', '-A'],
+        capture_stdout=True)
     databases = [line.split('|')[0] for line in stdout.splitlines()]
     if app_name in databases:
         print 'Database %s already exists' % app_name
     else:
         print 'Database %s does not exist; creating.' % app_name
-        proc = subprocess.Popen(
-            ['createdb', '-O', 'www-mgr', '-T', 'template_postgis',
-             app_name], env=env)
-        proc.communicate()
+        run(['createdb', '-O', 'www-mgr', '-T', 'template_postgis',
+             app_name])
+
 
 def app_setup(app_config, config, environ,
               devel=False, devel_config=None):
@@ -132,15 +106,11 @@ def app_setup(app_config, config, environ,
             sa += ':' + environ['CONFIG_PG_PORT']
         sa += '/' + environ['CONFIG_PG_DBNAME']
         environ['CONFIG_PG_SQLALCHEMY'] = sa
-                
+
+
 def backup(app_dir, config, environ, output_dir):
-    e = os.environ.copy()
-    e['LANG'] = 'C'
-    proc = subprocess.Popen(
-        ['pg_dump', '-Fc', environ['CONFIG_PG_DBNAME'],
-         '--file', os.path.join(output_dir, 'postgis.pgdump')],
-        env=e)
-    proc.communicate()
+    run(['pg_dump', '-Fc', environ['CONFIG_PG_DBNAME'],
+         '--file', os.path.join(output_dir, 'postgis.pgdump')])
     fp = open(os.path.join(output_dir, 'postgis.README.txt'), 'w')
     fp.write(BACKUP_README)
     fp.close()
@@ -149,17 +119,14 @@ BACKUP_README = """\
 The backup is created by pg_dump -Fc.  To restore it use pg_restore.
 """
 
+
 def restore(app_dir, config, environ, input_dir):
     path = os.path.join(input_dir, 'postgis.pgdump')
     dbname = environ['CONFIG_PG_DBNAME']
-    proc = subprocess.Popen(
-        ['pg_restore', '--dbname', dbname, path])
-    proc.communicate()
+    run(['pg_restore', '--dbname', dbname, path])
+
 
 def clear(app_dir, config, environ):
     dbname = environ['CONFIG_PG_DBNAME']
-    proc = subprocess.Popen(
-        ['dropdb', dbname])
-    proc.communicate()
+    run(['dropdb', dbname])
     install(app_dir, config)
-    

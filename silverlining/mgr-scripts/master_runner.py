@@ -47,11 +47,11 @@ def get_app(environ):
     delete_boring_vars(environ)
     instance_name = environ['SILVER_INSTANCE_NAME']
     os.environ['SILVER_INSTANCE_NAME'] = instance_name
-    app_config = AppConfig.from_appinstance(instance_name)
+    app_config = AppConfig.from_instance_name(instance_name)
     os.environ['SILVER_CANONICAL_HOST'] = app_config.canonical_hostname()
     ## FIXME: give a real version here...
     environ['SILVER_VERSION'] = os.environ['SILVER_VERSION'] = 'silverlining/0.0'
-    
+
     # Fixup port and ipaddress
     environ['SERVER_PORT'] = '80'
     if 'HTTP_X_FORWARDED_FOR' in environ:
@@ -60,7 +60,7 @@ def get_app(environ):
         environ['SERVER_ADDR'] = environ.pop('HTTP_X_VARNISH_IP')
     if 'SCRIPT_URI' in environ:
         environ['SCRIPT_URI'] = environ['SCRIPT_URI'].replace(':8080', '')
-    
+
     if found_app:
         assert found_app_instance_name == instance_name, (
             "second request with unexpected instance_name (first request had instance_name=%r; "
@@ -87,7 +87,7 @@ class ErrorApp(object):
     """Application that simply displays the error message"""
     def __init__(self, message):
         self.message = message
-    
+
     def __call__(self, environ, start_response):
         start_response('500 Server Error', [('Content-type', 'text/plain')])
         return [self.message]
@@ -102,4 +102,3 @@ def delete_boring_vars(environ):
     for name in BORING_VARS:
         if name in environ:
             del environ[name]
-

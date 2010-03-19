@@ -1,19 +1,18 @@
+"""PHP support"""
+
+from silversupport.shell import apt_install
+
 import os
-import subprocess
 
 packages = [
     'php5',
     ]
 
-def install(app_config, config):
-    env = os.environ.copy()
-    env['LANG'] = 'C'
 
+def install(app_config, config):
     if not os.path.exists('/usr/share/doc/php5'):
-        proc = subprocess.Popen(
-            ['apt-get', '-y', 'install'] + packages,
-            env=env)
-        proc.communicate()
+        apt_install(packages)
+
 
 def app_setup(app_config, config, environ,
               devel=False, devel_config=None):

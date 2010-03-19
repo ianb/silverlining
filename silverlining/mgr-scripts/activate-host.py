@@ -12,16 +12,17 @@ parser.add_option(
     action='store_true',
     help='Set the activated application to be debug/threaded/single-process')
 
+
 def main():
     options, args = parser.parse_args()
-    hostname, path = appdata.normalize_locations([args[0]])[0]
+    hostname, path = appdata.normalize_location(args[0])
     instance_name = args[1]
     if instance_name.lower() == 'prev':
         instance_name = appdata.instance_for_location('prev.'+hostname, path)
         if instance_name is None:
             print 'There is no host at prev.%s%s to activate/revert' % (hostname, path)
             return 1
-    appdata.set_appdata(
+    appdata.add_appdata(
         instance_name, [(hostname, path)],
         debug_single_process=options.debug_single_process)
     print '%s%s mapped to instance %s' % (hostname, path, instance_name)
