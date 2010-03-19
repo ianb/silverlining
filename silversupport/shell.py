@@ -1,7 +1,11 @@
 """Simple shell routines"""
 
 import os
+import re
 import subprocess
+
+__all__ = ['ssh', 'run', 'apt_install', 'shell_escape',
+           'conditional_shell_escape']
 
 
 def ssh(user, host, command, **kw):
@@ -11,6 +15,8 @@ def ssh(user, host, command, **kw):
 
     This will use sudo for some users, and ssh in directory in other cases.
     """
+    if isinstance(command, (list, tuple)):
+        command = ' '.join(conditional_shell_escape(i) for i in command)
     if user == 'www-data':
         # This is a bit tricky:
         user = 'www-mgr'
@@ -61,3 +67,12 @@ def apt_install(packages, **kw):
 def shell_escape(arg):
     """Escapes an argument for the shell"""
     return "'%s'" % arg.replace("'", "'\\''")
+
+
+def conditional_shell_escape(arg):
+    """Escapes an argument, unless it's obvious it doesn't need
+    escaping"""
+    if re.match(r'^[a-zA-Z0-9_,./-]+$', arg):
+        return arg
+    else:
+        return shell_escape(arg)
