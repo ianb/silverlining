@@ -2,6 +2,7 @@
 
 import os
 import time
+import re
 from scripttest import TestFileEnvironment
 
 here = os.path.dirname(os.path.abspath(__file__))
@@ -22,7 +23,7 @@ def run_test(name, stage=None):
     try:
         if stage is None:
             if name:
-                stage = 'update'
+                stage = 'clean'
             else:
                 stage = 'setup-node'
         env = get_environment()
@@ -66,6 +67,8 @@ def run_test(name, stage=None):
             assert 'Site: default-disabled' in result.stdout
             assert 'default-disabled: disabled/' in result.stdout
             assert 'functest' in result.stdout
+            assert re.search(r'functest.*?: %s/' % name, result.stdout)
+
     finally:
         print 'Name used: %s' % name
 
