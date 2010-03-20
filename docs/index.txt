@@ -102,7 +102,7 @@ application is a bunch of files that are uploaded to the server.  You
 don't "build" an application on the server.  To upload or update an
 application, you run::
 
-    $ silver update path/to/app/ --host=myapp.com
+    $ silver update path/to/app/ myapp.com
 
 This uploads your files, makes sure requests to myapp.com go to your
 new application.  Your application has a file ``app.ini`` (located, in
@@ -241,7 +241,7 @@ These are really just frontends to what libcloud provides.
 Each "node" has a hostname, which is the name of the node, and also
 the hostname setup in ``/etc/hosts``.
 
-``silver list-images``: 
+``silver list-images``:
     Lists all the images available (these are starter systems that can
     be cloned).
 

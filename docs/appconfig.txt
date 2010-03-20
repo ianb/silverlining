@@ -27,12 +27,11 @@ symlink it into its location at the root of the app directory.
     line (in ``.ini`` files you can use indentation on subsequent
     lines to continue a configuration value).
 
-``default_host``:
-    This is a default for ``silver update --host``, so you don't
-    have to enter that option each time you update.
+``default_location``:
+    This is a default for ``silver update APP LOCATION``, so you don't
+    have to enter that location each time you update.
 
 ``service.*``
     The presence of the setting activates the `service <services.html>`_.
     It can have a value, which is passed to the service, but no
     service uses that yet.
-
