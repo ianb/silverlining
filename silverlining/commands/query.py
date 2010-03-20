@@ -42,7 +42,7 @@ def command_query(config):
         site_instances.setdefault(site_name, {})[release] = line
         sites.add(site_name)
         instance_site[line] = site_name
-    site_names = getattr(config.args, 'site-name')
+    site_names = getattr(config.args, 'app-name')
     if site_names:
         matcher = re.compile('|'.join(fnmatch.translate(s) for s in site_names))
         new_hosts = {}

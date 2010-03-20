@@ -77,7 +77,7 @@ def run_test(name, stage=None):
 
         if run_stage(stage, 'query'):
             print 'Doing query'
-            result = env.run('silver --yes query --node %s' % name)
+            result = env.run('silver --yes query %s' % name)
             print result
             assert 'Site: default-disabled' in result.stdout
             assert 'default-disabled: disabled/' in result.stdout

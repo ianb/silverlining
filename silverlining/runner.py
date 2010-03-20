@@ -170,12 +170,12 @@ parser_init.add_argument(
 parser_init.add_argument(
     '--config',
     action='store_true',
-    help="Use config.ini (not main.py)")
+    help="Put in a sample Paste Deploy config.ini")
 
 parser_init.add_argument(
     '--main',
     action='store_true',
-    help="Use main.py (not config.ini)")
+    help="Put in a sample main.py")
 
 parser_serve = subcommands.add_parser(
     'serve', help="Serve up an application for development")
@@ -237,13 +237,13 @@ parser_query = subcommands.add_parser(
     'query', help="See what apps are on a node")
 
 parser_query.add_argument(
-    '--node',
-    metavar='NODE_HOSTNAME',
+    'node',
+    metavar='HOSTNAME',
     help="Node to query")
 
 parser_query.add_argument(
-    'site-name', nargs='*',
-    help="The site or hostname to query (wildcards allowed)")
+    'app-name', nargs='*',
+    help="The app_name or hostname to query (wildcards allowed)")
 
 parser_activate = subcommands.add_parser(
     'activate', help="Activate a site instance for a given domain")
@@ -254,8 +254,8 @@ parser_activate.add_argument(
     help="Node to act on")
 
 parser_activate.add_argument(
-    'host',
-    help="The hostname to act on")
+    'location',
+    help="The hostname/path to act on")
 
 parser_activate.add_argument(
     'instance_name',
@@ -270,8 +270,8 @@ parser_deactivate.add_argument(
     help="Node to act on")
 
 parser_deactivate.add_argument(
-    'hosts', nargs='+',
-    help="The hostname to act on; if you give more than one, "
+    'locations', nargs='+',
+    help="The hostname/path to act on; if you give more than one, "
     "they must all be on the same node.  Can be a wildcard.")
 
 parser_deactivate.add_argument(
