@@ -136,6 +136,6 @@ WSGIDaemonProcess general user=www-data processes=5 threads=1 maximum-requests=2
 WSGIDaemonProcess general_debug user=www-data processes=1 threads=10 maximum-requests=200 display-name=wsgi home=/var/www
 WSGIPassAuthorization On
 
-WSGIScriptAlias / /usr/local/share/silverlining/mgr-scripts/master_runner.py
+WSGIScriptAlias / /usr/local/share/silverlining/mgr-scripts/master-runner.py
 
 </VirtualHost>
