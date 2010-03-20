@@ -26,6 +26,7 @@ warnings.simplefilter('ignore', DeprecationWarning)
 found_app = None
 found_app_instance_name = None
 
+
 def application(environ, start_response):
     try:
         get_app(environ)
@@ -42,6 +43,7 @@ def application(environ, start_response):
         return ['\n'.join(lines)]
     return found_app(environ, start_response)
 
+
 def get_app(environ):
     global found_app, found_app_instance_name
     delete_boring_vars(environ)
@@ -51,6 +53,11 @@ def get_app(environ):
     os.environ['SILVER_CANONICAL_HOST'] = app_config.canonical_hostname()
     ## FIXME: give a real version here...
     environ['SILVER_VERSION'] = os.environ['SILVER_VERSION'] = 'silverlining/0.0'
+    if 'SILVER_MATCH_PATH' in environ:
+        path = environ.pop('SILVER_MATCH_PATH')
+        environ['SCRIPT_NAME'] += path
+        assert environ['PATH_INFO'].startswith(path)
+        environ['PATH_INFO'] = environ['PATH_INFO'][len(path):]
 
     # Fixup port and ipaddress
     environ['SERVER_PORT'] = '80'
@@ -70,9 +77,7 @@ def get_app(environ):
     if not re.search(r'^[A-Za-z0-9._-]+$', instance_name):
         raise Exception("Bad instance_name: %r" % instance_name)
 
-    site_dir = app_config.app_dir
     app_config.activate_path()
-
     app_config.activate_services(os.environ)
 
     try:
@@ -82,6 +87,7 @@ def get_app(environ):
             "Could not load the runner %s: %s" % (app_config.runner, e))
     found_app_instance_name = instance_name
     return found_app
+
 
 class ErrorApp(object):
     """Application that simply displays the error message"""
@@ -97,6 +103,7 @@ class ErrorApp(object):
 BORING_VARS = [
     'SILVER_APP_DATA', 'SILVER_PROCESS_GROUP', 'SILVER_PLATFORM',
     'SILVER_PHP_ROOT']
+
 
 def delete_boring_vars(environ):
     for name in BORING_VARS:

@@ -65,8 +65,10 @@ parser_create.add_argument(
     metavar='HOSTNAME',
     help="The hostname of the node to create")
 
+## FIXME: this hard-coded image-id works for rackspace but not elsewhere:
 parser_create.add_argument(
     '--image-id',
+    default='14362',
     metavar="ID",
     help="Image ID to use")
 
@@ -86,13 +88,15 @@ parser_create.add_argument(
     help="Wait for the node to be created, but don't setup (like "
     "--setup-node that just quits before it actually sets up the node)")
 
-parser_default = subcommands.add_parser(
-    'default-node', help="Set a node as the default node")
-
-parser_default.add_argument(
-    'node',
-    metavar='HOSTNAME',
-    help="The hostname of the node to set as default")
+## FIXME: this isn't working right (comments aren't preserved
+## correctly by INITools):
+#parser_default = subcommands.add_parser(
+#    'default-node', help="Set a node as the default node")
+#
+#parser_default.add_argument(
+#    'node',
+#    metavar='HOSTNAME',
+#    help="The hostname of the node to set as default")
 
 parser_setup = subcommands.add_parser(
     'setup-node', help="Setup a new (fresh Ubuntu Jaunty install) server")
@@ -123,9 +127,10 @@ parser_update.add_argument(
     help="The directory to upload to the server")
 
 parser_update.add_argument(
-    '--host', '-H',
-    metavar="HOST",
-    help="Hostname to server off of")
+    'location', nargs='?',
+    metavar="HOSTNAME[/PATH]",
+    help="Place to upload to (will default to the default_location "
+    "setting in app.ini)")
 
 parser_update.add_argument(
     '--debug-single-process',
@@ -137,7 +142,7 @@ parser_update.add_argument(
 parser_update.add_argument(
     '--name',
     metavar="NAME",
-    help="'Name' of the site; defaults to app_name")
+    help="'Name' of the site; defaults to the app_name setting in app.ini")
 
 parser_update.add_argument(
     '--node',

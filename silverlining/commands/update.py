@@ -6,6 +6,7 @@ import virtualenv
 from silverlining.etchosts import get_host_ip, set_etc_hosts
 from silversupport.shell import ssh
 from silversupport.appconfig import AppConfig
+from silversupport import appdata
 
 _instance_name_re = re.compile(r'instance_name="(.*?)"')
 
@@ -29,11 +30,14 @@ def command_update(config):
         config.logger.level_adjust -= -1
     app = AppConfig(os.path.join(config.args.dir, 'app.ini'),
                     app_name=config.args.name or None)
-    if not config.args.host:
+    if not config.args.location:
         if app.default_location:
-            config.args.host = app.default_location
+            config.args.location = app.default_location
         else:
-            config.args.host = config.node_hostname
+            config.args.location = config.node_hostname
+    if not config.args.node:
+        from silversupport.appdata import normalize_location
+        config.args.node = normalize_location(config.args.location)[0]
     stdout, stderr, returncode = ssh(
         'www-mgr', config.node_hostname,
         '/usr/local/share/silverlining/mgr-scripts/prepare-new-site.py %s' % app.app_name,
@@ -57,14 +61,15 @@ def command_update(config):
         debug_single_process = ''
 
     ssh('www-mgr', config.node_hostname,
-        '/usr/local/share/silverlining/mgr-scripts/update-hostmap.py %(instance_name)s %(debug_single_process)s %(host)s; '
-        'sudo -H -u www-data /usr/local/share/silverlining/mgr-scripts/internal-request.py --update %(instance_name)s %(host)s; '
+        '/usr/local/share/silverlining/mgr-scripts/update-hostmap.py %(instance_name)s %(debug_single_process)s %(location)s; '
+        'sudo -H -u www-data /usr/local/share/silverlining/mgr-scripts/internal-request.py --update %(instance_name)s %(location)s; '
         'sudo -H -u www-data pkill -INT -f -u www-data wsgi; '
         % dict(instance_name=instance_name,
                debug_single_process=debug_single_process,
-               host=config.args.host),
+               location=config.args.location),
         )
 
     ip = get_host_ip(config.node_hostname)
-    set_etc_hosts(config, [config.args.host,
-                           'prev.' + config.args.host], ip)
+    hostname = appdata.normalize_location(config.args.location)[0]
+    set_etc_hosts(config, [hostname,
+                           'prev.' + hostname], ip)

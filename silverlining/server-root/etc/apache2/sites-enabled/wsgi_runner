@@ -20,7 +20,7 @@
 	#	Order allow,deny
 	#	Allow from all
 	#</Directory>
-	
+
 	<LocationMatch />
          # Insert filter
         SetOutputFilter DEFLATE
@@ -63,7 +63,7 @@ RewriteRule (.*) http://%1$1 [R=permanent,L]
 # Needed?
 #RewriteLock /var/lock/apache2/rewrite_map.lck
 RewriteMap appdata prg:/usr/local/share/silverlining/mgr-scripts/rewrite-map.py
-RewriteCond ${appdata:%{HTTP_HOST}^%{PATH_INFO}} (.*)
+RewriteCond ${appdata:%{HTTP_HOST}^%{REQUEST_URI}} (.*)
 RewriteRule . - [E=SILVER_APP_DATA:%1]
 # Special case redirect:
 RewriteCond %{ENV:SILVER_APP_DATA} ^addslash$
@@ -139,4 +139,3 @@ WSGIPassAuthorization On
 WSGIScriptAlias / /usr/local/share/silverlining/mgr-scripts/master_runner.py
 
 </VirtualHost>
-

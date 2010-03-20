@@ -7,11 +7,15 @@ abs_hostnames = {}
 filename = '/var/www/appdata.map'
 mtime = 0
 
+
 def loop():
     global mtime
     while 1:
         try:
-            line = sys.stdin.readline().strip()
+            line = sys.stdin.readline()
+            if not line:
+                break
+            line = line.strip()
             cur_mtime = os.path.getmtime(filename)
             if cur_mtime > mtime:
                 mtime = cur_mtime
@@ -38,10 +42,12 @@ def loop():
         sys.stdout.write(data.strip() + '\n')
         sys.stdout.flush()
 
+
 def lookup(hostname, path):
     record = lookup_hostname(hostname)
     path_match, data = lookup_path(record, path)
     return path_match, data
+
 
 def lookup_hostname(hostname, seen=None):
     record = None
@@ -73,6 +79,7 @@ def lookup_hostname(hostname, seen=None):
         return lookup_hostname(name, seen)
     return record
 
+
 def lookup_path(record, path):
     for path_prefix, data in record:
         if path == path_prefix[:-1] and path_prefix.endswith('/'):
@@ -84,12 +91,14 @@ def lookup_path(record, path):
         ## FIXME: how should this fail?
         raise LookupError('No application mounted to /')
 
+
 def read_file():
     fp = open(filename, 'rb')
     try:
         read_file_data(fp)
     finally:
         fp.close()
+
 
 def read_file_data(fp):
     global glob_hostnames, abs_hostnames

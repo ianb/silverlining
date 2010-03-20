@@ -3,6 +3,7 @@
 import os
 import time
 import re
+import urllib
 from scripttest import TestFileEnvironment
 
 here = os.path.dirname(os.path.abspath(__file__))
@@ -12,7 +13,7 @@ def get_environment():
     env = TestFileEnvironment(os.path.join(here, 'test-data'))
     return env
 
-stage_seq = ['create-node', 'setup-node', 'clean', 'update', 'query']
+stage_seq = ['create-node', 'setup-node', 'clean', 'update', 'update-path', 'query']
 
 
 def run_stage(name, match):
@@ -36,13 +37,15 @@ def run_test(name, stage=None):
             print 'Setting up node %s' % name
             print env.run('silver --yes setup-node %s' % name,
                           expect_stderr=True)
+
         if run_stage(stage, 'clean'):
             print env.run('silver --yes deactivate --node=%s "*"' % name)
             print env.run('silver --yes clean-node %s' % name)
+
         if run_stage(stage, 'update'):
             print 'Doing update'
-            result = env.run('silver --yes update --node=%s --host=%s "%s"'
-                             % (name, name, os.path.join(here, 'example-app')),
+            result = env.run('silver --yes update "%s" %s'
+                             % (os.path.join(here, 'example-app'), name),
                              expect_stderr=True)
             print result
             assert 'env CONFIG_COUCHDB_DB=functest' in result.stdout
@@ -56,10 +59,22 @@ def run_test(name, stage=None):
             assert 'env CONFIG_PG_USER=www-mgr' in result.stdout
             assert 'env CONFIG_WRITABLE_ROOT=/var/lib/silverlining/writable-roots/functest' in result.stdout
             assert 'env SILVER_VERSION=silverlining/' in result.stdout
-            result = env.run('silver --yes update --node=%s --host=%s --debug-single-process "%s"'
-                             % (name, name, os.path.join(here, 'example-app')),
+            result = env.run('silver --yes update --debug-single-process "%s" %s'
+                             % (os.path.join(here, 'example-app'), name),
                              expect_stderr=True)
             print result
+
+        if run_stage(stage, 'update-path'):
+            print 'Doing update to path'
+            result = env.run('silver --yes update "%s" %s/test'
+                             % (os.path.join(here, 'example-app'), name),
+                             expect_stderr=True)
+            print result
+            url = 'http://%s/test/update' % name
+            resp = urllib.urlopen(url).read()
+            print 'The actual HTTP response: (%s)' % url
+            print resp
+
         if run_stage(stage, 'query'):
             print 'Doing query'
             result = env.run('silver --yes query --node %s' % name)

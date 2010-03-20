@@ -56,6 +56,8 @@ def make_internal_request(wsgi_app, instance_name, hostname,
     if environ:
         basic_environ.update(environ)
     basic_environ['SILVER_INSTANCE_NAME'] = instance_name
+    ## FIXME: This isn't a very good guess of the path:
+    basic_environ['SILVER_MATCH_PATH'] = ''
     out = StringIO()
     info = []
 
