@@ -11,12 +11,12 @@ the request properly after having gone through Varnish.
 """
 import sys
 sys.path.insert(0, '/usr/local/share/silverlining/lib')
-import os
 # Import these to work around a mod_wsgi problem:
 import time, _strptime
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-from silversupport.appconfig import AppConfig
+import os
 import re
+import urllib
+from silversupport.appconfig import AppConfig
 
 #don't show DeprecationWarning in error.log
 #TODO, make this configurable
@@ -54,7 +54,7 @@ def get_app(environ):
     ## FIXME: give a real version here...
     environ['SILVER_VERSION'] = os.environ['SILVER_VERSION'] = 'silverlining/0.0'
     if 'SILVER_MATCH_PATH' in environ:
-        path = environ.pop('SILVER_MATCH_PATH')
+        path = urllib.unquote(environ.pop('SILVER_MATCH_PATH'))
         environ['SCRIPT_NAME'] += path
         assert environ['PATH_INFO'].startswith(path)
         environ['PATH_INFO'] = environ['PATH_INFO'][len(path):]
