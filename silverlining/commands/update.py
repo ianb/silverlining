@@ -40,11 +40,11 @@ def command_update(config):
         config.args.node = normalize_location(config.args.location)[0]
     stdout, stderr, returncode = ssh(
         'www-mgr', config.node_hostname,
-        '/usr/local/share/silverlining/mgr-scripts/prepare-new-site.py %s' % app.app_name,
+        '/usr/local/share/silverlining/mgr-scripts/prepare-new-instance.py %s' % app.app_name,
         capture_stdout=True, capture_stderr=True)
     match = _instance_name_re.search(stdout)
     if not match:
-        config.logger.fatal("Did not get the new instance_name from prepare-new-site.py")
+        config.logger.fatal("Did not get the new instance_name from prepare-new-instance.py")
         config.logger.fatal("Output: %s (stderr: %s)" % (stdout, stderr))
         raise Exception("Bad instance_name output")
     instance_name = match.group(1)
