@@ -1,52 +1,6 @@
 Silver Lining Terminology
 =========================
 
-Provider:
-    This is a provider like Rackspace, EC2, etc.  This is generally
-    defined in ~/.silverlining.conf
-
-Platform: 
-    This is the development platform the application uses.  Current
-    options are ``python`` (default?) and ``php``.
-
-Node:
-    This is a virtual server that has been setup.  It has a name,
-    which is also the domain name it can be accessed by.  The name
-    doesn't have to be in DNS (/etc/hosts is setup for this).
-
-Hostname:
-    This is a running instance of an application.  It lives on some
-    Node, and can be deployed to.  Over its life a hostname will have
-    many application instances deployed to it.  In most cases once a
-    hostname has been assigned to a node, you can use the hostname
-    instead of the node name (all Silver Lining really cares about is
-    that the nodename is a DNS-or-/etc/hosts-resolvable name, so the
-    canonical and the per-site host names are interchangeable).
-
-Application:
-    This is a codebase that can be run.  It has an app.ini file, and a
-    main.py or config.ini file for actually running the application.
-
-Site:
-    This is a deployment of an application.  It has a name (used
-    internally) and one or more hostnames.  Any persistence is shared
-    over all deployments of a site.
-
-Deployment:
-    This is a site when it is deployed.  It typically has a name that
-    starts with the site name, and looks like
-    "site_name.date" (maybe with numbers appended
-    to make the deployment name unique).
-
-Services:
-    These are persistent services that the application will use.  The
-    only one written so far is postgis, which sets up a postgis
-    database.
-
-
-New Terminology
----------------
-
 This terminology is not yet implemented, but with a refactoring it
 will be:
 
@@ -120,7 +74,7 @@ deb Package:
 
 ``node``:
     There are a limited number of times when ``node`` is distinct from
-    ``hostname``: 
+    ``hostname``:
 
     * first, if you provide ``--node`` then that overrides the
       hostname for ssh, etc.  This can be useful when there is a load

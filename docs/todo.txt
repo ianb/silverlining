@@ -341,7 +341,7 @@ will probably work just like static files, with RewriteRules to detect
 and serve the files.  If multiple locations are supported I don't see
 a way to do it with any static map, instead I'll need to write a
 rewrite map script.  But probably rewrite map scripts are a necessity
-anyway. 
+anyway.
 
 It's possible that multiple locations aren't necessary (e.g., ``/foo``
 and ``/bar`` as in the example), but that only a single location can
@@ -657,18 +657,3 @@ Here's what I want to do right away:
   really)
 * Make all the app activation unified
 * Make the instantiated app available in the interactive shell
-
-Refactor List
--------------
-
-I'm planning an upcoming refactoring, touching lots of code, and this
-includes these changes:
-
-* Get everything in line with `this terminology
-  </terminology.html#new-terminology>`_
-
-* Basic code review on all the scripts.
-
-* *Maybe* try to create some proper domain objects, now that things
-   are a tad more clear.  The weird local/remote parallels make this
-   awkward in places.
