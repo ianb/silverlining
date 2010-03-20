@@ -61,7 +61,7 @@ def command_update(config):
         debug_single_process = ''
 
     ssh('www-mgr', config.node_hostname,
-        '/usr/local/share/silverlining/mgr-scripts/update-hostmap.py %(instance_name)s %(debug_single_process)s %(location)s; '
+        '/usr/local/share/silverlining/mgr-scripts/update-appdata.py %(instance_name)s %(debug_single_process)s %(location)s; '
         'sudo -H -u www-data /usr/local/share/silverlining/mgr-scripts/internal-request.py --update %(instance_name)s %(location)s; '
         'sudo -H -u www-data pkill -INT -f -u www-data wsgi; '
         % dict(instance_name=instance_name,
