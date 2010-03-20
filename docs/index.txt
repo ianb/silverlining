@@ -9,6 +9,7 @@ Silver Lining
     terminology
     services
     appconfig
+    envvariables
     devpatterns
     management-scripts
     php
@@ -20,6 +21,7 @@ Silver Lining
     todo
     comparisons
     dns
+    filelayout
     devel-silverlining
     license
     contributors

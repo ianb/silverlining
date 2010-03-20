@@ -83,6 +83,7 @@ precedence over the dynamic application.  To enable use::
 Your application gets the variable::
 
 ``CONFIG_WRITABLE_ROOT``:
+
     Path where you can write these files.
 
 Note ``index.html`` files will work.
@@ -96,16 +97,16 @@ For PostGIS (PostgreSQL with the PostGIS extensions) do::
 
 Then look for these environmental variables:
 
-``CONFIG_PG_DBNAME``: 
+``CONFIG_PG_DBNAME``:
     The database name.
 
-``CONFIG_PG_USERNAME``: 
+``CONFIG_PG_USERNAME``:
     The username to connect as.
 
-``CONFIG_PG_PASSWORD``: 
+``CONFIG_PG_PASSWORD``:
     The password to use (an empty string means no password is required).
 
-``CONFIG_PG_HOST``: 
+``CONFIG_PG_HOST``:
     The host to connect to; an empty string means localhost.
 
 ``CONFIG_PG_PORT``:
@@ -127,16 +128,16 @@ For MySQL do::
 
 Then look for these environmental variables:
 
-``CONFIG_MYSQL_DBNAME``: 
+``CONFIG_MYSQL_DBNAME``:
     The database name.
 
-``CONFIG_MYSQL_USERNAME``: 
+``CONFIG_MYSQL_USERNAME``:
     The username to connect as.
 
-``CONFIG_MYSQL_PASSWORD``: 
+``CONFIG_MYSQL_PASSWORD``:
     The password to use (an empty string means no password is required).
 
-``CONFIG_MYSQL_HOST``: 
+``CONFIG_MYSQL_HOST``:
     The host to connect to; an empty string means localhost.
 
 ``CONFIG_MYSQL_PORT``:
