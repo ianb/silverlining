@@ -1,10 +1,11 @@
 """Remove an instance from a location"""
 from silversupport.shell import ssh
+from silversupport import appdata
 
 
 def command_deactivate(config):
     if not config.args.node:
-        config.args.node = config.args.locations[0]
+        config.args.node = appdata.normalize_location(config.args.locations[0])[0]
     if config.args.disable:
         for location in config.args.locations:
             ssh('www-mgr', config.args.host,

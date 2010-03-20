@@ -70,6 +70,9 @@ def normalize_location(location, empty_path='/'):
     commands may want to distinguish this and so can use
     ``empty_path=None`` to note the difference
     """
+    if isinstance(location, (list, tuple)) and len(location) == 2:
+        # Already normalized
+        return location
     if location.startswith('http://'):
         location = location[len('http://'):]
     if location.startswith('https://'):

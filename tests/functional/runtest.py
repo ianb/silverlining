@@ -13,7 +13,8 @@ def get_environment():
     env = TestFileEnvironment(os.path.join(here, 'test-data'))
     return env
 
-stage_seq = ['create-node', 'setup-node', 'clean', 'update', 'update-path', 'query']
+stage_seq = ['create-node', 'setup-node', 'clean', 'update', 'update-path',
+             'query', 'activation']
 
 
 def run_stage(name, match):
@@ -83,6 +84,12 @@ def run_test(name, stage=None):
             assert 'default-disabled: disabled/' in result.stdout
             assert 'functest' in result.stdout
             assert re.search(r'functest.*?: %s/' % name, result.stdout)
+
+        if run_stage(stage, 'activation'):
+            print env.run('silver --yes deactivate %s/test' % name)
+            print env.run('silver --yes query %s' % name)
+            print env.run('silver --yes activate %s prev' % name)
+            print env.run('silver --yes query %s' % name)
 
     finally:
         print 'Name used: %s' % name

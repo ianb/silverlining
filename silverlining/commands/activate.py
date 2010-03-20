@@ -1,6 +1,6 @@
 """Routines to activate instances for specific locations"""
 from silversupport.shell import ssh
-from silveruspport import appdata
+from silversupport import appdata
 
 
 def command_activate(config):
