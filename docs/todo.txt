@@ -616,22 +616,24 @@ like::
 Yes (which would work with ``--yes``) would just keep going, No
 aborts, Update would run setup-node immediately and then continue.
 
+Serve general files
+-------------------
+
+You can use `mod_negotiation
+<http://httpd.apache.org/docs/2.2/mod/mod_negotiation.html>`_ to serve
+static files without extensions.
+
 Short-term list
 ---------------
 
 Here's what I want to do right away:
 
-* Revise the terminology
-  - Rename what needs renaming
-  - Change hostname to location (hostname+path)
 * Switch to Karmic-only (no Jaunty)
   - Set up default ``--image-id`` for node creation
 * Set up a continuous integration server
   - Rackspace account seems all setup and comp'd
 * Write a VirtualBox libcloud driver (for testing)
   - Will use VBoxManage
-* Make the code a little easier to navigate
-  - ``silverlining/server-files/serverroot/var/www/support/tcsupport`` is too nested
 * Backup/restore
   - Consider how this interacts with testing
   - Specifically the Django ``test_*`` databases
@@ -642,18 +644,11 @@ Here's what I want to do right away:
 * Set up DevAuth for admin access
 * Support apps like a log viewer app (w/ DevAuth)
 * Switch things that take URLs to take URLs or scripts (like ``update_fetch``)
-* Abstract all the ssh stuff into a seperate library.
-* Move some of the files out of ``/var/www/support`` (maybe into
-  ``/var/lib/silverlining/support``?)
-* Start using a dynamic RewriteMap.
 * Get https working in some fashion.  (Ad hoc https seems to only get
   harder over time though)
-* Document and be explicit about where all the files go (e.g.,
-  ``/var/log/silverlining/``)
 * Separate out logs more intelligently in a per-app manner.
 * Put host name into apache access logs (since they are hard to
   separate out otherwise)
 * Look into the Varnish logs (Apache logs aren't that complete,
   really)
-* Make all the app activation unified
 * Make the instantiated app available in the interactive shell
