@@ -60,5 +60,5 @@ def command_run(config):
     stdout, stderr, returncode = ssh(
         args.user, args.host,
         '/usr/local/share/silverlining/mgr-scripts/run-command.py %s %s %s %s' %
-        (args.host, location, args.script, shell_escape(translated_args)))
+        (args.host, location, args.script, ' '.join(shell_escape(a) for a in translated_args)))
     return returncode
