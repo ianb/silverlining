@@ -58,7 +58,10 @@ RewriteEngine on
 # Strip www. from all (non-https) domains:
 RewriteCond %{SERVER_PORT} ^8080$
 RewriteCond %{HTTP_HOST} ^www\.(.*)$
-RewriteRule (.*) http://%1$1 [R=permanent,L]
+RewriteRule (.*) http://%1$1 [L,R=permanent]
+
+RewriteCond %{HTTP_HOST} ^(.*)(:8080)?$
+RewriteRule . - [E=SILVER_REDIR_HOST:http://%1]
 
 # Needed?
 #RewriteLock /var/lock/apache2/rewrite_map.lck
@@ -67,7 +70,7 @@ RewriteCond ${appdata:%{HTTP_HOST}^%{REQUEST_URI}} (.*)
 RewriteRule . - [E=SILVER_APP_DATA:%1]
 # Special case redirect:
 RewriteCond %{ENV:SILVER_APP_DATA} ^addslash$
-RewriteRule (.*) $1/ [R=permanent,L]
+RewriteRule (.*) %{ENV:SILVER_REDIR_HOST}$1/ [L,R=permanent]
 RewriteCond %{ENV:SILVER_APP_DATA} ^error:(.*)$
 RewriteRule . /usr/local/share/silverlining/error/routing-error.html [R=500,L,E=ERROR_MSG:%1]
 RewriteCond %{ENV:SILVER_APP_DATA} (.*)\|(.*)\|(.*)\|(.*)\|(.*)\|(.*)
@@ -88,7 +91,7 @@ RewriteRule . - [E=SILVER_APP_NAME:%1]
 
 # Refuse /index.html files (redirect):
 RewriteCond /var/www/%{ENV:SILVER_INSTANCE_NAME}/static%{REQUEST_URI} -f
-RewriteRule (.*/)index.html $1 [L]
+RewriteRule (.*/)index.html %{ENV:SILVER_REDIR_HOST}$1 [L,R=permanent]
 # Serve up any static files:
 RewriteCond /var/www/%{ENV:SILVER_INSTANCE_NAME}/static%{REQUEST_URI} -f
 RewriteRule . /var/www/%{ENV:SILVER_INSTANCE_NAME}/static%{REQUEST_URI} [L]
@@ -96,7 +99,7 @@ RewriteRule . /var/www/%{ENV:SILVER_INSTANCE_NAME}/static%{REQUEST_URI} [L]
 RewriteCond /var/www/%{ENV:SILVER_INSTANCE_NAME}/static%{REQUEST_URI} -d
 RewriteCond %{REQUEST_URI} [^/]$
 RewriteCond /var/www/%{ENV:SILVER_INSTANCE_NAME}/static%{REQUEST_URI}/index.html -f
-RewriteRule (.*) $1/ [R=permanent]
+RewriteRule (.*) %{ENV:SILVER_REDIR_HOST}$1/ [L,R=permanent]
 # Otherwise serve up index.html:
 RewriteCond /var/www/%{ENV:SILVER_INSTANCE_NAME}/static%{REQUEST_URI}/index.html -f
 RewriteRule . /var/www/%{ENV:SILVER_INSTANCE_NAME}/static%{REQUEST_URI}/index.html [L]
@@ -105,7 +108,7 @@ RewriteRule . /var/www/%{ENV:SILVER_INSTANCE_NAME}/static%{REQUEST_URI}/index.ht
 ## Repeat static serving for writable-root files:
 # Refuse /index.html files (redirect):
 RewriteCond %{ENV:CONFIG_WRITABLE_ROOT}%{REQUEST_URI} -f
-RewriteRule (.*/)index.html $1 [L]
+RewriteRule (.*/)index.html %{ENV:SILVER_REDIR_HOST}$1 [L,R=permanent]
 # Serve up any static files:
 RewriteCond %{ENV:CONFIG_WRITABLE_ROOT}%{REQUEST_URI} -f
 RewriteRule . %{ENV:CONFIG_WRITABLE_ROOT}%{REQUEST_URI} [L]
@@ -113,7 +116,7 @@ RewriteRule . %{ENV:CONFIG_WRITABLE_ROOT}%{REQUEST_URI} [L]
 RewriteCond %{ENV:CONFIG_WRITABLE_ROOT}%{REQUEST_URI} -d
 RewriteCond %{REQUEST_URI} [^/]$
 RewriteCond %{ENV:CONFIG_WRITABLE_ROOT}%{REQUEST_URI}/index.html -f
-RewriteRule (.*) $1/ [R]
+RewriteRule (.*) %{ENV:SILVER_REDIR_HOST}$1/ [L,R=permanent]
 # Otherwise serve up index.html:
 RewriteCond %{ENV:CONFIG_WRITABLE_ROOT}%{REQUEST_URI}/index.html -f
 RewriteRule . %{ENV:CONFIG_WRITABLE_ROOT}%{REQUEST_URI}/index.html [L]
