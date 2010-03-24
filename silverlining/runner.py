@@ -282,6 +282,37 @@ parser_deactivate.add_argument(
     '--keep-prev', action='store_true',
     help="Keep the prev.* host activate (by default it is deleted)")
 
+# This is a mock for use with -h:
+parser_run_mock = subcommands.add_parser(
+    'run', help="Run a command on a remote host")
+
+parser_run_mock.add_argument(
+    '-p', '--provider',
+    metavar='NAME',
+    help="The [provider:NAME] section from ~/.silverlining.conf to use (default [provider:default])",
+    default="default")
+
+parser_run_mock.add_argument(
+    '-y', '--yes',
+    action='store_true',
+    help="Answer yes to any questions")
+
+#add_verbose(parser_run, add_log=True)
+
+parser_run_mock.add_argument(
+    'host',
+    help="Host where the application is running")
+
+parser_run_mock.add_argument(
+    'script',
+    help="script (in bin/) to run")
+
+parser_run_mock.add_argument(
+    '--user', metavar='USERNAME',
+    default="www-data",
+    help="The user to run the command as; default is www-data.  "
+    "Other options are www-mgr and root")
+
 
 def catch_error(func):
     """Catch CommandError and turn it into an error message"""
@@ -302,6 +333,10 @@ def main():
         return
     if len(sys.argv) > 1 and sys.argv[1] == 'run':
         # Special case for silver run:
+        if sys.argv[2:] in [['-h'], ['--help']]:
+            # Don't generally catch this, as you might want to pass this option
+            print parser_run.format_help()
+            return 0
         args, unknown_args = parser_run.parse_known_args(sys.argv[2:])
         args.unknown_args = unknown_args
         args.command = 'run'
