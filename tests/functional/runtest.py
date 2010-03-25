@@ -21,7 +21,7 @@ def run_stage(name, match):
     return match in stage_seq[stage_seq.index(name):]
 
 
-def run_test(name, stage=None):
+def run_test(name, stage=None, ci=False):
     try:
         if stage is None:
             if name:
@@ -99,11 +99,15 @@ def run_test(name, stage=None):
 
     finally:
         print 'Name used: %s' % name
+        if ci:
+            print 'Cleaning up server'
+            env.run('silver --yes destroy-node %s' % name)
 
 if __name__ == '__main__':
     import optparse
     parser = optparse.OptionParser()
     parser.add_option('--name')
     parser.add_option('--stage')
+    parser.add_option('--ci', action='store_true')
     options, args = parser.parse_args()
-    run_test(options.name, options.stage or None)
+    run_test(options.name, options.stage or None, options.ci)
