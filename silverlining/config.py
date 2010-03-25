@@ -1,3 +1,4 @@
+import sys
 from initools.configparser import ConfigParser
 from UserDict import UserDict
 from cmdutils import CommandError
@@ -43,7 +44,14 @@ class Config(UserDict):
     def driver(self):
         if self._driver is None:
             provider = self['provider']
-            DriverClass = libcloud_get_driver(getattr(Provider, provider.upper()))
+            if ':' in provider:
+                # Then it's a module import path
+                mod, obj_name = provider.split(':', 1)
+                __import__(mod)
+                mod = sys.modules[mod]
+                DriverClass = getattr(mod, obj_name)
+            else:
+                DriverClass = libcloud_get_driver(getattr(Provider, provider.upper()))
             self._driver = DriverClass(self['username'], self['secret'])
         return self._driver
 
