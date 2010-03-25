@@ -64,6 +64,12 @@ def run_test(name, stage=None):
                              % (os.path.join(here, 'example-app'), name),
                              expect_stderr=True)
             print result
+            resp = urllib.urlopen('http://%s/update' % name).read()
+            print 'Got HTTP response:\n%s' % resp
+            assert ('SILVER_CANONICAL_HOST=%s' % name) in resp
+            assert 'wsgi.multiprocess=True' in resp
+            assert 'wsgi.multithread=True' in resp
+            assert "path='' '/update'" in resp
 
         if run_stage(stage, 'update-path'):
             print 'Doing update to path'
