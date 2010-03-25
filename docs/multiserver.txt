@@ -3,11 +3,14 @@ Design Notes On Multiple Server Support
 
 What should it look like to support multiple servers?
 
-Here's an imagined config file::
+Multiple servers will make up a "set".  In particular, a "nodeset".  A
+configuration file will describe this::
 
     [general]
     # Just naming the general setup:
     name = my-server-setup
+    # This is used for filling in node names if they aren't explicitly given:
+    base_domain = foobar.com
     # If you set this to false, then /etc/hosts won't be updated:
     set_etc_hosts = false
 
@@ -25,7 +28,7 @@ Here's an imagined config file::
     # This describes the app server
     # You can have multiple things setup:
     locations =
-        http://foobar.com/ app1
+        http://foobar.com/ APP_NAME1
 
     # You can setup multiple nodes:
     nodes = 10
@@ -38,13 +41,12 @@ Here's an imagined config file::
     size = ram 256MB
 
     # This is used to name the nodes:
-    node_names = app{{n}}.foobar.com
+    node_name = app{{n}}.foobar.com
 
-    [app:app1]
-    # There is a section for each application
-    # I'm really uncomfortable with this part...
-    dir = /path/to/app1
-    # Name is automatically picked up from [app:app1]
+    # If not provided, this will be automatically determined by the
+    # number of nodes (1=no balancing), and the existence of a
+    # [balancer] section.
+    load_balancer = true
 
     [service:mysql]
     # How many nodes to assign:
@@ -54,29 +56,83 @@ Here's an imagined config file::
 
     [balancer]
     # Describes the load balancer
+    node_name = balancer.foobar.com
     hostnames = foobar.com
         baz.com
 
-We need a name for this thing.  Server-set?  Interpolation will be
-available anywhere in this file, using `this pattern
+This describes a set of nodes/servers, imagine this file is named
+``foobar.conf``.  The commands for creating and setting up nodes
+will take nodeset configurations, like::
+
+    silver create-node foobar.conf
+    silver setup-node foobar.conf
+
+The command will specifically look for ``.conf`` in the name, then
+inferring it is not a domain name.
+
+Then this configuration file will also be a target just like a
+"location".  E.g., you can do::
+
+    silver update myapp/ foobar.conf
+
+This will match the name against the locations in the configuration
+file to determine where exactly to upload the application to.
+
+Interpolation will be available anywhere in the configuration file,
+using `this pattern
 <http://blog.ianbicking.org/2009/04/20/treating-configuration-values-as-templates/>`_.
+This way you can extend another file (using buildout-style directives;
+these are already built into `INITools
+<http://pythonpaste.org/initools/>`_) and abstract out aspects through
+various variables (including environmental variables).
 
-Then Silver Lining will deploy this set.  First it figures out what
-servers will be allocated, and what the names of those servers are.
-It will check if the named servers already exist and create any that
-need to be created.  The ``setup-node`` setup will be refactored some,
-so basic setup is separate from app server setup.  Basic setup handles
-users, logging, a few other things.  app server setup installs Apache,
-etc.  Services and the load balance will probably just work off the
-base server.  Services will have to have their API extended slightly.
-Also all servers will get configuration pointing to each other (all
-the same configuration).  So the service code running on the app
-server will know where the service was installed, and can communicate
-to that other service.
+When running ``create-node`` and ``setup-node`` all the servers needed
+will be enumerated and named.  ``create-node`` will create any new
+nodes necessary (and can be run to scale up -- not sure how to scale
+down except manually deleting nodes, ``delete-node foobar.conf`` won't
+really work).
 
-When deploying an application, first it will setup the services,
-ssh'ing directly into the service machine and setting up the service.
-Then it will upload the application to the appservers.  It won't
-actually activate this new application, it will just upload them, and
-then activate them all in a second step.  This includes
-``update_fetch``.
+``setup-node`` will need to support multiple kinds of servers.  There
+will first be a basic setup (install normal libraries, users,
+authentication).  Then another layer of setup on top: one for an
+appserver (what we are doing now), one for a service (not much more
+than the basic setup), and one for the load balancer.  All servers
+will be updated with configuration pointing to all the other servers,
+including ``/etc/hosts`` entries for all the domain names.  This
+configuration will probably look roughly like::
+
+    appserver = app1.foobar.com 10.4.3.2
+    appserver = app2.foobar.com 10.4.3.3
+    appserver = app3.foobar.com 10.4.3.4
+    service.mysql = mysql.foobar.com 10.4.3.5
+    balancer = balancer.foobar.com 10.4.3.6
+
+The balancer will use this to find the appservers, and the appservers
+will use this to configure their services.  I guess ssh keys will be
+setup for automated ssh'ing between these machines?  Not sure if it is
+necessary.
+
+The update will be a bit more sophisticated.  Imagine you are updating
+an application with this ``app.ini``::
+
+    [production]
+    app_name = blog
+    service.mysql =
+    update_fetch = /setup-stuff
+
+On update first ``silver`` will connect to ``mysql.foobar.com`` and
+setup the service for this application.  This mostly just creates the
+database if necessary.  Then it will half-deploy this application to
+all app servers.  The application will be deployed but not active.
+Then it will activate the first application and do ``update_fetch``,
+then activate the rest of the applications.  (Maybe running
+``update_fetch`` everywhere, but with a special flag to note it's not
+the primary update.)
+
+The service ``app_setup()`` code will run on each app server, but it
+will use the configuration to actually fill in some of those values,
+now pointing to another server instead of a local server.  Also the
+``install()`` function will be run on both the appservers and the
+service servers (with a flag to indicate the different environments).
+Client libraries still get loaded in the appserver, servers in the
+service servers.
