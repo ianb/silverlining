@@ -55,9 +55,14 @@ def get_app(environ):
     environ['SILVER_VERSION'] = os.environ['SILVER_VERSION'] = 'silverlining/0.0'
     if 'SILVER_MATCH_PATH' in environ:
         path = urllib.unquote(environ.pop('SILVER_MATCH_PATH'))
-        environ['SCRIPT_NAME'] += path
-        assert environ['PATH_INFO'].startswith(path)
-        environ['PATH_INFO'] = environ['PATH_INFO'][len(path):]
+        if path != '/':
+            # Only paths besides / are interesting
+            environ['SCRIPT_NAME'] += path
+            assert environ['PATH_INFO'].startswith(path)
+            environ['PATH_INFO'] = environ['PATH_INFO'][len(path):]
+            assert not environ['PATH_INFO'] or environ['PATH_INFO'].startswith('/'), (
+                "Bad PATH_INFO: %r (SCRIPT_NAME: %r, SILVER_MATCH_PATH: %r)" %
+                (environ['PATH_INFO'], environ['SCRIPT_NAME'], path))
 
     # Fixup port and ipaddress
     environ['SERVER_PORT'] = '80'
