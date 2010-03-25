@@ -39,11 +39,12 @@ Author, license, etc
 --------------------
 
 This is written by `Ian Bicking <http://ianbicking.org>`_; you might
-`email him <mailto:ianb@colorstudy.com>`_ with feedback, or `open a
-ticket <http://bitbucket.org/ianb/silverlining/issues/>`_, or maybe
-head on over to FreeNode, #pythonpaste.  There's a `bitbucket
-repository <http://bitbucket.org/ianb/silverlining>`_.  It was written
-with support by `The Open Planning Project <http://openplans.org>`_.
+`join the list <http://groups.google.com/group/silverlining-dev>`_ or
+`open a ticket <http://bitbucket.org/ianb/silverlining/issues/>`_, or
+maybe head on over to FreeNode, ``#silverlining``.  There's a
+`bitbucket repository <http://bitbucket.org/ianb/silverlining>`_.  It
+was written with support by `The Open Planning Project
+<http://openplans.org>`_.
 
 It's under the `GPL <license.html>`_, though that **does not** imply
 anything with respect to the licensing on applications that use this
