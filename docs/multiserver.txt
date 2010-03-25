@@ -1,0 +1,82 @@
+Design Notes On Multiple Server Support
+=======================================
+
+What should it look like to support multiple servers?
+
+Here's an imagined config file::
+
+    [general]
+    # Just naming the general setup:
+    name = my-server-setup
+    # If you set this to false, then /etc/hosts won't be updated:
+    set_etc_hosts = false
+
+    [provider]
+    # You can just look up a provider in ~/.silverlining.conf:
+    name = whatever
+    # Or specify all the values:
+    provider = rackspace
+    username = foobar
+    secret = XXX
+    # or:
+    secret_file = ${HOME}/.rackspace-secret.txt
+
+    [appserver]
+    # This describes the app server
+    # You can have multiple things setup:
+    locations =
+        http://foobar.com/ app1
+
+    # You can setup multiple nodes:
+    nodes = 10
+    # default being 1, of course.
+
+    # You can indicate the size of these nodes too:
+    size = id 1
+    # You can also give the size in MB of ram (since that generally
+    # increments):
+    size = ram 256MB
+
+    # This is used to name the nodes:
+    node_names = app{{n}}.foobar.com
+
+    [app:app1]
+    # There is a section for each application
+    # I'm really uncomfortable with this part...
+    dir = /path/to/app1
+    # Name is automatically picked up from [app:app1]
+
+    [service:mysql]
+    # How many nodes to assign:
+    nodes = 1
+    # Without special support, generally just 1 node is supported
+    # also node_name/size
+
+    [balancer]
+    # Describes the load balancer
+    hostnames = foobar.com
+        baz.com
+
+We need a name for this thing.  Server-set?  Interpolation will be
+available anywhere in this file, using `this pattern
+<http://blog.ianbicking.org/2009/04/20/treating-configuration-values-as-templates/>`_.
+
+Then Silver Lining will deploy this set.  First it figures out what
+servers will be allocated, and what the names of those servers are.
+It will check if the named servers already exist and create any that
+need to be created.  The ``setup-node`` setup will be refactored some,
+so basic setup is separate from app server setup.  Basic setup handles
+users, logging, a few other things.  app server setup installs Apache,
+etc.  Services and the load balance will probably just work off the
+base server.  Services will have to have their API extended slightly.
+Also all servers will get configuration pointing to each other (all
+the same configuration).  So the service code running on the app
+server will know where the service was installed, and can communicate
+to that other service.
+
+When deploying an application, first it will setup the services,
+ssh'ing directly into the service machine and setting up the service.
+Then it will upload the application to the appservers.  It won't
+actually activate this new application, it will just upload them, and
+then activate them all in a second step.  This includes
+``update_fetch``.
