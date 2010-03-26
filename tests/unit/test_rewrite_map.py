@@ -9,6 +9,7 @@ rewritemap = new.module('rewritemap')
 rewritemap.__file__ = rewrite_map_fn
 execfile(rewrite_map_fn, rewritemap.__dict__)
 
+
 def test_rewrite_map():
     data = StringIO("""\
 test1.example.com / test1-root
@@ -22,7 +23,7 @@ test2.example.com seeother test1.example.com
     rewritemap.read_file_data(data)
     assert 'test1.example.com' in rewritemap.abs_hostnames, (
         rewritemap.abs_hostnames)
-    
+
     assert '*' in rewritemap.glob_hostnames, (
         rewritemap.glob_hostnames)
     assert '.example.com' in rewritemap.glob_hostnames
@@ -43,11 +44,12 @@ nothing.notfound^/blog/foo /blog all-blog""".splitlines()
         assert result == output, (
             "Bad result: %r -> %r" % (line, result))
 
+
 def test_appdata():
     from silversupport import appdata
     locations = ['http://foo.com/bar', 'example.com/',
                  'test1.example.com', 'example.com/blog']
-    assert appdata.normalize_locations(locations) == (
+    assert [appdata.normalize_location(l) for l in locations] == (
         [('foo.com', '/bar'), ('example.com', '/'),
          ('test1.example.com', '/'), ('example.com', '/blog')])
     existing = """\
@@ -56,18 +58,19 @@ example.com / app_name.1|general|/dev/null|python|
 example.com /blog blog_name|general|/var/lib/silverlining/app/writable-roots/blog_name|python|
 example.com /wiki media_name|general|/dev/null|php|mediawiki
 """
-    vars = dict(app_name='app_name.2', platform='python',
+    vars = dict(instance_name='app_name.2', platform='python',
                 php_root='', process_group='general_debug',
                 write_root='/dev/null')
     new = appdata.rewrite_lines(existing, [('example.com', '/'), ('test2.example.com', '/stage')],
-                                vars)
+                                True, vars)
     assert new == """\
 # Here are some lines:
+prev.example.com / app_name.1|general|/dev/null|python|
 example.com /blog blog_name|general|/var/lib/silverlining/app/writable-roots/blog_name|python|
 example.com /wiki media_name|general|/dev/null|php|mediawiki
 example.com / app_name.2|general_debug|/dev/null|python|
 test2.example.com /stage app_name.2|general_debug|/dev/null|python|
-"""
+""", new
 
 if __name__ == '__main__':
     test_rewrite_map()
