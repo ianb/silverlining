@@ -2,6 +2,7 @@
 import sys
 sys.path.insert(0, '/usr/local/share/silverlining/lib')
 from silversupport.appdata import add_appdata
+from silversupport.appconfig import AppConfig
 from optparse import OptionParser
 
 parser = OptionParser(
@@ -20,4 +21,7 @@ parser.add_option(
 if __name__ == '__main__':
     options, args = parser.parse_args()
     instance_name = args[0]
-    add_appdata(instance_name, args[1:], debug_single_process=options.debug_single_process)
+    app_config = AppConfig.from_instance_name(instance_name)
+    add_appdata(app_config, args[1:], debug_single_process=options.debug_single_process)
+    if app_config.platform == 'php':
+        app_config.write_php_env()

@@ -9,7 +9,7 @@ __all__ = ['add_appdata', 'normalize_location',
            'list_instances']
 
 
-def add_appdata(instance_name, locations, debug_single_process=False,
+def add_appdata(app_config, locations, debug_single_process=False,
                 add_prev=True):
     """Adds new application deployment to appdata.map
 
@@ -17,14 +17,15 @@ def add_appdata(instance_name, locations, debug_single_process=False,
     `add_prev` is true then any old instances at these locations will
     be moved to a prev.* hostname
     """
-    app_config = AppConfig.from_instance_name(instance_name)
+    if isinstance(app_config, basestring):
+        app_config = AppConfig.from_instance_name(app_config)
     if debug_single_process:
         process_group = 'general_debug'
     else:
         process_group = 'general'
     locations = [normalize_location(l) for l in locations]
     new_lines = rewrite_lines(appdata_lines(), locations, add_prev, dict(
-        instance_name=instance_name, platform=app_config.platform,
+        instance_name=app_config.instance_name, platform=app_config.platform,
         process_group=process_group, php_root=app_config.php_root,
         write_root=app_config.writable_root_location))
     fp = open(APPDATA_MAP, 'w')

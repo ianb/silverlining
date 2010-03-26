@@ -220,6 +220,18 @@ class AppConfig(object):
         else:
             return None
 
+    def write_php_env(self):
+        assert self.platform == 'php'
+        filename = os.path.join(self.app_dir, 'silver-env-variables.php')
+        fp = open(filename, 'w')
+        fp.write('<?\n')
+        env = {}
+        self.activate_services(env)
+        for name, value in sorted(env.iteritems()):
+            fp.write('$_SERVER[%s] = %r;\n' % (name, value))
+        fp.write('?>')
+        fp.close()
+
     def sync(self, host, instance_name):
         """Synchronize this application (locally) with a remove server
         at the given host.
