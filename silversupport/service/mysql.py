@@ -9,12 +9,20 @@ packages = [
     'python-mysqldb',
     ]
 
+platform_packages = dict(
+    python=['python-mysqldb'],
+    php=['php5-mysql'],
+    )
+
 
 def install(app_config, config):
     if not os.path.exists('/usr/bin/mysqld_multi'):
-        apt_install(packages)
+        apt_install(packages + platform_packages[app_config.platform])
         run(['/usr/bin/mysql', '-u', 'root',
              '-e', 'CREATE USER wwwmgr'])
+        if app_config.platform == 'php':
+            # We need to restart Apache after installing php5-mysql
+            run(['/etc/init.d/apache2', 'restart'])
 
     app_name = app_config.app_name
     stdout, stderr, returncode = run(
@@ -35,13 +43,18 @@ def install(app_config, config):
 def app_setup(app_config, config, environ,
               devel=False, devel_config=None):
     app_name = app_config.app_name
+    platform = app_config.platform
     if not devel:
         environ['CONFIG_MYSQL_DBNAME'] = app_name
         environ['CONFIG_MYSQL_USER'] = 'wwwmgr'
         environ['CONFIG_MYSQL_PASSWORD'] = ''
-        environ['CONFIG_MYSQL_HOST'] = ''
+        if platform == 'php':
+            environ['CONFIG_MYSQL_HOST'] = 'localhost'
+        else:
+            environ['CONFIG_MYSQL_HOST'] = ''
         environ['CONFIG_MYSQL_PORT'] = ''
-        environ['CONFIG_MYSQL_SQLALCHEMY'] = 'mysql://wwwmgr@/%s' % app_name
+        if platform == 'python':
+            environ['CONFIG_MYSQL_SQLALCHEMY'] = 'mysql://wwwmgr@/%s' % app_name
     else:
         environ['CONFIG_MYSQL_DBNAME'] = app_name
         environ['CONFIG_MYSQL_USER'] = 'root'

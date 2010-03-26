@@ -12,19 +12,26 @@ packages = [
     'postgresql-client-8.3',
     'postgresql-client-common',
     'postgresql-common',
-    'python-psycopg2',
-    'python-egenix-mxdatetime',
-    'python-egenix-mxtools',
-    'python-gdal',
     'proj',
-    'python-pyproj',
-    'python-pyproj-data',
     ]
+
+platform_packages = dict(
+    python=[
+        'python-psycopg2',
+        'python-egenix-mxdatetime',
+        'python-egenix-mxtools',
+        'python-gdal',
+        'python-pyproj',
+        'python-pyproj-data',
+        ],
+    php=[
+        'php5-pgsql',
+        ])
 
 
 def install(app_config, config):
     if not os.path.exists('/usr/bin/psql'):
-        apt_install(packages)
+        apt_install(packages+platform_packages[app_config.platform])
         shutil.copyfile(os.path.join(os.path.dirname(__file__),
                                      'postgis-pg_hba.conf'),
                         '/etc/postgresql/8.3/main/pg_hba.conf')
@@ -58,7 +65,8 @@ def install(app_config, config):
         parts.append("GRANT ALL ON geometry_columns TO PUBLIC;\n")
         parts.append("GRANT ALL ON spatial_ref_sys TO PUBLIC;\n")
         run(['psql', '-U', 'postgres', 'template_postgis'],
-            stdin=''.join(parts))
+            stdin=''.join(parts),
+            capture_stdout=True)
 
     app_name = app_config.app_name
     stdout, stderr, returncode = run(

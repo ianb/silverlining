@@ -14,7 +14,7 @@ $silver_runner = $silver_app_config['production']['runner'];
 
 define('SILVER_SECRET', file_get_contents('/var/lib/silverlining/secret.txt'));
 
-include("{$silver_base}/silver-env-variables.php");
-include("{$silver_base}/{$silver_runner}");
+include "{$silver_base}/silver-env-variables.php";
+include "{$silver_base}/{$silver_runner}";
 
 ?>
