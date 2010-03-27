@@ -4,11 +4,24 @@ from cStringIO import StringIO
 import os
 import sys
 import urllib
+from silversupport.shell import run
 
-__all__ = ['make_internal_request', 'create_wsgi_app']
+__all__ = ['internal_request']
 
 
-def make_internal_request(wsgi_app, instance_name, hostname,
+def internal_request(app_config, hostname, path, body=None, environ=None):
+    if app_config.platform == 'python':
+        func = wsgi_internal_request
+    elif app_config.platform == 'php':
+        func = php_internal_request
+    else:
+        assert 0
+    return func(
+        app_config,
+        hostname, path, body, environ)
+
+
+def wsgi_internal_request(app_config, instance_name, hostname,
                           path, body=None, environ=None):
     """Make an internal request:
 
@@ -31,6 +44,7 @@ def make_internal_request(wsgi_app, instance_name, hostname,
 
     This returns ``(status, header_list, body_as_str)``
     """
+    wsgi_app = app_config.get_app_from_runner()
     basic_environ = {
         'PATH_INFO': urllib.unquote(str(path)),
         'SCRIPT_NAME': '',
@@ -78,6 +92,7 @@ def make_internal_request(wsgi_app, instance_name, hostname,
 
 
 def create_wsgi_app(instance_name):
+    ## FIXME: should this even exist?
     os.environ['SITE'] = instance_name
     fn = '/usr/local/share/silverlining/mgr-scripts/master-runner.py'
     ns = {'__file__': fn,
@@ -85,3 +100,26 @@ def create_wsgi_app(instance_name):
     execfile(fn, ns)
     wsgi_app = ns['application']
     return wsgi_app
+
+
+def php_internal_request(app_config, hostname, path, body=None, environ=None):
+    assert app_config.platform == 'php'
+    env = {}
+    env['SILVER_SCRIPT_NAME'] = env['SCRIPT_NAME'] = urllib.unquote(path)
+    env['SILVER_INSTANCE_NAME'] = app_config.instance_name
+    env['SILVER_CANONICAL_HOSTNAME'] = hostname
+    ## FIXME: nice if this was more... intelligent:
+    env['SILVER_MATCH_PATH'] = '/'
+    if body:
+        env['REQUEST_METHOD'] = 'POST'
+    else:
+        env['REQUEST_METHOD'] = 'GET'
+    env.update(environ)
+    for key, value in env.items():
+        if not isinstance(value, str):
+            env[key] = str(value)
+    stdout, stderr, returncode = run(
+        ['php5', '/usr/local/share/silverlining/mgr-scripts/master-runner.php'], capture_stdout=True,
+        extra_env=env, stdin=body)
+    print stdout
+    return '200 OK', [], stdout

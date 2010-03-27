@@ -1,10 +1,9 @@
 #!/usr/bin/env python
 import sys
 sys.path.insert(0, '/usr/local/share/silverlining/lib')
-import os
-from silversupport.requests import make_internal_request, create_wsgi_app
-from ConfigParser import ConfigParser
 from optparse import OptionParser
+from silversupport.requests import internal_request
+from silversupport.appconfig import AppConfig
 
 parser = OptionParser(
     usage="%prog (--update INSTANCE_NAME) or (INSTANCE_NAME HOSTNAME PATH VAR1=value VAR2=value)",
@@ -24,6 +23,7 @@ parser.add_option(
     action='store_true',
     help="Run the update_fetch command on the given app_name")
 
+
 def run():
     """Run the command, making an internal request"""
     options, args = parser.parse_args()
@@ -39,11 +39,12 @@ def run():
         for arg in args[4:]:
             name, value = arg.split('=', 1)
             environ[name] = value
-    app = create_wsgi_app(instance_name)
-    status, headers, body = make_internal_request(
-        app, instance_name, hostname,
+    app_config = AppConfig.from_instance_name(instance_name)
+    status, headers, body = internal_request(
+        app_config, hostname,
         path, body=body, environ=environ)
     write_output(status, headers, body)
+
 
 def write_output(status, headers, body):
     sys.stdout.write('%s\n' % status)
@@ -53,30 +54,24 @@ def write_output(status, headers, body):
     sys.stdout.flush()
     sys.stdout.write(body)
 
+
 def run_update(instance_name, hostname):
     """Run the --update command, running any request configured with
     update_fetch in app.ini"""
-    app_ini = os.path.join('/var/www', instance_name, 'app.ini')
-    parser = ConfigParser()
-    parser.read([app_ini])
-    if parser.has_option('production', 'update_fetch'):
-        urls = parser.get('production', 'update_fetch')
-        urls = [url for url in urls.splitlines()
-                if url.strip() and not url.strip().startswith('#')]
-        for url in urls:
-            print 'Fetching update URL %s' % url
-            app = create_wsgi_app(instance_name)
-            status, headers, body = make_internal_request(
-                app, instance_name, hostname,
-                url, environ={'silverlining.update': True})
-            if not status.startswith('200'):
-                sys.stdout.write(status+'\n')
-                sys.stdout.flush()
-            if body:
-                sys.stdout.write(body)
-                if not body.endswith('\n'):
-                    sys.stdout.write('\n')
-                sys.stdout.flush()
+    app_config = AppConfig.from_instance_name(instance_name)
+    for url in app_config.update_fetch:
+        print 'Fetching update URL %s' % url
+        status, headers, body = internal_request(
+            app_config, hostname,
+            url, environ={'silverlining.update': True})
+        if not status.startswith('200'):
+            sys.stdout.write(status+'\n')
+            sys.stdout.flush()
+        if body:
+            sys.stdout.write(body)
+            if not body.endswith('\n'):
+                sys.stdout.write('\n')
+            sys.stdout.flush()
 
 if __name__ == '__main__':
     run()

@@ -124,9 +124,9 @@ RewriteRule . %{ENV:CONFIG_WRITABLE_ROOT}%{REQUEST_URI}/index.html [L]
 # Next, if the request points to something that is not a .php file,
 # then serve it up directly...
 RewriteCond %{ENV:SILVER_PLATFORM} ^php$
-RewriteCond /var/www/%{ENV:SILVER_INSTANCE_NAME}/%{ENV:SILVER_PHP_ROOT}%{REQUEST_URI} -f
+RewriteCond %{ENV:SILVER_PHP_ROOT}%{REQUEST_URI} -f
 RewriteCond %{REQUEST_URI} !\.php$
-RewriteRule . /var/www/%{ENV:SILVER_INSTANCE_NAME}/%{ENV:SILVER_PHP_ROOT}%{REQUEST_URI} [L]
+RewriteRule . %{ENV:SILVER_PHP_ROOT}%{REQUEST_URI} [L]
 
 # Lastly, we run the actual PHP:
 RewriteCond %{ENV:SILVER_PLATFORM} ^php$
