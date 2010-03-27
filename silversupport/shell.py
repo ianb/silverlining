@@ -53,9 +53,17 @@ def run(command, extra_env=None, stdin=None,
         kw['stderr'] = subprocess.PIPE
     if cwd:
         kw['cwd'] = cwd
-    proc = subprocess.Popen(
-        command, env=env, **kw)
-    stdout, stderr = proc.communicate(stdin)
+    for key, value in env.items():
+        assert isinstance(value, str), "bad value %r: %r" % (key, value)
+    for v in command:
+        assert isinstance(v, str), "bad command argument %r" % v
+    try:
+        proc = subprocess.Popen(
+            command, env=env, **kw)
+    except OSError, e:
+        raise OSError('Error while running command "%s": %s' % (
+            ' '.join(conditional_shell_escape(i) for i in command), e))
+    stdout, stderr = proc.communicate(stdin or '')
     return stdout, stderr, proc.returncode
 
 
