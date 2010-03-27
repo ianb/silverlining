@@ -149,6 +149,11 @@ parser_update.add_argument(
     metavar='NODE_HOSTNAME',
     help="The hostname of the node to upload to")
 
+parser_update.add_argument(
+    '--clear',
+    action='store_true',
+    help='Clear the database on update (clears all database, files, etc!)')
+
 parser_init = subcommands.add_parser(
     'init', help="Create a new application file layout")
 

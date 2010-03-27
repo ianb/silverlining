@@ -80,7 +80,7 @@ def app_setup(app_config, config, environ,
         environ['CONFIG_MYSQL_SQLALCHEMY'] = sa
 
 
-def backup(app_dir, config, environ, output_dir):
+def backup(app_config, config, environ, output_dir):
     raise NotImplemented
 
 BACKUP_README = """\
@@ -88,9 +88,25 @@ FIXME
 """
 
 
-def restore(app_dir, config, environ, input_dir):
+def restore(app_config, config, environ, input_dir):
     raise NotImplemented
 
 
-def clear(app_dir, config, environ):
-    raise NotImplemented
+def mysql_options(environ):
+    options = []
+    options.append('--user=%s' % environ['CONFIG_MYSQL_USER'])
+    for option, key in [('password', 'PASSWORD'),
+                        ('user', 'USER'),
+                        ('host', 'HOST'),
+                        ('port', 'PORT')]:
+        if environ.get('CONFIG_MYSQL_%s' % key):
+            options.append('--%s=%s' % (option, environ['CONFIG_MYSQL_%s' % key]))
+    options.append(environ['CONFIG_MYSQL_DBNAME'])
+    return options
+
+
+def clear(app_config, config, environ):
+    run(["mysql"] + mysql_options(environ),
+        stdin='DROP DATABASE %s' % environ['CONFIG_MYSQL_DBNAME'])
+    install(app_config, config)
+    print 'Cleared database %s' % environ['CONFIG_MYSQL_DBNAME']

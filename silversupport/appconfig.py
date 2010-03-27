@@ -143,13 +143,19 @@ class AppConfig(object):
             mod.app_setup(self, config, environ,
                           devel=devel, devel_config=devel_config)
 
-    def install_services(self):
+    def install_services(self, clear=False):
         """Installs all the services for this application.
 
         This is run on deployment"""
         for service, config in sorted(self.services.items()):
             mod = self.load_service_module(service)
             mod.install(self, config)
+            if clear:
+                env = {}
+                mod.app_setup(self, config, env)
+                if not hasattr(mod, 'clear'):
+                    print 'Bad module: %s' % mod
+                mod.clear(self, config, env)
 
     def load_service_module(self, service_name):
         """Load the service module for the given service name"""
@@ -171,6 +177,9 @@ class AppConfig(object):
 
     def get_app_from_runner(self):
         """Returns the WSGI app that the runner indicates"""
+        assert self.platform == 'python', (
+            "get_app_from_runner() shouldn't be run on an app with the platform %s"
+            % self.platform)
         runner = self.runner
         if '#' in runner:
             runner, spec = runner.split('#', 1)

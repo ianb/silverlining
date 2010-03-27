@@ -50,10 +50,15 @@ def command_update(config):
     instance_name = match.group(1)
     assert instance_name.startswith(app.app_name), instance_name
     app.sync('www-mgr@%s' % config.node_hostname, instance_name)
+    if config.args.clear:
+        clear_option = '--clear'
+    else:
+        clear_option = ''
     ssh('root', config.node_hostname,
         'python -m compileall -q /var/www/%(instance_name)s; '
-        '/usr/local/share/silverlining/mgr-scripts/update-service.py %(instance_name)s'
-        % dict(instance_name=instance_name))
+        '/usr/local/share/silverlining/mgr-scripts/update-service.py %(instance_name)s %(clear_option)s'
+        % dict(instance_name=instance_name,
+               clear_option=clear_option))
 
     if config.args.debug_single_process:
         debug_single_process = '--debug-single-process'
