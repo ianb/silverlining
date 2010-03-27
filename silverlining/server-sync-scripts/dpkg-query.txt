@@ -1,5 +1,5 @@
 apache2	2.2.11-2ubuntu2
-apache2-mpm-worker	2.2.11-2ubuntu2
+#apache2-mpm-worker	2.2.11-2ubuntu2
 apache2-utils	2.2.11-2ubuntu2
 apache2.2-common	2.2.11-2ubuntu2
 binutils	2.19.1-0ubuntu3

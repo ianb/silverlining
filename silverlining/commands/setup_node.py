@@ -73,7 +73,7 @@ apt-get -y -q=2 install rsync
         os.path.join(__file__, '../../server-sync-scripts/dpkg-query.txt'))))
     packages = ' '.join(line.strip().split()[0]
                         for line in lines
-                        if line.strip())
+                        if line.strip() and not line.strip().startswith('#'))
     stdout, stderr, returncode = ssh(
         'root', node, 'apt-get -y -q=2 install $(cat)',
         stdin=packages)
