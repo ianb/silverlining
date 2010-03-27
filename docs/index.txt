@@ -27,6 +27,7 @@ Silver Lining
     contributors
     Repository <http://bitbucket.org/ianb/silverlining>
     Mailing List <http://groups.google.com/group/silverlining-dev>
+    Continuous Integration Server <http://ci.cloudsilverlining.org>
 
 .. comment: not working
 
