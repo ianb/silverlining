@@ -639,7 +639,6 @@ Here's what I want to do right away:
   - Specifically the Django ``test_*`` databases
 * Setup up deployment for Weave Sync 2.0 API implementation
   - Set up multi-server deployments
-* Deploy WordPress (fix up PHP)
 * Get a PostgreSQL service (no GIS)
 * Set up DevAuth for admin access
 * Support apps like a log viewer app (w/ DevAuth)
