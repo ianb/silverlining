@@ -10,22 +10,14 @@ Enabling PHP
 
 To enable PHP, in your ``app.ini`` file, place::
 
-    service.php =
+    platform = php
     php_root = site/
     runner = site/runner.php
 
-``service.php`` indicates that this is a PHP app.  PHP will be
+``platform = php`` indicates that this is a PHP app.  PHP will be
 installed on the server if necessary.  No PHP libraries will be
-installed!  If you use, for example, ``service.postgis``, then the
-PostgreSQL drivers for PHP won't be installed.  You'll have to arrange
-that yourself, like::
-
-    packages = php5-pgsql
-
-(Note: this should probably be fixed by extending services to be aware
-of what kinds of application is being installed, and then
-``tcsupport.services.postgis`` would start installig this package for
-PHP apps.)
+installed!  However if you use, for example, ``service.postgis``, then
+the PostgreSQL drivers for PHP will be installed.
 
 Requests that point to a file in ``static/`` will (like with Python)
 serve that file directly.  Files that point to something in
@@ -37,7 +29,11 @@ with static files in PHP applications).
 our example).  This PHP file may direct the request wherever it sees
 fit.  If you wish to simply pass it on, you may do so, like::
 
-    include("{$silver_base}/site/{$SCRIPT_NAME}");
+    $path = silver_call_next("{$silver_base}/DEFAULT.php");
+    include $path;
+
+Note if the file isn't found then ``DEFAULT.php`` would have been
+called.
 
 Note that ``.htaccess`` files will not work, so if you need that kind
 of functionality you'll need to implement it directly in your runner.

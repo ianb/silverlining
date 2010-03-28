@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 import sys
 sys.path.insert(0, '/usr/local/share/silverlining/lib')
-from silversupport.appconfig import AppConfig
-from silversupport.shell import apt_install
+import os
 from optparse import OptionParser
+from silversupport.appconfig import AppConfig
+from silversupport.shell import apt_install, run
 
 parser = OptionParser(
     usage="%prog INSTANCE_NAME",
@@ -17,6 +18,13 @@ parser.add_option(
     action='store_true',
     help='Clear the database')
 
+php_packages = [
+    'php5',
+    'php5-cgi',
+    'php5-cli',
+    'libapache2-mod-php5',
+    ]
+
 
 def update_service(instance_name, clear=False):
     app_config = AppConfig.from_instance_name(instance_name)
@@ -25,6 +33,13 @@ def update_service(instance_name, clear=False):
     if packages:
         print 'Confirming packages installed: %s' % ', '.join(packages)
         apt_install(packages)
+    if (app_config.platform == 'php' and
+        (not os.path.exists('/usr/share/doc/php5')
+         or not os.path.exists('/usr/bin/php5'))):
+        apt_install(packages)
+        run(['a2enmod', 'php5'])
+        run(['/etc/init.d/apache2', 'restart'])
+
 
 if __name__ == '__main__':
     options, args = parser.parse_args()
