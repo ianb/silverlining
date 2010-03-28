@@ -318,6 +318,18 @@ parser_run_mock.add_argument(
     help="The user to run the command as; default is www-data.  "
     "Other options are www-mgr and root")
 
+parser_backup = subcommands.add_parser(
+    'backup', help="Backup a deployed application's data")
+
+parser_backup.add_argument(
+    'location', metavar="LOCATION",
+    help="The location to back up (i.e., the server and application)")
+
+parser_backup.add_argument(
+    'destination', metavar='DESTINATION',
+    help="Destination to back up to.  Can be a local file, remote:filename, "
+    "site://location, ssh://hostname/location rsync://hostname/location")
+
 
 def catch_error(func):
     """Catch CommandError and turn it into an error message"""

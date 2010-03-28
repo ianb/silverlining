@@ -81,15 +81,25 @@ def app_setup(app_config, config, environ,
 
 
 def backup(app_config, config, environ, output_dir):
-    raise NotImplemented
+    outfile = os.path.join(output_dir, 'mysql.dump')
+    run(["mysqldump"] + mysql_options(environ) + ['--result-file', outfile])
+    fp = open(os.path.join(output_dir, 'README.txt'), 'w')
+    fp.write(BACKUP_README)
+    fp.close()
 
 BACKUP_README = """\
-FIXME
+The file mysql.dump was created with mysqldump; you can pip it into
+mysql to restore.
 """
 
 
 def restore(app_config, config, environ, input_dir):
-    raise NotImplemented
+    input_file = os.path.join(input_dir, 'mysql.dump')
+    fp = open(input_file)
+    content = fp.read()
+    fp.close()
+    run(['mysql'] + mysql_options(environ) + ['--silent'],
+        stdin=content)
 
 
 def mysql_options(environ):

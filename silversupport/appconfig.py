@@ -149,19 +149,44 @@ class AppConfig(object):
         This is run on deployment"""
         for service, config in sorted(self.services.items()):
             mod = self.load_service_module(service)
-            mod.install(self, config)
             if clear:
                 env = {}
                 mod.app_setup(self, config, env)
                 if not hasattr(mod, 'clear'):
                     print 'Bad module: %s' % mod
+                # Clear also installs:
                 mod.clear(self, config, env)
+            else:
+                mod.install(self, config)
 
     def load_service_module(self, service_name):
         """Load the service module for the given service name"""
         __import__('silversupport.service.%s' % service_name)
         mod = sys.modules['silversupport.service.%s' % service_name]
         return mod
+
+    def clear_services(self):
+        for service, config in sorted(self.services.items()):
+            mod = self.load_service_module(service)
+            mod.clear(self, config)
+
+    def backup_services(self, dest_dir):
+        for service, config in sorted(self.services.items()):
+            service_dir = os.path.join(dest_dir, service)
+            if not os.path.exists(service_dir):
+                os.makedirs(service_dir)
+            mod = self.load_service_module(service)
+            env = {}
+            mod.app_setup(self, config, env)
+            mod.backup(self, config, env, service_dir)
+
+    def restore_services(self, source_dir):
+        for service, config in sorted(self.services.items()):
+            service_dir = os.path.join(source_dir, service)
+            mod = self.load_service_module(service)
+            env = {}
+            mod.app_setup(self, config, env)
+            mod.restore(self, config, env, service_dir)
 
     def activate_path(self):
         """Adds any necessary entries to sys.path for this app"""
