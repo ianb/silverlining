@@ -12,6 +12,7 @@ standard_exclude_directories = (
     '.*', 'CVS', '.svn', '.hg', '_darcs', './build',
     './dist', 'EGG-INFO', '*.egg-info')
 
+
 def find_package_data(
     where='.', package='',
     exclude=standard_exclude,
@@ -45,7 +46,7 @@ def find_package_data(
     Note patterns use wildcards, or can be exact paths (including
     leading ``./``), and all searching is case-insensitive.
     """
-    
+
     out = {}
     stack = [(convert_path(where), '', package, only_in_packages)]
     while stack:
