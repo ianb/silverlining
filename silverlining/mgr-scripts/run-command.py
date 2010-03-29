@@ -24,8 +24,8 @@ def main():
             for r in rest]
     path = os.path.join(app_config.app_dir, 'bin', command)
     os.environ['SILVER_VERSION'] = 'silverlining/0.0'
-    app_config.activate_path()
     app_config.activate_services()
+    app_config.activate_path()
     # Buffering can happen because this isn't obviously hooked up to a
     # terminal (even though it is indirectly):
     sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)

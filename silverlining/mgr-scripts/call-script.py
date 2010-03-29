@@ -21,8 +21,8 @@ def main():
         app_config = AppConfig(app_ini)
     else:
         app_config = AppConfig.from_instance_name(instance_name)
-    app_config.activate_path()
     app_config.activate_services(os.environ)
+    app_config.activate_path()
     script = os.path.join(app_config.app_dir, script)
     ns = {'__file__': script, '__name__': '__main__'}
     execfile(script, ns)

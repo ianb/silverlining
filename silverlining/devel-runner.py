@@ -53,9 +53,9 @@ def get_app(base_path):
     instance_name = 'localhost'
     os.environ['SILVER_INSTANCE_NAME'] = instance_name
     os.environ['CANONICAL_HOST'] = 'localhost:8080'
+    app_config.activate_services(os.environ)
     app_config.activate_path()
     reloader.watch_file(app_config.config_file)
-    app_config.activate_services(os.environ)
     reloader.watch_file(app_config.runner.split('#')[0])
     found_app = app_config.get_app_from_runner()
 

@@ -68,8 +68,8 @@ def run_update(instance_name, hostname):
             call_script(app_config, script)
         else:
             print 'Fetching update URL %s' % url
-            app_config.activate_path()
             app_config.activate_services(os.environ)
+            app_config.activate_path()
             status, headers, body = internal_request(
                 app_config, hostname,
                 url, environ={'silverlining.update': True})
