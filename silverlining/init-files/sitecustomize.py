@@ -20,7 +20,8 @@ def add_silversupport():
     silversupport_location = os.path.dirname(silverlining_location)
     sys.path.append(silversupport_location)
 
-if not os.environ.get('SILVER_VERSION', '').startswith('silverlining/'):
+if (not os.environ.get('SILVER_VERSION', '').startswith('silverlining/')
+    and not os.path.exists('/usr/local/share/silverlining/lib')):
     # Not a production environment...
     add_silversupport()
     from silversupport.appconfig import AppConfig

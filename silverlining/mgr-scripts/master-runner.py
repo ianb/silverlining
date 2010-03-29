@@ -82,14 +82,17 @@ def get_app(environ):
     if not re.search(r'^[A-Za-z0-9._-]+$', instance_name):
         raise Exception("Bad instance_name: %r" % instance_name)
 
-    app_config.activate_path()
     app_config.activate_services(os.environ)
+    app_config.activate_path()
 
     try:
         found_app = app_config.get_app_from_runner()
     except Exception, e:
+        raise
         return ErrorApp(
             "Could not load the runner %s: %s" % (app_config.runner, e))
+    assert found_app is not None, (
+        "app_config %r.get_app_from_runner() returned None")
     found_app_instance_name = instance_name
     return found_app
 
