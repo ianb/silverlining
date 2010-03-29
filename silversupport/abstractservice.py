@@ -19,6 +19,11 @@ class AbstractService(object):
             self.output = self.stdout_output
         self.env = self.env_setup()
 
+    def __repr__(self):
+        return '<%s.%s for %r>' % (
+            self.__class__.__module__, self.__class__.__name__,
+            self.app_config)
+
     def stdout_output(self, msg):
         print msg
 
