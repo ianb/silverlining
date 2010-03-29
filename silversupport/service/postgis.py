@@ -1,7 +1,8 @@
 import os
 import shutil
-from silversupport.shell import run, apt_install
+from silversupport.shell import run
 from silversupport.abstractservice import AbstractService
+
 
 class Service(AbstractService):
 
@@ -30,7 +31,6 @@ class Service(AbstractService):
         php=[
             'php5-pgsql',
             ])
-
 
     def install(self):
         if not os.path.exists('/usr/bin/psql'):
@@ -119,9 +119,21 @@ class Service(AbstractService):
             environ['CONFIG_PG_SQLALCHEMY'] = sa
         return environ
 
+    def cli_options(self, force_user=None):
+        if not force_user:
+            force_user = self.env['CONFIG_PG_USER']
+        options = ['-U', force_user]
+        if self.env.get('CONFIG_PG_HOST'):
+            options.extend(['--host', self.env['CONFIG_PG_HOST']])
+            if self.env.get('CONFIG_PG_PORT'):
+                options.extend(['--port', self.env['CONFIG_PG_PORT']])
+        return options
+
     def backup(self, output_dir):
-        run(['pg_dump', '-Fc', self.env['CONFIG_PG_DBNAME'],
-             '--file', os.path.join(output_dir, 'postgis.pgdump')])
+        ## FIXME: this includes a bunch of nonsense
+        run(['pg_dump', '--format=custom', '--no-owner', '--no-acl', '--no-privileges']
+            + self.cli_options('postgres')
+            + [self.env['CONFIG_PG_DBNAME'], '--file', os.path.join(output_dir, 'postgis.pgdump')])
         fp = open(os.path.join(output_dir, 'postgis.README.txt'), 'w')
         fp.write(self.BACKUP_README)
         fp.close()
@@ -133,10 +145,10 @@ class Service(AbstractService):
     def restore(self, input_dir):
         path = os.path.join(input_dir, 'postgis.pgdump')
         dbname = self.env['CONFIG_PG_DBNAME']
-        run(['pg_restore', '--dbname', dbname, path])
+        run(['pg_restore'] + self.cli_options('postgres') + ['--dbname', dbname, path])
 
     def clear(self):
         dbname = self.env['CONFIG_PG_DBNAME']
         ## FIXME: -U etc?
-        run(['dropdb', dbname])
+        run(['dropdb'] + self.cli_options('postgres') + [dbname])
         self.install()
