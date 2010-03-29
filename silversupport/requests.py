@@ -16,19 +16,18 @@ def internal_request(app_config, hostname, path, body=None, environ=None):
         func = php_internal_request
     else:
         assert 0
+    assert not body or isinstance(body, basestring), (
+        "Incorrect body argument: %r" % body)
     return func(
-        app_config,
-        hostname, path, body, environ)
+        app_config, hostname, path, body, environ)
 
 
-def wsgi_internal_request(app_config, instance_name, hostname,
-                          path, body=None, environ=None):
+def wsgi_internal_request(app_config, hostname, path,
+                          body=None, environ=None):
     """Make an internal request:
 
     ``wsgi_app``: The application to request from (use
     ``create_wsgi_app`` to get this)
-
-    ``instance_name``: name of the application
 
     ``hostname``: the hostname to request agains
 
@@ -69,7 +68,7 @@ def wsgi_internal_request(app_config, instance_name, hostname,
         basic_environ['REQUEST_METHOD'] = 'POST'
     if environ:
         basic_environ.update(environ)
-    basic_environ['SILVER_INSTANCE_NAME'] = instance_name
+    basic_environ['SILVER_INSTANCE_NAME'] = app_config.instance_name
     ## FIXME: This isn't a very good guess of the path:
     basic_environ['SILVER_MATCH_PATH'] = ''
     out = StringIO()

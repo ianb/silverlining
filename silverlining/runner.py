@@ -330,6 +330,17 @@ parser_backup.add_argument(
     help="Destination to back up to.  Can be a local file, remote:filename, "
     "site://location, ssh://hostname/location rsync://hostname/location")
 
+parser_restore = subcommands.add_parser(
+    'restore', help="Restore a backup")
+
+parser_restore.add_argument(
+    'backup', metavar="BACKUP",
+    help="The backup to restore (file or archive)")
+
+parser_restore.add_argument(
+    'location', metavar="LOCATION",
+    help="Location (hostname[/path]) to restore to")
+
 
 def catch_error(func):
     """Catch CommandError and turn it into an error message"""

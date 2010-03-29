@@ -28,6 +28,5 @@ def main():
     app_config.backup_services(dirname)
     print 'backup="%s"' % dirname
 
-
 if __name__ == '__main__':
     main()

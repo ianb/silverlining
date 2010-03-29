@@ -16,9 +16,9 @@ here = os.path.abspath(os.path.dirname(__file__))
 for path in list(sys.path):
     if os.path.abspath(path) == here:
         sys.path.remove(path)
-from silversupport.requests import make_internal_request
-from silversupport.develconfig import load_devel_config
+from silversupport.requests import internal_request
 from silversupport.appconfig import AppConfig
+from silversupport.shell import run
 import mimetypes
 
 silverlining_conf = os.path.join(os.environ['HOME'], '.silverlining.conf')
@@ -54,10 +54,8 @@ def get_app(base_path):
     os.environ['SILVER_INSTANCE_NAME'] = instance_name
     os.environ['CANONICAL_HOST'] = 'localhost:8080'
     app_config.activate_path()
-    app_name = app_config.app_name
     reloader.watch_file(app_config.config_file)
-    devel_config = load_devel_config(app_name)
-    app_config.activate_services(os.environ, devel=True, devel_config=devel_config)
+    app_config.activate_services(os.environ)
     reloader.watch_file(app_config.runner.split('#')[0])
     found_app = app_config.get_app_from_runner()
 
@@ -65,18 +63,23 @@ def get_app(base_path):
     # is... questionable.
     update_fetch = app_config.update_fetch
     for url in update_fetch:
-        print 'Fetching update URL %s' % url
-        status, headers, body = make_internal_request(
-            found_app, app_name, 'localhost',
-            url, environ={'silverlining.update': True})
-        if not status.startswith('200'):
-            sys.stdout.write(status+'\n')
-            sys.stdout.flush()
-        if body:
-            sys.stdout.write(body)
-            if not body.endswith('\n'):
-                sys.stdout.write('\n')
-            sys.stdout.flush()
+        if url.startswith('script:'):
+            script = url[len('script:'):]
+            print 'Calling update script %s' % script
+            call_script(app_config, script)
+        else:
+            print 'Fetching update URL %s' % url
+            status, headers, body = internal_request(
+                app_config, 'localhost',
+                url, environ={'silverlining.update': True})
+            if not status.startswith('200'):
+                sys.stdout.write(status+'\n')
+                sys.stdout.flush()
+            if body:
+                sys.stdout.write(body)
+                if not body.endswith('\n'):
+                    sys.stdout.write('\n')
+                sys.stdout.flush()
 
     if app_config.writable_root_location:
         writable_root = os.environ['CONFIG_WRITABLE_ROOT']
@@ -84,6 +87,11 @@ def get_app(base_path):
         writable_root = None
 
     return found_app, writable_root
+
+
+def call_script(app_config, script):
+    run([sys.executable, os.path.join(os.path.dirname(__file__), 'mgr-scripts', 'call-script.py'),
+         app_config.app_dir, script])
 
 
 class CompoundApp(object):

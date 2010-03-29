@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 import sys
 sys.path.insert(0, '/usr/local/share/silverlining/lib')
+import os
 from optparse import OptionParser
 from silversupport.requests import internal_request
 from silversupport.appconfig import AppConfig
+from silversupport.shell import run
 
 parser = OptionParser(
     usage="%prog (--update INSTANCE_NAME) or (INSTANCE_NAME HOSTNAME PATH VAR1=value VAR2=value)",
@@ -24,7 +26,7 @@ parser.add_option(
     help="Run the update_fetch command on the given app_name")
 
 
-def run():
+def main():
     """Run the command, making an internal request"""
     options, args = parser.parse_args()
     if options.update:
@@ -60,18 +62,29 @@ def run_update(instance_name, hostname):
     update_fetch in app.ini"""
     app_config = AppConfig.from_instance_name(instance_name)
     for url in app_config.update_fetch:
-        print 'Fetching update URL %s' % url
-        status, headers, body = internal_request(
-            app_config, hostname,
-            url, environ={'silverlining.update': True})
-        if not status.startswith('200'):
-            sys.stdout.write(status+'\n')
-            sys.stdout.flush()
-        if body:
-            sys.stdout.write(body)
-            if not body.endswith('\n'):
-                sys.stdout.write('\n')
-            sys.stdout.flush()
+        if url.startswith('script:'):
+            script = url[len('script:'):]
+            print 'Calling update script %s' % script
+            call_script(app_config, script)
+        else:
+            print 'Fetching update URL %s' % url
+            status, headers, body = internal_request(
+                app_config, hostname,
+                url, environ={'silverlining.update': True})
+            if not status.startswith('200'):
+                sys.stdout.write(status+'\n')
+                sys.stdout.flush()
+            if body:
+                sys.stdout.write(body)
+                if not body.endswith('\n'):
+                    sys.stdout.write('\n')
+                sys.stdout.flush()
+
+
+def call_script(app_config, script):
+    run([sys.executable, os.path.join(os.path.dirname(__file__), 'call-script.py'),
+         app_config.app_dir, script])
+
 
 if __name__ == '__main__':
-    run()
+    main()

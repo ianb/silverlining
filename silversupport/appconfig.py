@@ -76,10 +76,28 @@ class AppConfig(object):
         value=any configuration)"""
         services = {}
         c = self.config['production']
-        for name in c:
+        devel = not is_production()
+        if devel:
+            devel_config = self.load_devel_config()
+        else:
+            devel_config = None
+        for name, config_string in c.items():
             if name.startswith('service.'):
-                services[name[len('service.'):]] = c[name]
+                name = name[len('service.'):]
+                mod = self.load_service_module(name)
+                service = mod.Service(self, config_string, devel=devel,
+                                      devel_config=devel_config)
+                service.name = name
+                services[name] = service
         return services
+
+    def load_devel_config(self):
+        from silversupport.develconfig import load_devel_config
+        return load_devel_config(self.app_name)
+
+    @property
+    def service_list(self):
+        return [s for n, s in sorted(self.services.items())]
 
     @property
     def php_root(self):
@@ -133,31 +151,26 @@ class AppConfig(object):
             line.strip() for line in lines.splitlines()
             if line.strip() and not line.strip().startswith('#')]
 
-    def activate_services(self, environ, devel=False, devel_config=None):
+    def activate_services(self, environ=None):
         """Activates all the services for this application/configuration.
 
         Note, this doesn't create databases, this only typically sets
         environmental variables indicating runtime configuration."""
-        for service, config in sorted(self.services.items()):
-            mod = self.load_service_module(service)
-            mod.app_setup(self, config, environ,
-                          devel=devel, devel_config=devel_config)
+        if environ is None:
+            environ = os.environ
+        for service in self.service_list:
+            environ.update(service.env_setup())
+        return environ
 
     def install_services(self, clear=False):
         """Installs all the services for this application.
 
         This is run on deployment"""
-        for service, config in sorted(self.services.items()):
-            mod = self.load_service_module(service)
+        for service in self.service_list:
             if clear:
-                env = {}
-                mod.app_setup(self, config, env)
-                if not hasattr(mod, 'clear'):
-                    print 'Bad module: %s' % mod
-                # Clear also installs:
-                mod.clear(self, config, env)
+                service.clear()
             else:
-                mod.install(self, config)
+                service.install()
 
     def load_service_module(self, service_name):
         """Load the service module for the given service name"""
@@ -166,27 +179,20 @@ class AppConfig(object):
         return mod
 
     def clear_services(self):
-        for service, config in sorted(self.services.items()):
-            mod = self.load_service_module(service)
-            mod.clear(self, config)
+        for service in self.service_list:
+            service.clear(self)
 
     def backup_services(self, dest_dir):
-        for service, config in sorted(self.services.items()):
-            service_dir = os.path.join(dest_dir, service)
+        for service in self.service_list:
+            service_dir = os.path.join(dest_dir, service.name)
             if not os.path.exists(service_dir):
                 os.makedirs(service_dir)
-            mod = self.load_service_module(service)
-            env = {}
-            mod.app_setup(self, config, env)
-            mod.backup(self, config, env, service_dir)
+            service.backup(service_dir)
 
     def restore_services(self, source_dir):
-        for service, config in sorted(self.services.items()):
-            service_dir = os.path.join(source_dir, service)
-            mod = self.load_service_module(service)
-            env = {}
-            mod.app_setup(self, config, env)
-            mod.restore(self, config, env, service_dir)
+        for service in self.service_list:
+            service_dir = os.path.join(source_dir, service.name)
+            service.restore(service_dir)
 
     def activate_path(self):
         """Adds any necessary entries to sys.path for this app"""
@@ -255,6 +261,11 @@ class AppConfig(object):
             return None
 
     def write_php_env(self):
+        """Writes out a PHP file that loads up all the environmental variables
+
+        This is because we don't run any Python during the actual
+        request cycle for PHP applications.
+        """
         assert self.platform == 'php'
         filename = os.path.join(self.app_dir, 'silver-env-variables.php')
         fp = open(filename, 'w')
