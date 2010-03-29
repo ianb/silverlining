@@ -5,7 +5,8 @@ import re
 import subprocess
 
 __all__ = ['ssh', 'run', 'apt_install', 'shell_escape',
-           'conditional_shell_escape']
+           'conditional_shell_escape', 'overwrite_file',
+           'add_to_file']
 
 
 def ssh(user, host, command, **kw):
@@ -84,3 +85,41 @@ def conditional_shell_escape(arg):
         return arg
     else:
         return shell_escape(arg)
+
+
+def overwrite_file(dest, source_text=None, source_file=None):
+    """Overwrite a file on the system"""
+    if source_file:
+        assert not source_text
+        fp = open(source_file, 'rb')
+        source_text = fp.read()
+        fp.close()
+    if os.path.exists(dest):
+        fp = open(dest, 'rb')
+        cur_text = fp.read()
+        fp.close()
+        if cur_text == source_text:
+            return
+        new = open(dest+'.silver-back', 'wb')
+        new.write(cur_text)
+        new.close()
+    ## FIXME: is writing over the file sufficient to keep its permissions?
+    fp = open(dest, 'wb')
+    fp.write(source_text)
+    fp.close()
+
+
+def add_to_file(dest, source_text, add_newline=True):
+    """Write the text to the end of the dest, or do nothing if the text
+    is found in the file already (anywhere in the file)"""
+    fp = open(dest, 'rb')
+    content = fp.read()
+    fp.close()
+    if source_text in content:
+        return
+    if not content.endswith('\n') and add_newline:
+        content += '\n'
+    content += source_text
+    fp = open(dest, 'wb')
+    fp.write(content)
+    fp.close()
