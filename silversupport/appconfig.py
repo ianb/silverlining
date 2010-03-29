@@ -160,6 +160,8 @@ class AppConfig(object):
             environ = os.environ
         for service in self.service_list:
             environ.update(service.env_setup())
+        if is_production():
+            environ['SILVER_VERSION'] = 'silverlining/0.0'
         return environ
 
     def install_services(self, clear=False):
