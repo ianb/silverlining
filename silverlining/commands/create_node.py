@@ -10,12 +10,20 @@ AFTER_PING_WAIT = 10
 
 
 def command_create_node(config):
+    node_hostname = config.node_hostname
+    if config.args.if_not_exists:
+        config.logger.info('Checking if node %s exists' % node_hostname)
+        for node in config.driver.list_nodes():
+            if node.name == node_hostname:
+                config.logger.notify('Node exists: %s' % node)
+                return
+        config.logger.info('No node by the name %s exists; continuing with create'
+                           % node_hostname)
     config.logger.info('Getting image/size info')
     image = config.select_image(image_id=config.args.image_id)
     size = config.select_size(size_id=config.args.size_id)
     config.logger.notify('Creating node (image=%s; size=%s)' % (
         image.name, size.name))
-    node_hostname = config.node_hostname
     if not re.search(r'^[a-z0-9.-]+$', node_hostname):
         raise CommandError(
             "Invalid hostname (must contain only letters, numbers, ., and -): %r"

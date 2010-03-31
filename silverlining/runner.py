@@ -88,6 +88,12 @@ parser_create.add_argument(
     help="Wait for the node to be created, but don't setup (like "
     "--setup-node that just quits before it actually sets up the node)")
 
+parser_create.add_argument(
+    '--if-not-exists', action='store_true',
+    dest='if_not_exists',
+    help="Only create the node if it does not exist (will check the cloud "
+    "providers server list)")
+
 ## FIXME: this isn't working right (comments aren't preserved
 ## correctly by INITools):
 #parser_default = subcommands.add_parser(
