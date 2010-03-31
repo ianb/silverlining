@@ -628,21 +628,18 @@ Short-term list
 
 Here's what I want to do right away:
 
-* Switch to Karmic-only (no Jaunty)
-  - Set up default ``--image-id`` for node creation
-* Set up a continuous integration server
-  - Rackspace account seems all setup and comp'd
+* Switch to Karmic-only (no Jaunty) (done-ish)
+  - Set up default ``--image-id`` for node creation (done-ish)
+  - Get rid of image-id and use an image-name wildcard
 * Write a VirtualBox libcloud driver (for testing)
   - Will use VBoxManage
-* Backup/restore
+* Backup/restore (backup done)
   - Consider how this interacts with testing
   - Specifically the Django ``test_*`` databases
 * Setup up deployment for Weave Sync 2.0 API implementation
   - Set up multi-server deployments
-* Get a PostgreSQL service (no GIS)
 * Set up DevAuth for admin access
 * Support apps like a log viewer app (w/ DevAuth)
-* Switch things that take URLs to take URLs or scripts (like ``update_fetch``)
 * Get https working in some fashion.  (Ad hoc https seems to only get
   harder over time though)
 * Separate out logs more intelligently in a per-app manner.
