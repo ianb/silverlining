@@ -14,7 +14,7 @@ def get_environment():
     return env
 
 stage_seq = ['create-node', 'setup-node', 'clean', 'update', 'update-path',
-             'query', 'activation', 'backup-update']
+             'query', 'activation', 'backup-update', 'backup-clear']
 
 
 def run_stage(name, match):
@@ -110,6 +110,21 @@ def run_test(name, stage=None, ci=False, setup_node=False):
             print resp
             assert 'test-backup/mysql/mysql.dump' in resp.files_created
             assert 'test-backup/files/files.tar' in resp.files_created
+
+        if run_stage(stage, 'backup-clear'):
+            print env.run('silver --yes clear %s' % name)
+            resp = env.run('silver --yes backup %s/ test-backup-cleared/' % name)
+            print resp
+            assert 'test_table' not in resp.files_created['test-backup-cleared/mysql/mysql.dump'].bytes
+            urllib.urlopen('http://'+name).read()
+            resp = env.run('silver --yes backup %s/ test-backup-bare/' % name)
+            print resp
+            assert 'test_table' in resp.files_created['test-backup-bare/mysql/mysql.dump'].bytes
+            print env.run('silver --yes clear %s' % name)
+            resp = env.run('silver --yes restore test-backup-bare/ %s' % name)
+            print resp
+            resp = env.run('silver --yes backup %s/ test-backup-restored/' % name)
+            assert 'test_table' in resp.files_created['test-backup-restored/mysql/mysql.dump'].bytes
 
     finally:
         print 'Name used: %s' % name

@@ -348,6 +348,12 @@ parser_restore.add_argument(
     'location', metavar="LOCATION",
     help="Location (hostname[/path]) to restore to")
 
+parser_clear = subcommands.add_parser(
+    'clear', help="Clear the data from an app")
+
+parser_clear.add_argument(
+    'location', metavar="LOCATION",
+    help="Location (hostname[/path]) to clear")
 
 def catch_error(func):
     """Catch CommandError and turn it into an error message"""

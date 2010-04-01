@@ -66,3 +66,21 @@ def archive(dir, dest):
             cwd=dir)
     else:
         assert 0, 'unknown extension %r' % ext
+
+
+def unarchive(archive, dest):
+    if not os.path.exists(dest):
+        os.makedirs(dest)
+    ext = extension(dest)
+    archive = os.path.abspath(archive)
+    if ext == '.zip':
+        run(['unzip', archive], cwd=dest)
+    elif ext in ('.tar.gz', '.tgz', '.tar.gz2', '.tbz2'):
+        if ext in ('.tar.gz', '.tgz'):
+            op = 'z'
+        else:
+            op = 'j'
+        run(['tar', op+'fx', archive],
+            cwd=dest)
+    else:
+        assert 0, 'unknown extension: %r' % ext
