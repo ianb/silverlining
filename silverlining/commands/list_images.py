@@ -2,9 +2,9 @@
 
 
 def command_list_images(config):
-    images = config.driver.list_images()
+    images = config.cached_images(expiration=0)
     try:
-        default_image = config.select_image(images)
+        default_image = config.select_image(images=images)
     except LookupError:
         default_image = None
     if not default_image:

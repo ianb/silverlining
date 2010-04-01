@@ -1,12 +1,16 @@
 import sys
+import os
 from initools.configparser import ConfigParser
 from UserDict import UserDict
+import re
+import fnmatch
+import time
+import cPickle as pickle
 from cmdutils import CommandError
 from libcloud.types import Provider
 from libcloud.providers import get_driver as libcloud_get_driver
-import re
-import fnmatch
 from silverlining import createconf
+from silversupport.env import local_location
 
 
 class Config(UserDict):
@@ -64,49 +68,86 @@ class Config(UserDict):
         raise CommandError(
             "You must give a --node option or set default-node")
 
-    def select_image(self, images=None, image_id=None):
+    def select_image(self, image_match=None, image_id=None, images=None):
         if images is None:
-            images = self.driver.list_images()
-        if image_id or self.get('image_id'):
-            image_id = image_id or self['image_id']
-            for image in images:
-                if image.id == image_id:
-                    return image
-            else:
-                raise LookupError(
-                    "No image with the id %s" % self['image_id'])
-        elif self.get('image_name'):
-            image_name = self['image_name']
-            if '*' in image_name:
-                regex = re.compile(fnmatch.translate(image_name))
-                images = sorted(
-                    [image for image in images
-                     if regex.match(image.name)],
-                    key=lambda i: i.name)
-                if not images:
-                    raise LookupError(
-                        "No image matches the pattern %s" % image_name)
-                return images[-1]
-            else:
-                for image in images:
-                    if image.name == image_name:
-                        return image
-                else:
-                    raise LookupError(
-                        "No image with the name %s" % image_name)
-        else:
-            raise LookupError(
-                "No config for image_id or image_name")
+            images = self.cached_images()
+        if image_id:
+            image_match = 'id %s' % image_id
+        if not image_match:
+            if self.get('image_id'):
+                image_match = 'id %s' % self['image_id']
+            elif self.get('image_name'):
+                image_match = 'name %s' % self['image_name']
+            elif self.get('image'):
+                image_match = self['image']
+        return self._match('image', image_match, images)
 
-    def select_size(self, sizes=None, size_id=None):
+    def select_size(self, size_match=None, size_id=None, sizes=None):
         if sizes is None:
-            sizes = self.driver.list_sizes()
-        size_id = size_id or self.get('size_id', '').strip()
-        for size in sizes:
-            if size.id == size_id:
-                return size
-        raise LookupError("Cannot find any size by the id %r"
-                          % size_id)
+            sizes = self.cached_sizes()
+        if size_id:
+            size_match = 'id %s' % size_id
+        if not size_match:
+            if self.get('size_id'):
+                size_match = 'id %s' % self['size_id']
+            elif self.get('size'):
+                size_match = self['size']
+        return self._match('size', size_match, sizes)
+
+    def _match(self, type, matcher, items):
+        matcher = matcher or ''
+        match_pattern = matcher
+        if ' ' in matcher:
+            match_type, matcher = matcher.split(None, 1)
+        else:
+            match_type = 'name'
+        select_first = False
+        if matcher.split()[0] == 'first':
+            select_first = True
+            matcher = matcher.split(None, 1)[1]
+        if not matcher:
+            raise LookupError("No matcher available")
+        possible = []
+        for item in items:
+            if match_type == 'id':
+                if item.id == matcher:
+                    possible.append(item)
+            if match_type == 'name':
+                if '*' in matcher:
+                    if re.match(fnmatch.translate(matcher), item.name, re.I):
+                        possible.append(item)
+                else:
+                    if item.name.lower() == matcher.lower():
+                        possible.append(item)
+            if match_type == 'ram':
+                if self._softint(matcher) == self._softint(item.ram):
+                    possible.append(item)
+        if not possible:
+            raise LookupError(
+                "Could not find any %s that matches the pattern %s"
+                % (type, match_pattern))
+        if select_first:
+            if match_type == 'name':
+                possible.sort(key=lambda x: x.name.lower())
+            elif match_type == 'id':
+                possible.sort(key=lambda x: int(x.id))
+            elif match_type == 'ram':
+                possible.sort(key=lambda x: self._softint(x.ram))
+        if not select_first and len(possible) > 1:
+            raise LookupError(
+                "Multiple %ss matched the pattern %s: %s"
+                % (type, match_pattern, ', '.join(repr(i) for i in possible)))
+        return possible[0]
+
+    @staticmethod
+    def _softint(v):
+        if isinstance(v, int):
+            return v
+        v = re.sub(r'[^\d]', '', v)
+        try:
+            return int(v)
+        except ValueError:
+            return None
 
     def set_default_node(self, node_name):
         parser = ConfigParser()
@@ -138,3 +179,57 @@ class Config(UserDict):
             if response[0] == 'n':
                 return False
             print 'I did not understand the response: %s' % response
+
+    def cache_object(self, name, expiration=None, driver=None):
+        path = local_location(name)
+        if os.path.exists(path):
+            if expiration is not None:
+                age = time.time() - os.path.getmtime(path)
+                if age > expiration:
+                    return None
+            fp = open(path, 'rb')
+            obj = pickle.load(fp)
+            fp.close()
+            if driver:
+                for item in obj:
+                    item.driver = driver
+            return obj
+        return None
+
+    def set_cache_object(self, name, obj):
+        ## FIXME: some objects are pickleable :(
+        path = local_location(name)
+        saved = {}
+        if isinstance(obj, list):
+            for item in obj:
+                if getattr(item, 'driver', None):
+                    saved[item] = item.driver
+                    item.driver = None
+        try:
+            try:
+                fp = open(path, 'wb')
+                pickle.dump(obj, fp)
+                fp.close()
+            except:
+                if os.path.exists(path):
+                    os.unlink(path)
+                raise
+        finally:
+            for item, driver in saved.iteritems():
+                item.driver = driver
+
+    def cached_images(self, expiration=None):
+        name = self['provider'] + '-images.cache'
+        obj = self.cache_object(name, expiration, driver=self.driver)
+        if obj is None:
+            obj = self.driver.list_images()
+            self.set_cache_object(name, obj)
+        return obj
+
+    def cached_sizes(self, expiration=None):
+        name = self['provider'] + '-sizes.cache'
+        obj = self.cache_object(name, expiration, driver=self.driver)
+        if obj is None:
+            obj = self.driver.list_sizes()
+            self.set_cache_object(name, obj)
+        return obj

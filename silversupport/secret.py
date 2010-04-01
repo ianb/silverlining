@@ -1,7 +1,7 @@
 """Get a secret key"""
 import os
 from ConfigParser import ConfigParser
-from silversupport.env import is_production
+from silversupport.env import is_production, local_location
 
 __all__ = ['get_secret', 'get_key']
 
@@ -9,8 +9,7 @@ if is_production():
     secret_file = '/var/lib/silverlining/secret.txt'
     key_file = '/var/lib/silverlining/keys.ini'
 else:
-    secret_file = os.path.join(
-        os.environ['HOME'], '.silverlining-secret')
+    secret_file = local_location('secret.txt')
     if not os.path.exists(secret_file):
         import base64
         fp = open(secret_file, 'wb')
