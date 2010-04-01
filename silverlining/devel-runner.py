@@ -16,10 +16,11 @@ here = os.path.abspath(os.path.dirname(__file__))
 for path in list(sys.path):
     if os.path.abspath(path) == here:
         sys.path.remove(path)
+import shlex
+import mimetypes
 from silversupport.requests import internal_request
 from silversupport.appconfig import AppConfig
 from silversupport.shell import run
-import mimetypes
 
 silverlining_conf = os.path.join(os.environ['HOME'], '.silverlining.conf')
 
@@ -91,7 +92,7 @@ def get_app(base_path):
 
 def call_script(app_config, script):
     run([sys.executable, os.path.join(os.path.dirname(__file__), 'mgr-scripts', 'call-script.py'),
-         app_config.app_dir, script])
+         app_config.app_dir] + shlex.split(script))
 
 
 class CompoundApp(object):

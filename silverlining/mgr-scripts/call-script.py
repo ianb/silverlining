@@ -5,17 +5,12 @@ if os.path.exists(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'runn
     sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 else:
     sys.path.insert(0, '/usr/local/share/silverlining/lib')
-import optparse
 from silversupport.appconfig import AppConfig
-
-parser = optparse.OptionParser(
-    usage='%prog INSTANCE_NAME_OR_DIR SCRIPT')
 
 
 def main():
-    options, args = parser.parse_args()
-    instance_name = args[0]
-    script = args[1]
+    instance_name = sys.argv[1]
+    script = sys.argv[2]
     if instance_name.startswith('/'):
         app_ini = os.path.join(instance_name, 'app.ini')
         app_config = AppConfig(app_ini)
@@ -25,6 +20,7 @@ def main():
     app_config.activate_path()
     script = os.path.join(app_config.app_dir, script)
     ns = {'__file__': script, '__name__': '__main__'}
+    sys.argv = [script] + sys.argv[3:]
     execfile(script, ns)
 
 if __name__ == '__main__':

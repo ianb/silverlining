@@ -3,6 +3,7 @@ import sys
 sys.path.insert(0, '/usr/local/share/silverlining/lib')
 import os
 from optparse import OptionParser
+import shlex
 from silversupport.requests import internal_request
 from silversupport.appconfig import AppConfig
 from silversupport.shell import run
@@ -85,7 +86,7 @@ def run_update(instance_name, hostname):
 
 def call_script(app_config, script):
     run([sys.executable, os.path.join(os.path.dirname(__file__), 'call-script.py'),
-         app_config.app_dir, script])
+         app_config.app_dir] + shlex.split(script))
 
 
 if __name__ == '__main__':
