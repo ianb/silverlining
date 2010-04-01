@@ -82,9 +82,18 @@ def apt_install(packages, **kw):
     return run(['apt-get', 'install', '-q=2', '-y', '--force-yes'] + packages, **kw)
 
 
+_end_quote_re = re.compile(r"^('*)(.*?)('*)$")
+_quote_re = re.compile("'+")
+
+
 def shell_escape(arg):
     """Escapes an argument for the shell"""
-    return "'%s'" % arg.replace("'", "'\\''")
+    end_quotes_match = _end_quote_re.match(arg)
+    inner = end_quotes_match.group(2)
+    inner = _quote_re.sub(lambda m: "'%s'" % m.group(1).replace("'", "\\'"),
+                          inner)
+    return (end_quotes_match.group(1).replace("'", "\\'")
+            + inner + end_quotes_match.group(3).replace("'", "\\'"))
 
 
 def conditional_shell_escape(arg):
