@@ -36,6 +36,9 @@ CDN.
 Groups of servers, replication
 ------------------------------
 
+**Note**: there a bunch more notes on this in ``multiserver design
+notes <multiserver.html>`_.
+
 This is kind of an obvious feature for Siler Lining, being all "cloud"
 like.  Instead of hosting things like a database locally, it should be
 possible to host it on a central server with many "application"
@@ -119,6 +122,10 @@ And then probably something like::
 
 Which would note any local checkpoints, and show log information about
 any other backups.
+
+**Note**: this is mostly implemented, though without a strong
+workflow, and without direct site-to-site backups (i.e., transer
+data between sites).
 
 Logs
 ----
@@ -251,27 +258,6 @@ happening, but at least for cron and perhaps tasks this is not the
 case.  Unifying environment setup might resolve this particular
 issue...
 
-Unify Environment Setup
------------------------
-
-Environment setup happens in some scripts (like ``master_runner.py``
-and ``internal-request.py``) and in other places like
-``lib/python2.6/sitecustomize.py``).  These should all work exactly
-the same.
-
-As a result the environment should become more command-line-program
-friendly.  Probably most places where URLs are fetched could also
-accept program invocations (e.g., ``django-admin.py syncdb``).  I kind
-of like using requests... but I also realize there's little reason to
-*require* them in this system, so the constraint really doesn't have
-to exist.
-
-Some of the monitoring mod_wsgi provides would be nice to (optionally)
-provide to command-line scripts.  Like, if a script stalls out it
-should be killed.  Maybe.  At least for cron jobs or something (they
-might have a max-time setting, with some default, so long-running
-values would be possible but only if explicitly requested.)
-
 Cron and Tasks
 --------------
 
@@ -312,59 +298,6 @@ support for this already, but it is poorly exposed.
 
 This is something that might be good to manage organization-wide.
 Which just makes the workflow slightly different.
-
-Writable Static Files
----------------------
-
-Right now there's not really a way to manage static files.  This is
-kind of weird to me because Sphinx makes nice static files, and I
-can't actually host them with Silver Lining.
-
-I can't quite figure out how this would work, except I guess you might
-define something in ``app.ini`` like::
-
-    writable_static_files =
-        /foo
-        /bar
-
-And then there would be environmental variables to give the file paths
-of those locations.  It's kind of structured, so fitting it into an
-environmental variable is kind of awkward.  It's similar to
-``service.files``, just visible files.
-
-If you are hosting non-public files, then
-``environ['wsgi.file_wrapper']`` will remain the better option, and
-can be achieved currently with ``service.files``.
-
-This will require Apache configuration support, as the file locations
-will probably work just like static files, with RewriteRules to detect
-and serve the files.  If multiple locations are supported I don't see
-a way to do it with any static map, instead I'll need to write a
-rewrite map script.  But probably rewrite map scripts are a necessity
-anyway.
-
-It's possible that multiple locations aren't necessary (e.g., ``/foo``
-and ``/bar`` as in the example), but that only a single location can
-be provided, and like ``static/`` it can get the first chance to serve
-up *all* files.  So if you request ``/foo/image.png`` and
-``$CONFIG_WRITABLE_FILES/foo/image.png`` exists, then it will be
-served.
-
-I might integrate this with `bbdocs
-<http://bitbucket.org/ianb/bbdocs>`_, as that would make the
-deployment simpler.
-
-Per-path applications
----------------------
-
-Right now an application is only associated with a hostname.  Isolated
-and independent applications should be possible with a path (e.g.,
-upload an application to ``example.com/blog/``).  This will require
-changes to the hostmap (probably writing some `mapping code
-<http://httpd.apache.org/docs/2.2/mod/mod_rewrite.html#rewritemap>`_
-in Python to be run by Apache).  This also will effect the
-nomenclature as "hostname" won't become a unique identifier, only
-"hostname[/path]".
 
 Inter-application communication
 -------------------------------
