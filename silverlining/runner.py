@@ -232,8 +232,8 @@ parser_run.add_argument(
 #add_verbose(parser_run, add_log=True)
 
 parser_run.add_argument(
-    'host',
-    help="Host where the application is running")
+    'location',
+    help="Location where the application is running")
 
 parser_run.add_argument(
     'script',
@@ -354,6 +354,7 @@ parser_clear = subcommands.add_parser(
 parser_clear.add_argument(
     'location', metavar="LOCATION",
     help="Location (hostname[/path]) to clear")
+
 
 def catch_error(func):
     """Catch CommandError and turn it into an error message"""
