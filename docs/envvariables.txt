@@ -41,3 +41,14 @@ notice).
     This is the naming convention for all the information coming from
     services.
 
+``TEMP``:
+
+    This points to a place to put "temporary" files.  These are files
+    that don't have to exist forever (the ``service.files`` service
+    and ``CONFIG_FILES`` should be used for such files), but is a good
+    place to put cache files.  You can also keep files in ``/tmp`` but
+    using ``TEMP`` is more cleanly.  Some modules like `tempfile
+    <http://docs.python.org/library/tempfile.html>`_ will
+    automatically look at this variable.
+
+    This directory is cleared everytime the application is uploaded.

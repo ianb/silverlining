@@ -1,6 +1,7 @@
 """Application configuration object"""
 
 import os
+import pwd
 import sys
 import warnings
 from site import addsitedir
@@ -169,6 +170,10 @@ class AppConfig(object):
             environ.update(service.env_setup())
         if is_production():
             environ['SILVER_VERSION'] = 'silverlining/0.0'
+        if is_production() and pwd.getpwuid(os.getuid())[0] == 'www-data':
+            tmp = environ['TEMP'] = os.path.join('/var/lib/silverlining/tmp/', self.app_name)
+            if not os.path.exists(tmp):
+                os.makedirs(tmp)
         return environ
 
     def install_services(self, clear=False):
