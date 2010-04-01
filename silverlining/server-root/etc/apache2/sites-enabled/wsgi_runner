@@ -47,7 +47,10 @@
 	# alert, emerg.
 	LogLevel warn
 
-	CustomLog /var/log/apache2/access.log combined
+        ## FIXME: %l and %u are always -; why bother?
+        # 10.5.2.1 - - [Date] "GET /foo HTTP/1.1" 200 9430 "http://ref" "Mozilla/blah" thisserver.com "some_app" 103000
+        LogFormat "%{SILVER_FORWARDED}e %l %u %t \"%r\" %>s %O \"%{Referer}i\" \"%{User-Agent}i\" %v \"%{SILVER_APP_NAME}e\" %D" wsgi_combined
+	CustomLog /var/log/apache2/access.log wsgi_combined
 
 ## Python/WSGI setup:
 RewriteEngine on
@@ -62,6 +65,9 @@ RewriteRule (.*) http://%1$1 [L,R=permanent]
 
 RewriteCond %{HTTP_HOST} ^(.*)(:8080)?$
 RewriteRule . - [E=SILVER_REDIR_HOST:http://%1]
+
+RewriteCond %{HTTP:X-Forwarded-For} ^([0-9.]+)
+RewriteRule . - [E=SILVER_FORWARDED:%1]
 
 # Needed?
 #RewriteLock /var/lock/apache2/rewrite_map.lck

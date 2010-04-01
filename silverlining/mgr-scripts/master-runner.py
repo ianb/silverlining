@@ -67,7 +67,7 @@ def get_app(environ):
     # Fixup port and ipaddress
     environ['SERVER_PORT'] = '80'
     if 'HTTP_X_FORWARDED_FOR' in environ:
-        environ['REMOTE_ADDR'] = environ.pop('HTTP_X_FORWARDED_FOR')
+        environ['REMOTE_ADDR'] = environ.pop('HTTP_X_FORWARDED_FOR', '').split(',')[0]
     if 'HTTP_X_VARNISH_IP' in environ:
         environ['SERVER_ADDR'] = environ.pop('HTTP_X_VARNISH_IP')
     if 'SCRIPT_URI' in environ:
@@ -110,7 +110,7 @@ class ErrorApp(object):
 # dull but used internally; we'll delete them for cleanliness:
 BORING_VARS = [
     'SILVER_APP_DATA', 'SILVER_PROCESS_GROUP', 'SILVER_PLATFORM',
-    'SILVER_PHP_ROOT', 'SILVER_REDIR_HOST']
+    'SILVER_PHP_ROOT', 'SILVER_REDIR_HOST', 'SILVER_FORWARDED']
 
 
 def delete_boring_vars(environ):
