@@ -4,6 +4,7 @@ sys.path.insert(0, '/usr/local/share/silverlining/lib')
 import os
 from optparse import OptionParser
 from silversupport.appconfig import AppConfig
+from silversupport.appdata import instance_for_location, normalize_location
 from silversupport.shell import apt_install, run
 
 parser = OptionParser(
@@ -17,6 +18,10 @@ parser.add_option(
     '--clear',
     action='store_true',
     help='Clear the database')
+
+parser.add_option(
+    '--location',
+    help='location to update/clear (instead of INSTANCE_NAME)')
 
 php_packages = [
     'php5',
@@ -43,5 +48,8 @@ def update_service(instance_name, clear=False):
 
 if __name__ == '__main__':
     options, args = parser.parse_args()
-    instance_name = args[0]
+    if options.location:
+        instance_name = instance_for_location(*normalize_location(options.location))
+    else:
+        instance_name = args[0]
     update_service(instance_name, options.clear)
