@@ -43,6 +43,13 @@ class AppConfig(object):
         """Loads an instance given its name; only valid in production"""
         return cls(os.path.join('/var/www', instance_name, 'app.ini'))
 
+    @classmethod
+    def from_location(cls, location):
+        """Loads an instance given its location (hostname[/path])"""
+        import appdata
+        return cls.from_instance_name(
+            appdata.instance_for_location(*appdata.normalize_location(location)))
+
     @property
     def platform(self):
         """The platform of the application.
