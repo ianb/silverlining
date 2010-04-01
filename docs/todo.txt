@@ -629,8 +629,6 @@ Short-term list
 Here's what I want to do right away:
 
 * Switch to Karmic-only (no Jaunty) (done-ish)
-  - Set up default ``--image-id`` for node creation (done-ish)
-  - Get rid of image-id and use an image-name wildcard
 * Write a VirtualBox libcloud driver (for testing)
   - Will use VBoxManage
 * Backup/restore (backup done)

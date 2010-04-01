@@ -65,17 +65,18 @@ parser_create.add_argument(
     metavar='HOSTNAME',
     help="The hostname of the node to create")
 
-## FIXME: this hard-coded image-id works for rackspace but not elsewhere:
 parser_create.add_argument(
-    '--image-id',
-    default='14362',
-    metavar="ID",
-    help="Image ID to use")
+    '--image',
+    default='name *karmic*',
+    metavar="IMAGE",
+    help='Image to use, can be "id 10", and can contain wildcards like "name *karmic*".  '
+    'Default is "name *karmic*" which will select an Ubuntu Karmic image.')
 
 parser_create.add_argument(
-    '--size-id',
-    metavar="ID",
-    help="Size ID to use")
+    '--size',
+    metavar="SIZE",
+    default="ram 256",
+    help='Size to use, can be "id 1", "ram 256" etc')
 
 parser_create.add_argument(
     '--setup-node', action='store_true',

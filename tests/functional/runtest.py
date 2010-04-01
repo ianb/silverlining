@@ -32,7 +32,7 @@ def run_test(name, stage=None, ci=False):
         if not name:
             name = 'functest%s.example.com' % int(time.time())
             print 'Creating node %s' % name
-            print env.run('silver --yes create-node --image-id=14362 --wait %s' % name,
+            print env.run('silver --yes create-node --wait %s' % name,
                           expect_stderr=True)
         if run_stage(stage, 'setup-node'):
             print 'Setting up node %s' % name

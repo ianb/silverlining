@@ -9,7 +9,7 @@ def command_list_images(config):
         default_image = None
     if not default_image:
         config.logger.info(
-            '[%s] has no image_id or image_name (default image)' % (
+            '[%s] has no default image' % (
                 config['section_name']))
     for image in images:
         if image is default_image:

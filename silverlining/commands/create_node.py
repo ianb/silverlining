@@ -20,8 +20,8 @@ def command_create_node(config):
         config.logger.info('No node by the name %s exists; continuing with create'
                            % node_hostname)
     config.logger.info('Getting image/size info')
-    image = config.select_image(image_id=config.args.image_id)
-    size = config.select_size(size_id=config.args.size_id)
+    image = config.select_image(image_match=config.args.image)
+    size = config.select_size(size_match=config.args.size)
     config.logger.notify('Creating node (image=%s; size=%s)' % (
         image.name, size.name))
     if not re.search(r'^[a-z0-9.-]+$', node_hostname):
