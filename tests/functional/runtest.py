@@ -14,14 +14,14 @@ def get_environment():
     return env
 
 stage_seq = ['create-node', 'setup-node', 'clean', 'update', 'update-path',
-             'query', 'activation']
+             'query', 'activation', 'backup-update']
 
 
 def run_stage(name, match):
     return match in stage_seq[stage_seq.index(name):]
 
 
-def run_test(name, stage=None, ci=False):
+def run_test(name, stage=None, ci=False, setup_node=False):
     try:
         if stage is None:
             if name:
@@ -34,7 +34,8 @@ def run_test(name, stage=None, ci=False):
             print 'Creating node %s' % name
             print env.run('silver --yes create-node --wait %s' % name,
                           expect_stderr=True)
-        if run_stage(stage, 'setup-node'):
+
+        if run_stage(stage, 'setup-node') or setup_node:
             print 'Setting up node %s' % name
             print env.run('silver --yes setup-node %s' % name,
                           expect_stderr=True)
@@ -97,6 +98,19 @@ def run_test(name, stage=None, ci=False):
             print env.run('silver --yes activate %s prev' % name)
             print env.run('silver --yes query %s' % name)
 
+        if run_stage(stage, 'backup-update'):
+            print env.run('silver --yes deactivate --node=%s "*"' % name)
+            print env.run('silver --yes update "%s" %s'
+                          % (os.path.join(here, 'example-backup'), name),
+                          expect_stderr=True)
+            url = 'http://%s/' % name
+            resp = urllib.urlopen(url).read()
+            print resp
+            resp = env.run('silver --yes backup %s/ test-backup/' % name)
+            print resp
+            assert 'test-backup/mysql/mysql.dump' in resp.files_created
+            assert 'test-backup/files/files.tar' in resp.files_created
+
     finally:
         print 'Name used: %s' % name
         if ci:
@@ -109,5 +123,7 @@ if __name__ == '__main__':
     parser.add_option('--name')
     parser.add_option('--stage')
     parser.add_option('--ci', action='store_true')
+    parser.add_option('--setup-node', action='store_true')
     options, args = parser.parse_args()
-    run_test(options.name, options.stage or None, options.ci)
+    run_test(options.name, options.stage or None, options.ci,
+             setup_node=options.setup_node)

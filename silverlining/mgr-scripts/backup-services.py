@@ -15,7 +15,7 @@ parser = optparse.OptionParser(
 def main():
     options, args = parser.parse_args()
     location = args[0]
-    instance_name = appdata.instance_for_location(location)
+    instance_name = appdata.instance_for_location(*appdata.normalize_location(location))
     if not instance_name:
         print 'Could not match against location: %s' % location
         sys.exit(1)
