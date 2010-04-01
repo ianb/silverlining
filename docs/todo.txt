@@ -630,7 +630,7 @@ Here's what I want to do right away:
 
 * Write a VirtualBox libcloud driver (for testing)
   - Will use VBoxManage
-* Backup/restore (backup done)
+* Backup/restore (backup done, restore mostly done)
   - Consider how this interacts with testing
   - Specifically the Django ``test_*`` databases
 * Setup up deployment for Weave Sync 2.0 API implementation
