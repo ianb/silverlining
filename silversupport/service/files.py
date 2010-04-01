@@ -49,13 +49,15 @@ class AbstractFileService(AbstractService):
         path = self.env[self.env_var]
         ## FIXME: should this be compressed, or just rely on that to
         ## happen at a higher level?
+        ## Or should it be a tar at all, or just a copy of the files?
         run(['tar', 'fc', os.path.join(output_dir, 'files.tar'), '.'],
-            cwd=path)
+            cwd=path, fail_on_error=True)
 
     def restore(self, input_dir):
         path = self.env[self.env_var]
-        run(['tar', 'fx', os.path.join(input_dir, 'files.tar')],
-            cwd=path)
+        tar_path = os.path.join(input_dir, 'files.tar')
+        run(['sudo', '-u', 'www-data', 'tar', 'fx', tar_path],
+            cwd=path, fail_on_error=True)
 
     def clear(self):
         path = self.env[self.env_var]
