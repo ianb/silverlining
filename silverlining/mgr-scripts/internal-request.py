@@ -6,6 +6,7 @@ from optparse import OptionParser
 import shlex
 from silversupport.requests import internal_request
 from silversupport.appconfig import AppConfig
+from silversupport.appdata import instance_for_location, normalize_location
 from silversupport.shell import run
 
 parser = OptionParser(
@@ -26,12 +27,21 @@ parser.add_option(
     action='store_true',
     help="Run the update_fetch command on the given app_name")
 
+parser.add_option(
+    '--update-location',
+    action='store_true',
+    help="Run the update_fetch command on the given location")
+
 
 def main():
     """Run the command, making an internal request"""
     options, args = parser.parse_args()
     if options.update:
         return run_update(args[0], args[1])
+    elif options.update_location:
+        hostname, path = normalize_location(args[0])
+        instance_name = instance_for_location(hostname, path)
+        return run_update(instance_name, args[0])
     instance_name = args[0]
     hostname = args[1]
     path = args[2]
