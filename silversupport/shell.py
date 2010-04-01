@@ -28,7 +28,7 @@ def ssh(user, host, command, **kw):
 
 def run(command, extra_env=None, stdin=None,
         capture_stdout=False, capture_stderr=False,
-        cwd=None):
+        cwd=None, fail_on_error=False):
     """Runs a command.
 
     The command may be a string or (preferred) a list of
@@ -65,6 +65,15 @@ def run(command, extra_env=None, stdin=None,
         raise OSError('Error while running command "%s": %s' % (
             ' '.join(conditional_shell_escape(i) for i in command), e))
     stdout, stderr = proc.communicate(stdin or '')
+    if fail_on_error and proc.returncode:
+        if stderr:
+            msg = '; stderr:\n%s' % stderr
+        else:
+            msg = ''
+        raise OSError(
+            'Error while running command "%s": returncode %s%s'
+            % (' '.join(conditional_shell_escape(i) for i in command),
+               proc.returncode, msg))
     return stdout, stderr, proc.returncode
 
 
