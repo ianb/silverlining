@@ -4,7 +4,8 @@ import re
 from cStringIO import StringIO
 import zipfile
 from cmdutils import CommandError
-from silversupport.shell import ssh, shell_escape
+from silversupport.shell import ssh
+from silversupport.appdata import normalize_location
 
 _tmp_re = re.compile(r'tmp="(.*)"')
 
@@ -43,22 +44,23 @@ def command_run(config):
             translated_args.append(arg)
     zip.close()
     zip_content = out.getvalue()
+    host = normalize_location(args.location)[0]
     if args.user not in ['root', 'www-mgr', 'www-data']:
         raise CommandError(
             "Unknown --user=%s" % args.user)
     if any_translated:
         stdout, stderr, returncode = ssh(
-            args.user, args.host, '/usr/local/share/silverlining/mgr-scripts/save-tmp-file.py',
+            args.user, host, '/usr/local/share/silverlining/mgr-scripts/save-tmp-file.py',
             stdin=zip_content, capture_stdout=True, capture_stderr=True)
         match = _tmp_re.search(stdout)
         if not match:
             raise CommandError(
                 "Got bad output from save-tmp-file.py:\n%s" % stdout)
-        location = match.group(1)
+        tmp_location = match.group(1)
     else:
-        location = 'NONE'
+        tmp_location = 'NONE'
     stdout, stderr, returncode = ssh(
-        args.user, args.host,
-        '/usr/local/share/silverlining/mgr-scripts/run-command.py %s %s %s %s' %
-        (args.host, location, args.script, ' '.join(shell_escape(a) for a in translated_args)))
+        args.user, host,
+        ['/usr/local/share/silverlining/mgr-scripts/run-command.py',
+         args.location, tmp_location, args.script] + translated_args)
     return returncode
