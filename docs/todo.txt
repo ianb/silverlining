@@ -628,7 +628,6 @@ Short-term list
 
 Here's what I want to do right away:
 
-* Switch to Karmic-only (no Jaunty) (done-ish)
 * Write a VirtualBox libcloud driver (for testing)
   - Will use VBoxManage
 * Backup/restore (backup done)
@@ -641,8 +640,6 @@ Here's what I want to do right away:
 * Get https working in some fashion.  (Ad hoc https seems to only get
   harder over time though)
 * Separate out logs more intelligently in a per-app manner.
-* Put host name into apache access logs (since they are hard to
-  separate out otherwise)
 * Look into the Varnish logs (Apache logs aren't that complete,
   really)
 * Make the instantiated app available in the interactive shell
