@@ -9,7 +9,8 @@ from silversupport.shell import run
 __all__ = ['internal_request']
 
 
-def internal_request(app_config, hostname, path, body=None, environ=None):
+def internal_request(app_config, hostname, path, body=None, environ=None,
+                     capture_stdout=True):
     if app_config.platform == 'python':
         func = wsgi_internal_request
     elif app_config.platform == 'php':
@@ -19,11 +20,12 @@ def internal_request(app_config, hostname, path, body=None, environ=None):
     assert not body or isinstance(body, basestring), (
         "Incorrect body argument: %r" % body)
     return func(
-        app_config, hostname, path, body, environ)
+        app_config, hostname, path, body, environ,
+        capture_stdout=capture_stdout)
 
 
 def wsgi_internal_request(app_config, hostname, path,
-                          body=None, environ=None):
+                          body=None, environ=None, capture_stdout=True):
     """Make an internal request:
 
     ``wsgi_app``: The application to request from (use
@@ -78,11 +80,17 @@ def wsgi_internal_request(app_config, hostname, path,
         if exc_info is not None:
             raise exc_info[0], exc_info[1], exc_info[2]
         info[:] = [status, headers]
-        return out.write
+        if capture_stdout:
+            return out.write
+        else:
+            return sys.stdout.write
     app_iter = wsgi_app(basic_environ, start_response)
     try:
         for item in app_iter:
-            out.write(item)
+            if capture_stdout:
+                sys.stdout.write(item)
+            else:
+                out.write(item)
     finally:
         if hasattr(app_iter, 'close'):
             app_iter.close()
@@ -101,7 +109,7 @@ def create_wsgi_app(instance_name):
     return wsgi_app
 
 
-def php_internal_request(app_config, hostname, path, body=None, environ=None):
+def php_internal_request(app_config, hostname, path, body=None, environ=None, capture_stdout=True):
     assert app_config.platform == 'php'
     env = {}
     env['SILVER_SCRIPT_NAME'] = env['SCRIPT_NAME'] = urllib.unquote(path)
@@ -118,7 +126,6 @@ def php_internal_request(app_config, hostname, path, body=None, environ=None):
         if not isinstance(value, str):
             env[key] = str(value)
     stdout, stderr, returncode = run(
-        ['php5', '/usr/local/share/silverlining/mgr-scripts/master-runner.php'], capture_stdout=True,
+        ['php5', '/usr/local/share/silverlining/mgr-scripts/master-runner.php'], capture_stdout=capture_stdout,
         extra_env=env, stdin=body)
-    print stdout
     return '200 OK', [], stdout

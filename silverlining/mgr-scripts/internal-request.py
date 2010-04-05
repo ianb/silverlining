@@ -36,6 +36,9 @@ parser.add_option(
 def main():
     """Run the command, making an internal request"""
     options, args = parser.parse_args()
+    # Buffering can happen because this isn't obviously hooked up to a
+    # terminal (even though it is indirectly):
+    sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
     if options.update:
         return run_update(args[0], args[1])
     elif options.update_location:
@@ -83,7 +86,8 @@ def run_update(instance_name, hostname):
             app_config.activate_path()
             status, headers, body = internal_request(
                 app_config, hostname,
-                url, environ={'silverlining.update': True})
+                url, environ={'silverlining.update': True},
+                capture_stdout=False)
             if not status.startswith('200'):
                 sys.stdout.write(status+'\n')
                 sys.stdout.flush()

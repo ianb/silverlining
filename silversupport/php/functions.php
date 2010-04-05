@@ -1,15 +1,17 @@
 <?
 
 function silver_next_path($default=NULL, $url_path=NULL) {
+    global $silver_base, $silver_php_root;
     if (! $url_path) {
         $url_path = $_SERVER['SCRIPT_NAME'];
     }
     $path = "{$silver_base}/{$silver_php_root}/{$url_path}";
     if (is_dir($path)) {
-        $path = $path . '/index.php';
+        $path = rtrim($path, '/') . '/index.php';
     }
     if (! file_exists($path)) {
         if ($default) {
+            /*echo "Path '{$path}' (in '{$silver_php_root}') didn't exist<br>\n";*/
             $path = $default;
         } else {
             return NULL;
