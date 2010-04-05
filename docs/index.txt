@@ -261,10 +261,5 @@ the hostname setup in ``/etc/hosts``.
     ``~/.ssh/known_hosts`` after destroying it to avoid SSH warnings
     in future.
 
-``silver default-node``:
-    This sets the default node, so you can do ``silver update
-    myapp/`` without a ``--node=hostname`` option (instead using this
-    default).
-
 ``silver setup-node``:
     This takes a bare Ubuntu Jaunty system and sets it up.

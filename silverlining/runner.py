@@ -95,16 +95,6 @@ parser_create.add_argument(
     help="Only create the node if it does not exist (will check the cloud "
     "providers server list)")
 
-## FIXME: this isn't working right (comments aren't preserved
-## correctly by INITools):
-#parser_default = subcommands.add_parser(
-#    'default-node', help="Set a node as the default node")
-#
-#parser_default.add_argument(
-#    'node',
-#    metavar='HOSTNAME',
-#    help="The hostname of the node to set as default")
-
 parser_setup = subcommands.add_parser(
     'setup-node', help="Setup a new (fresh Ubuntu Jaunty install) server")
 

@@ -46,12 +46,15 @@ def update_service(instance_name, clear=False):
         run(['a2enmod', 'php5'])
         run(['/etc/init.d/apache2', 'restart'])
     tmp = os.path.join('/var/lib/silverlining/tmp', app_config.app_name)
-    for name in os.listdir(tmp):
-        fn = os.path.join(tmp, name)
-        if os.path.isdir(fn):
-            shutil.rmtree(fn)
-        else:
-            os.unlink(fn)
+    if os.path.exists(tmp):
+        for name in os.listdir(tmp):
+            fn = os.path.join(tmp, name)
+            if os.path.isdir(fn):
+                shutil.rmtree(fn)
+            else:
+                os.unlink(fn)
+    else:
+        os.makedirs(tmp)
 
 
 if __name__ == '__main__':

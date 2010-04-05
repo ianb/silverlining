@@ -11,6 +11,7 @@ from libcloud.types import Provider
 from libcloud.providers import get_driver as libcloud_get_driver
 from silverlining import createconf
 from silversupport.env import local_location
+from silversupport.appdata import normalize_location
 
 
 class Config(UserDict):
@@ -63,10 +64,10 @@ class Config(UserDict):
     def node_hostname(self):
         if getattr(self.args, 'node', None):
             return self.args.node
-        if self.get('default_node'):
-            return self['default_node']
+        if getattr(self.args, 'location'):
+            return normalize_location(self.args.location)[0]
         raise CommandError(
-            "You must give a --node option or set default-node")
+            "You must give a --node option")
 
     def select_image(self, image_match=None, image_id=None, images=None):
         if images is None:
@@ -148,18 +149,6 @@ class Config(UserDict):
             return int(v)
         except ValueError:
             return None
-
-    def set_default_node(self, node_name):
-        parser = ConfigParser()
-        parser.read([createconf.silverlining_conf])
-        parser.set(self['section_name'],
-                   'default_node', node_name)
-        fp = open(createconf.silverlining_conf, 'w')
-        parser.write(fp)
-        fp.close()
-        self.logger.notify('Set default_node in %s to %s'
-                           % (createconf.silverlining_conf,
-                              node_name))
 
     def ask(self, query):
         if getattr(self.args, 'yes', False):
