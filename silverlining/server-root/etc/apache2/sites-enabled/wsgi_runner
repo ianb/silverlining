@@ -1,3 +1,5 @@
+RewriteLock /var/lock/apache2/rewrite.lck
+
 <VirtualHost 127.0.0.1:8080>
 	ServerAdmin webmaster@localhost
 
@@ -69,8 +71,6 @@ RewriteRule . - [E=SILVER_REDIR_HOST:http://%1]
 RewriteCond %{HTTP:X-Forwarded-For} ^([0-9.]+)
 RewriteRule . - [E=SILVER_FORWARDED:%1]
 
-# Needed?
-#RewriteLock /var/lock/apache2/rewrite_map.lck
 RewriteMap appdata prg:/usr/local/share/silverlining/mgr-scripts/rewrite-map.py
 RewriteCond ${appdata:%{HTTP_HOST}^%{REQUEST_URI}} (.*)
 RewriteRule . - [E=SILVER_APP_DATA:%1]
