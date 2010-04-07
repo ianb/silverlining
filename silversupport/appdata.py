@@ -26,7 +26,7 @@ def add_appdata(app_config, locations, debug_single_process=False,
     locations = [normalize_location(l) for l in locations]
     new_lines = rewrite_lines(appdata_lines(), locations, add_prev, dict(
         instance_name=app_config.instance_name, platform=app_config.platform,
-        process_group=process_group, php_root=app_config.php_root,
+        process_group=process_group, php_root=app_config.php_root.rstrip('/'),
         write_root=app_config.writable_root_location))
     fp = open(APPDATA_MAP, 'w')
     fp.writelines(new_lines)
