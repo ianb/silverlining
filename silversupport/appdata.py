@@ -142,6 +142,23 @@ def instance_for_location(hostname, path='/'):
     return None
 
 
+def instance_for_app_name(hostname, app_name):
+    """Returns the instance name for a given hostname and app_name
+
+    Returns None if no instance found"""
+    for line in appdata_lines():
+        if not line.strip() or line.strip().startswith('#'):
+            continue
+        line_hostname, line_path, data = line.split(None, 2)
+        if line_hostname != hostname:
+            continue
+        line_instance_name = data.split('|')[0]
+        line_app_name = line_instance_name.split('.')[0]
+        if line_app_name == app_name:
+            return line_instance_name
+    return None
+
+
 def all_app_instances():
     """Returns a dictionary of all app instances.
 

@@ -345,6 +345,24 @@ parser_clear.add_argument(
     'location', metavar="LOCATION",
     help="Location (hostname[/path]) to clear")
 
+parser_diff = subcommands.add_parser(
+    'diff', help="Diff a local app and a deployed app")
+
+parser_diff.add_argument(
+    'dir', metavar='DIR',
+    help="The application to diff")
+
+parser_diff.add_argument(
+    'location', metavar='HOST', nargs='?',
+    help="the host to diff with")
+
+parser_diff.add_argument(
+    '--app-name', metavar='NAME',
+    help="A name besides app.ini:app_name")
+
+parser_diff.add_argument(
+    '--instance-name', metavar='APP_NAME.DATE_VERSION',
+    help="Diff with a specific instance (not the active one)")
 
 def catch_error(func):
     """Catch CommandError and turn it into an error message"""

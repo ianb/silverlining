@@ -427,17 +427,6 @@ hold all the files that were deployed.  This would be a parallel
 version control system unrelated to any developer version control, and
 would be used only for auditing.
 
-Remote Diff
------------
-
-I'd like to be able to do::
-
-    silver diff . hostname
-
-and see a unified diff between the directory and what is present
-remotely.  This could let you feel more confident about the effect of
-updates.
-
 Local/CDN Javascript
 --------------------
 
