@@ -11,45 +11,53 @@ AFTER_PING_WAIT = 10
 
 def command_create_node(config):
     node_hostname = config.node_hostname
+    node_exists = False
     if config.args.if_not_exists:
         config.logger.info('Checking if node %s exists' % node_hostname)
         for node in config.driver.list_nodes():
             if node.name == node_hostname:
                 config.logger.notify('Node exists: %s' % node)
-                return
-        config.logger.info('No node by the name %s exists; continuing with create'
-                           % node_hostname)
-    config.logger.info('Getting image/size info')
-    image = config.select_image(image_match=config.args.image)
-    size = config.select_size(size_match=config.args.size)
-    config.logger.notify('Creating node (image=%s; size=%s)' % (
-        image.name, size.name))
-    if not re.search(r'^[a-z0-9.-]+$', node_hostname):
-        raise CommandError(
-            "Invalid hostname (must contain only letters, numbers, ., and -): %r"
-            % node_hostname)
-    assert node_hostname
-    resp = config.driver.create_node(
-        name=node_hostname,
-        image=image,
-        size=size,
-        files={'/root/.ssh/authorized_keys': config.get('root_authorized_keys')},
-        )
-    public_ip = resp.public_ip[0]
-    config.logger.notify('Status %s at IP %s' % (
-        resp.state, public_ip))
-    set_etc_hosts(config, [node_hostname], public_ip)
+                node_exists = True
+                break
+        else:
+            config.logger.info('No node by the name %s exists; continuing with create'
+                               % node_hostname)
+    if not node_exists:
+        config.logger.info('Getting image/size info')
+        image = config.select_image(image_match=config.args.image)
+        size = config.select_size(size_match=config.args.size)
+        config.logger.notify('Creating node (image=%s; size=%s)' % (
+            image.name, size.name))
+        if not re.search(r'^[a-z0-9.-]+$', node_hostname):
+            raise CommandError(
+                "Invalid hostname (must contain only letters, numbers, ., and -): %r"
+                % node_hostname)
+        assert node_hostname
+        resp = config.driver.create_node(
+            name=node_hostname,
+            image=image,
+            size=size,
+            files={'/root/.ssh/authorized_keys': config.get('root_authorized_keys')},
+            )
+        public_ip = resp.public_ip[0]
+        config.logger.notify('Status %s at IP %s' % (
+            resp.state, public_ip))
+        set_etc_hosts(config, [node_hostname], public_ip)
 
     if config.args.setup_node or config.args.wait:
-        wait_for_node_ready_ping(config, public_ip)
-        config.logger.notify('Waiting %s seconds for full boot'
-                             % AFTER_PING_WAIT)
-        time.sleep(AFTER_PING_WAIT)
-        if config.args.setup_node:
-            from silverlining.commands.setup_node import command_setup_node
-            config.args.node = node_hostname
-            config.logger.notify('Setting up server')
-            command_setup_node(config)
+        if not node_exists:
+            wait_for_node_ready_ping(config, public_ip)
+            config.logger.notify('Waiting %s seconds for full boot'
+                                 % AFTER_PING_WAIT)
+            time.sleep(AFTER_PING_WAIT)
+    else:
+        return
+
+    if config.args.setup_node:
+        from silverlining.commands.setup_node import command_setup_node
+        config.args.node = node_hostname
+        config.logger.notify('Setting up server')
+        command_setup_node(config)
 
 
 def wait_for_node_ready(config, node_name):
