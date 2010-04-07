@@ -174,7 +174,17 @@ class AppConfig(object):
             tmp = environ['TEMP'] = os.path.join('/var/lib/silverlining/tmp/', self.app_name)
             if not os.path.exists(tmp):
                 os.makedirs(tmp)
+        environ['SILVER_LOGS'] = self.log_dir
+        if not is_production and not os.path.exists(environ['SILVER_LOGS']):
+            os.makedirs(environ['SILVER_LOGS'])
         return environ
+
+    @property
+    def log_dir(self):
+        if is_production():
+            return os.path.join('/var/log/silverlining/apps', self.app_name)
+        else:
+            return os.path.join(self.app_dir, 'silver-logs')
 
     def install_services(self, clear=False):
         """Installs all the services for this application.

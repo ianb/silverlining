@@ -1,4 +1,5 @@
 import os
+import sys
 import traceback
 
 
@@ -18,6 +19,9 @@ def application(environ, start_response):
         else:
             body = 'INSTANCE=%s' % os.environ['SILVER_INSTANCE_NAME']
         start_response('200 OK', [('Content-type', 'text/plain')])
+        environ['wsgi.errors'].write('Executed application\n')
+        print 'This is stdout'
+        print >> sys.stderr, 'This is stderr'
         return [body]
     except:
         start_response('500 Server Error', [('Content-type', 'text/plain')])

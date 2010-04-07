@@ -36,6 +36,13 @@ notice).
     hostname possible.  When only one hostname is mapped to an
     application this is always correct.
 
+``SILVER_LOGS``:
+
+    This is a directory where log files should be kept.  This is a
+    per-application directory.  In development it will be in
+    ``silver-logs/`` under your application's main directory (what you
+    created with ``silver init``).
+
 ``CONFIG_*``:
 
     This is the naming convention for all the information coming from

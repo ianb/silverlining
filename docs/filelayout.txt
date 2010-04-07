@@ -72,5 +72,9 @@ Configuration files get put wherever they belong, e.g.,
 
 Log files go in ``/var/log/silverlining/``.
 
-(Per-application log files, and other kinds of logs, still need to be
-filled out better.)
+Individual applications have log files in
+``/var/log/silverlining/apps/APP_NAME``, specifically ``errors.log``
+is anything written to stderr, stdout, or ``environ['wsgi.errors']``.
+These items are also grouped by request (all content written is
+buffered, written out in one chunk with a header/footer to help group
+it to a request).

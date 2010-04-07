@@ -5,6 +5,7 @@ import time
 import re
 import urllib
 from scripttest import TestFileEnvironment
+from silversupport.shell import ssh
 
 here = os.path.dirname(os.path.abspath(__file__))
 
@@ -14,7 +15,7 @@ def get_environment():
     return env
 
 stage_seq = ['create-node', 'setup-node', 'clean', 'update', 'update-path',
-             'query', 'activation', 'backup-update', 'backup-clear']
+             'logs', 'query', 'activation', 'backup-update', 'backup-clear']
 
 
 def run_stage(name, match):
@@ -82,6 +83,20 @@ def run_test(name, stage=None, ci=False, setup_node=False):
             resp = urllib.urlopen(url).read()
             print 'The actual HTTP response: (%s)' % url
             print resp
+
+        if run_stage(stage, 'logs'):
+            print 'Doing log check'
+            ssh('www-data', name, 'rm /var/log/silverlining/apps/functest/*')
+            url = 'http://%s/test/update' % name
+            resp = urllib.urlopen(url).read()
+            text, _, _ = ssh('www-data', name,
+                             'cat /var/log/silverlining/apps/functest/errors.log',
+                             capture_stdout=True)
+            text_lines = ''.join(text.strip().splitlines(True)[1:-1]).strip()
+            assert text_lines == """\
+Executed application
+This is stdout
+This is stderr""", repr(text_lines)
 
         if run_stage(stage, 'query'):
             print 'Doing query'

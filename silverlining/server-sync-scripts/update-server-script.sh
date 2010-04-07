@@ -42,6 +42,8 @@ echo "Restarting apache2 and varnish"
 mkdir -p /var/silverlining/build-files
 mkdir -p /var/log/silverlining-setup
 mkdir -p /var/log/silverlining
+mkdir -p /var/log/silverlining/apps
+chown www-data:www-data /var/log/silverlining/apps
 mkdir -p /var/www
 mkdir -p /var/lib/silverlining
 mkdir -p /var/lib/silverlining/backups

@@ -16,6 +16,7 @@ import time, _strptime
 import os
 import re
 import urllib
+import threading
 from silversupport.appconfig import AppConfig
 
 #don't show DeprecationWarning in error.log
@@ -25,31 +26,45 @@ warnings.simplefilter('ignore', DeprecationWarning)
 
 found_app = None
 found_app_instance_name = None
+error_collector = None
 
 
 def application(environ, start_response):
     try:
-        get_app(environ)
-    except:
-        import traceback
-        bt = traceback.format_exc()
-        start_response('500 Server Error', [('Content-type', 'text/plain')])
-        lines = ['There was an error loading the application:', bt, '\nEnviron:']
-        for name, value in sorted(environ.items()):
-            try:
-                lines.append('%s=%r' % (name, value))
-            except:
-                lines.append('%s=<error>' % name)
-        return ['\n'.join(lines)]
-    return found_app(environ, start_response)
+        try:
+            get_app(environ)
+        except:
+            import traceback
+            bt = traceback.format_exc()
+            start_response('500 Server Error', [('Content-type', 'text/plain')])
+            lines = ['There was an error loading the application:', bt, '\nEnviron:']
+            for name, value in sorted(environ.items()):
+                try:
+                    lines.append('%s=%r' % (name, value))
+                except:
+                    lines.append('%s=<error>' % name)
+            return ['\n'.join(lines)]
+        return found_app(environ, start_response)
+    finally:
+        if error_collector is not None:
+            error_collector.flush_request(environ)
 
 
 def get_app(environ):
-    global found_app, found_app_instance_name
+    global found_app, found_app_instance_name, error_collector
     delete_boring_vars(environ)
     instance_name = environ['SILVER_INSTANCE_NAME']
     os.environ['SILVER_INSTANCE_NAME'] = instance_name
     app_config = AppConfig.from_instance_name(instance_name)
+    if error_collector is None:
+        log_location = os.path.join('/var/log/silverlining/apps', app_config.app_name)
+        if not os.path.exists(log_location):
+            os.makedirs(log_location)
+        error_collector = ErrorCollector(os.path.join(log_location, 'errors.log'))
+        sys.stderr = sys.stdout = error_collector
+    error_collector.start_request()
+    environ['silverlining.apache_errors'] = environ['wsgi.errors']
+    environ['wsgi.errors'] = error_collector
     os.environ['SILVER_CANONICAL_HOST'] = app_config.canonical_hostname()
     ## FIXME: give a real version here...
     environ['SILVER_VERSION'] = os.environ['SILVER_VERSION'] = 'silverlining/0.0'
@@ -117,3 +132,52 @@ def delete_boring_vars(environ):
     for name in BORING_VARS:
         if name in environ:
             del environ[name]
+
+
+class ErrorCollector(object):
+    def __init__(self, filename):
+        self.filename = filename
+        self.buffers = threading.local()
+
+    def start_request(self):
+        self.buffers.start_time = time.time()
+        self.buffers.buffer = []
+
+    def write(self, text):
+        self.buffers.buffer.append(text)
+
+    def writelines(self, lines):
+        self.buffers.buffer.extend(lines)
+
+    def flush(self):
+        ## FIXME: should this do something?
+        pass
+
+    def close(self):
+        ## FIXME: should this exist?
+        pass
+
+    def flush_request(self, environ):
+        if not self.buffers.buffer:
+            return
+        total = time.time() - self.buffers.start_time
+        buf = self.buffers.buffer
+        date_formatted = time.strftime('%Y-%d-%m %H:%M:%S', time.gmtime(self.buffers.start_time))
+        req_name = (
+            environ['REQUEST_METHOD'] + ' ' +
+            environ.get('SCRIPT_NAME', '') +
+            environ.get('PATH_INFO', ''))
+        buf.insert(0, 'Errors for request %s (%s, %fsec):\n'
+                   % (req_name, date_formatted, total))
+        if not buf[-1].endswith('\n'):
+            buf.append('\n')
+        buf.append('Finish errors for request %s (%s)\n' % (req_name, date_formatted))
+        complete = ''.join(buf)
+        fp = open(self.filename, 'a')
+        fp.write(complete)
+        fp.flush()
+        fp.close()
+        self.buffers.buffer[:] = []
+
+    def __repr__(self):
+        return '<silverlining error collector %s>' % self.filename
