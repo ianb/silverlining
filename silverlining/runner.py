@@ -289,19 +289,6 @@ parser_run_mock = subcommands.add_parser(
     'run', help="Run a command on a remote host")
 
 parser_run_mock.add_argument(
-    '-p', '--provider',
-    metavar='NAME',
-    help="The [provider:NAME] section from ~/.silverlining.conf to use (default [provider:default])",
-    default="default")
-
-parser_run_mock.add_argument(
-    '-y', '--yes',
-    action='store_true',
-    help="Answer yes to any questions")
-
-#add_verbose(parser_run, add_log=True)
-
-parser_run_mock.add_argument(
     'host',
     help="Host where the application is running")
 
@@ -363,6 +350,23 @@ parser_diff.add_argument(
 parser_diff.add_argument(
     '--instance-name', metavar='APP_NAME.DATE_VERSION',
     help="Diff with a specific instance (not the active one)")
+
+
+for subparser in subcommands._name_parser_map.values():
+    ## FIXME: these options should also be available in the subparsers:
+    subparser.add_argument(
+        '-p', '--provider',
+        metavar='NAME',
+        help="The [provider:NAME] section from ~/.silverlining.conf to use (default [provider:default])",
+        default="default")
+
+    subparser.add_argument(
+        '-y', '--yes',
+        action='store_true',
+        help="Answer yes to any questions")
+
+    add_verbose(subparser, add_log=True)
+
 
 def catch_error(func):
     """Catch CommandError and turn it into an error message"""
