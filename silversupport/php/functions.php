@@ -6,7 +6,13 @@ function silver_next_path($default=NULL, $url_path=NULL) {
         $url_path = $_SERVER['SCRIPT_NAME'];
     }
     $path = "{$silver_base}/{$silver_php_root}/{$url_path}";
-    if (is_dir($path)) {
+    if (is_dir($path) and file_exists(rtrim($path, '/') . '/index.php')) {
+        if (rtrim($path, '/') == $path) {
+            # We need a redirect
+            header("Status: 301 Moved Permanently");
+            header("Location: {$url_path}/");
+            exit();
+        }
         $path = rtrim($path, '/') . '/index.php';
     }
     if (! file_exists($path)) {
