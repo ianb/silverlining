@@ -10,9 +10,6 @@ class Service(AbstractService):
         #WARNING, this will only work on ubuntu 9.10
         #since we don't have official ubuntu packages we use 10gen's PPA
 
-        #needed for add-apt-repository, perhaps we should just implement a command to append:
-        apt_install(['python-software-properties'])
-
         #FIXME, add-apt-repository will duplicate if run twice:
         run(['add-apt-repository', "deb http://downloads.mongodb.org/distros/ubuntu 9.10 10gen"])
         run(['apt-get', 'update'])
