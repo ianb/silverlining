@@ -19,6 +19,13 @@ def command_update(config):
     virtualenv.logger = config.logger
     config.logger.indent += 2
     config.logger.level_adjust += -1
+    app = AppConfig(os.path.join(config.args.dir, 'app.ini'),
+                    app_name=config.args.name or None)
+    if not config.args.location:
+        if app.default_location:
+            config.args.location = app.default_location
+        else:
+            config.args.location = config.node_hostname
     try:
         virtualenv.fixup_pth_and_egg_link(
             config.args.dir,
@@ -28,13 +35,6 @@ def command_update(config):
     finally:
         config.logger.indent -= 2
         config.logger.level_adjust -= -1
-    app = AppConfig(os.path.join(config.args.dir, 'app.ini'),
-                    app_name=config.args.name or None)
-    if not config.args.location:
-        if app.default_location:
-            config.args.location = app.default_location
-        else:
-            config.args.location = config.node_hostname
     if not config.args.node:
         from silversupport.appdata import normalize_location
         config.args.node = normalize_location(config.args.location)[0]
