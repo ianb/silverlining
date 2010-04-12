@@ -31,9 +31,9 @@ def loop():
             sys.stdout.flush()
             continue
         try:
-            path_match, data = lookup(hostname, path)
+            path_match, data, rest = lookup(hostname, path)
             if path_match:
-                data = '%s|%s' % (path_match, data)
+                data = '%s|%s|%s' % (path_match, data, rest)
         except LookupError, e:
             sys.stderr.write('Error with hostname=%r, path=%r: %s\n'
                              % (hostname, path, e))
@@ -45,8 +45,8 @@ def loop():
 
 def lookup(hostname, path):
     record = lookup_hostname(hostname)
-    path_match, data = lookup_path(record, path)
-    return path_match, data
+    path_match, data, rest = lookup_path(record, path)
+    return path_match, data, rest
 
 
 def lookup_hostname(hostname, seen=None):
@@ -84,9 +84,9 @@ def lookup_path(record, path):
     for path_prefix, data in record:
         if path == path_prefix[:-1] and path_prefix.endswith('/'):
             # We need a / redirect
-            return None, 'addslash'
+            return None, 'addslash', None
         if path.startswith(path_prefix):
-            return path_prefix, data
+            return path_prefix, data, path[len(path_prefix):]
     else:
         ## FIXME: how should this fail?
         raise LookupError('No application mounted to /')

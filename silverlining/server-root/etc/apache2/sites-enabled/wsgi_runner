@@ -57,8 +57,8 @@ RewriteLock /var/lock/apache2/rewrite.lck
 ## Python/WSGI setup:
 RewriteEngine on
 ## Uncomment if you want to understand what is happening here:
-#RewriteLog /var/log/apache2/rewrite.log
-#RewriteLogLevel 5
+RewriteLog /var/log/apache2/rewrite.log
+RewriteLogLevel 5
 
 # Strip www. from all (non-https) domains:
 RewriteCond %{SERVER_PORT} ^8080$
@@ -79,60 +79,62 @@ RewriteCond %{ENV:SILVER_APP_DATA} ^addslash$
 RewriteRule (.*) %{ENV:SILVER_REDIR_HOST}$1/ [L,R=permanent]
 RewriteCond %{ENV:SILVER_APP_DATA} ^error:(.*)$
 RewriteRule . /usr/local/share/silverlining/error/routing-error.html [R=500,L,E=ERROR_MSG:%1]
-RewriteCond %{ENV:SILVER_APP_DATA} (.*)\|(.*)\|(.*)\|(.*)\|(.*)\|(.*)
+RewriteCond %{ENV:SILVER_APP_DATA} (.*)\|(.*)\|(.*)\|(.*)\|(.*)\|(.*)\|(.*)
 RewriteRule . - [E=SILVER_MATCH_PATH:%1]
-RewriteCond %{ENV:SILVER_APP_DATA} (.*)\|(.*)\|(.*)\|(.*)\|(.*)\|(.*)
+RewriteCond %{ENV:SILVER_APP_DATA} (.*)\|(.*)\|(.*)\|(.*)\|(.*)\|(.*)\|(.*)
 RewriteRule . - [E=SILVER_INSTANCE_NAME:%2]
-RewriteCond %{ENV:SILVER_APP_DATA} (.*)\|(.*)\|(.*)\|(.*)\|(.*)\|(.*)
+RewriteCond %{ENV:SILVER_APP_DATA} (.*)\|(.*)\|(.*)\|(.*)\|(.*)\|(.*)\|(.*)
 RewriteRule . - [E=SILVER_PROCESS_GROUP:%3]
-RewriteCond %{ENV:SILVER_APP_DATA} (.*)\|(.*)\|(.*)\|(.*)\|(.*)\|(.*)
+RewriteCond %{ENV:SILVER_APP_DATA} (.*)\|(.*)\|(.*)\|(.*)\|(.*)\|(.*)\|(.*)
 RewriteRule . - [E=CONFIG_WRITABLE_ROOT:%4]
-RewriteCond %{ENV:SILVER_APP_DATA} (.*)\|(.*)\|(.*)\|(.*)\|(.*)\|(.*)
+RewriteCond %{ENV:SILVER_APP_DATA} (.*)\|(.*)\|(.*)\|(.*)\|(.*)\|(.*)\|(.*)
 RewriteRule . - [E=SILVER_PLATFORM:%5]
-RewriteCond %{ENV:SILVER_APP_DATA} (.*)\|(.*)\|(.*)\|(.*)\|(.*)\|(.*)
+RewriteCond %{ENV:SILVER_APP_DATA} (.*)\|(.*)\|(.*)\|(.*)\|(.*)\|(.*)\|(.*)
 RewriteRule . - [E=SILVER_PHP_ROOT:%6]
+RewriteCond %{ENV:SILVER_APP_DATA} (.*)\|(.*)\|(.*)\|(.*)\|(.*)\|(.*)\|(.*)
+RewriteRule . - [E=SILVER_REMAINING_URI:%7]
 
 RewriteCond %{ENV:SILVER_INSTANCE_NAME} ^([^.]*)\.
 RewriteRule . - [E=SILVER_APP_NAME:%1]
 
 # Refuse /index.html files (redirect):
-RewriteCond /var/www/%{ENV:SILVER_INSTANCE_NAME}/static%{REQUEST_URI} -f
+RewriteCond /var/www/%{ENV:SILVER_INSTANCE_NAME}/static%{ENV:SILVER_REMAINING_URI} -f
 RewriteRule (.*/)index.html %{ENV:SILVER_REDIR_HOST}$1 [L,R=permanent]
 # Serve up any static files:
-RewriteCond /var/www/%{ENV:SILVER_INSTANCE_NAME}/static%{REQUEST_URI} -f
-RewriteRule . /var/www/%{ENV:SILVER_INSTANCE_NAME}/static%{REQUEST_URI} [L]
+RewriteCond /var/www/%{ENV:SILVER_INSTANCE_NAME}/static%{ENV:SILVER_REMAINING_URI} -f
+RewriteRule . /var/www/%{ENV:SILVER_INSTANCE_NAME}/static%{ENV:SILVER_REMAINING_URI} [L]
 # Add a trailing slash when necessary:
-RewriteCond /var/www/%{ENV:SILVER_INSTANCE_NAME}/static%{REQUEST_URI} -d
-RewriteCond %{REQUEST_URI} [^/]$
-RewriteCond /var/www/%{ENV:SILVER_INSTANCE_NAME}/static%{REQUEST_URI}/index.html -f
+RewriteCond /var/www/%{ENV:SILVER_INSTANCE_NAME}/static%{ENV:SILVER_REMAINING_URI} -d
+RewriteCond %{ENV:SILVER_REMAINING_URI} [^/]$
+RewriteCond /var/www/%{ENV:SILVER_INSTANCE_NAME}/static%{ENV:SILVER_REMAINING_URI}/index.html -f
 RewriteRule (.*) %{ENV:SILVER_REDIR_HOST}$1/ [L,R=permanent]
 # Otherwise serve up index.html:
-RewriteCond /var/www/%{ENV:SILVER_INSTANCE_NAME}/static%{REQUEST_URI}/index.html -f
-RewriteRule . /var/www/%{ENV:SILVER_INSTANCE_NAME}/static%{REQUEST_URI}/index.html [L]
+RewriteCond /var/www/%{ENV:SILVER_INSTANCE_NAME}/static%{ENV:SILVER_REMAINING_URI}/index.html -f
+RewriteRule . /var/www/%{ENV:SILVER_INSTANCE_NAME}/static%{ENV:SILVER_REMAINING_URI}/index.html [L]
 
 ## FIXME: even when there is no writable root, these all get run:
 ## Repeat static serving for writable-root files:
 # Refuse /index.html files (redirect):
-RewriteCond %{ENV:CONFIG_WRITABLE_ROOT}%{REQUEST_URI} -f
+RewriteCond %{ENV:CONFIG_WRITABLE_ROOT}%{ENV:SILVER_REMAINING_URI} -f
 RewriteRule (.*/)index.html %{ENV:SILVER_REDIR_HOST}$1 [L,R=permanent]
 # Serve up any static files:
-RewriteCond %{ENV:CONFIG_WRITABLE_ROOT}%{REQUEST_URI} -f
-RewriteRule . %{ENV:CONFIG_WRITABLE_ROOT}%{REQUEST_URI} [L]
+RewriteCond %{ENV:CONFIG_WRITABLE_ROOT}%{ENV:SILVER_REMAINING_URI} -f
+RewriteRule . %{ENV:CONFIG_WRITABLE_ROOT}%{ENV:SILVER_REMAINING_URI} [L]
 # Add a trailing slash when necessary:
-RewriteCond %{ENV:CONFIG_WRITABLE_ROOT}%{REQUEST_URI} -d
-RewriteCond %{REQUEST_URI} [^/]$
-RewriteCond %{ENV:CONFIG_WRITABLE_ROOT}%{REQUEST_URI}/index.html -f
+RewriteCond %{ENV:CONFIG_WRITABLE_ROOT}%{ENV:SILVER_REMAINING_URI} -d
+RewriteCond %{ENV:SILVER_REMAINING_URI} [^/]$
+RewriteCond %{ENV:CONFIG_WRITABLE_ROOT}%{ENV:SILVER_REMAINING_URI}/index.html -f
 RewriteRule (.*) %{ENV:SILVER_REDIR_HOST}$1/ [L,R=permanent]
 # Otherwise serve up index.html:
-RewriteCond %{ENV:CONFIG_WRITABLE_ROOT}%{REQUEST_URI}/index.html -f
-RewriteRule . %{ENV:CONFIG_WRITABLE_ROOT}%{REQUEST_URI}/index.html [L]
+RewriteCond %{ENV:CONFIG_WRITABLE_ROOT}%{ENV:SILVER_REMAINING_URI}/index.html -f
+RewriteRule . %{ENV:CONFIG_WRITABLE_ROOT}%{ENV:SILVER_REMAINING_URI}/index.html [L]
 
 # Next, if the request points to something that is not a .php file,
 # then serve it up directly...
 RewriteCond %{ENV:SILVER_PLATFORM} ^php$
-RewriteCond %{ENV:SILVER_PHP_ROOT}%{REQUEST_URI} -f
-RewriteCond %{REQUEST_URI} !\.php$
-RewriteRule . %{ENV:SILVER_PHP_ROOT}%{REQUEST_URI} [L]
+RewriteCond %{ENV:SILVER_PHP_ROOT}%{ENV:SILVER_REMAINING_URI} -f
+RewriteCond %{ENV:SILVER_REMAINING_URI} !\.php$
+RewriteRule . %{ENV:SILVER_PHP_ROOT}%{ENV:SILVER_REMAINING_URI} [L]
 
 # Lastly, we run the actual PHP:
 RewriteCond %{ENV:SILVER_PLATFORM} ^php$
