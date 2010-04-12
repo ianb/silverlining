@@ -32,6 +32,9 @@ class AppConfig(object):
             if self.config['production'].get('default_hostname'):
                 warnings.warn('default_hostname setting in %s has been renamed to default_location'
                               % config_file)
+            if self.config['production'].get('default_host'):
+                warnings.warn('default_host setting in %s has been renamed to default_location'
+                              % config_file)
         if app_name is None:
             if is_production():
                 app_name = os.path.basename(os.path.dirname(config_file)).split('.')[0]
