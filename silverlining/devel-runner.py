@@ -47,6 +47,16 @@ def load_paste_reloader():
 reloader = load_paste_reloader()
 reloader.install()
 
+def load_paste_httpserver():
+    import new
+    mod = new.module('paste.httpserver')
+    fn = os.environ['SILVER_PASTE_LOCATION']
+    if fn.endswith('.pyc'):
+        fn = fn[:-1]
+    mod.__file__ = fn
+    execfile(mod.__file__, mod.__dict__)
+    return mod
+
 
 def get_app(base_path):
     ## FIXME: is this a reasonable instance_name default?
@@ -151,12 +161,9 @@ class CompoundApp(object):
 
 def main(base_path):
     app = CompoundApp(base_path)
-    import wsgiref.simple_server
-    server = wsgiref.simple_server.make_server(
-        '127.0.0.1', 8080, app)
-    print 'Serving on http://127.0.0.1:8080'
+    httpserver = load_paste_httpserver()
     try:
-        server.serve_forever()
+        httpserver.serve(app)
     except KeyboardInterrupt:
         pass
 

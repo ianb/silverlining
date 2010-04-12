@@ -3,6 +3,7 @@ import os
 import sys
 import subprocess
 from cmdutils import CommandError
+from paste import httpserver
 
 
 def command_serve(config):
@@ -22,6 +23,7 @@ def command_serve(config):
     ## FIXME: should cut down the environ significantly
     environ = os.environ.copy()
     environ['SILVER_INSTANCE_NAME'] = 'localhost'
+    environ['SILVER_PASTE_LOCATION'] = httpserver.__file__
     proc = None
     try:
         try:
