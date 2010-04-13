@@ -114,9 +114,40 @@ class CompoundApp(object):
 
     def __init__(self, base_path, writable_root=None):
         self.base_path = base_path
-        self.app, self.writable_root = get_app(base_path)
+        self._app = self.writable_root = None
+        self.app
+
+    @property
+    def app(self):
+        if self._app is not None:
+            return self._app
+        prev_modules = sys.modules.keys()
+        try:
+            self._app, self.writable_root = get_app(self.base_path)
+        except:
+            self._app = None
+            # Make sure any stale/SyntaxError modules are removed:
+            for mod_name in sys.modules.keys():
+                if mod_name not in prev_modules:
+                    del sys.modules[mod_name]
+            return self.make_error_app()
+
+    def make_error_app(self):
+        import traceback
+        exc_info = sys.exc_info()
+        error = ''.join(traceback.format_exception(*exc_info))
+        print >> sys.stderr, error
+        def app(environ, start_response):
+            start_response('500 Server Error',
+                           [('content-type', 'text/plain')])
+            return ['Error loading app:\n', error]
+        app.is_error = True
+        return app
 
     def __call__(self, environ, start_response):
+        app = self.app
+        if getattr(app, 'is_error', False):
+            return app(environ, start_response)
         environ['silverlining.devel'] = True
         path_info = environ.get('PATH_INFO', '')
         path_info = os.path.normpath(path_info)
@@ -130,7 +161,7 @@ class CompoundApp(object):
                 return self.serve_file(os.path.join(path, 'index.html'), environ, start_response)
             if os.path.exists(path) and not os.path.isdir(path):
                 return self.serve_file(path, environ, start_response)
-        return self.app(environ, start_response)
+        return app(environ, start_response)
 
     def serve_file(self, path, environ, start_response):
         """Serve a file.
