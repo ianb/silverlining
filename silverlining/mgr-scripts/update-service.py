@@ -56,7 +56,7 @@ def update_service(instance_name, clear=False):
     else:
         os.makedirs(tmp)
     if not os.path.exists(app_config.log_dir):
-        run(['sudo', '-u', 'www-data', 'mkdir -p %s' % app_config.log_dir])
+        run(['sudo', '-u', 'www-data', 'mkdir', '-p', app_config.log_dir])
 
 
 if __name__ == '__main__':
