@@ -72,6 +72,9 @@ def run_test(name, stage=None, ci=False, setup_node=False):
             assert 'wsgi.multiprocess=True' in resp
             assert 'wsgi.multithread=True' in resp
             assert "path='' '/update'" in resp
+            resp = urllib.urlopen('http://%s/static_file.txt' % name).read()
+            print 'Got static HTTP response:\n%s' % resp
+            assert resp.strip() == 'This is a test'
 
         if run_stage(stage, 'update-path'):
             print 'Doing update to path'
