@@ -86,7 +86,8 @@ def lookup_path(record, path):
             # We need a / redirect
             return None, 'addslash', None
         if path.startswith(path_prefix):
-            return path_prefix, data, path[len(path_prefix):]
+            path_prefix = path_prefix.rstrip('/') or '/'
+            return path_prefix, data, path[len(path_prefix)-1:]
     else:
         ## FIXME: how should this fail?
         raise LookupError('No application mounted to /')

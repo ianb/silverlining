@@ -57,8 +57,8 @@ RewriteLock /var/lock/apache2/rewrite.lck
 ## Python/WSGI setup:
 RewriteEngine on
 ## Uncomment if you want to understand what is happening here:
-RewriteLog /var/log/apache2/rewrite.log
-RewriteLogLevel 5
+#RewriteLog /var/log/apache2/rewrite.log
+#RewriteLogLevel 5
 
 # Strip www. from all (non-https) domains:
 RewriteCond %{SERVER_PORT} ^8080$
