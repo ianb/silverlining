@@ -36,106 +36,36 @@ CDN.
 Groups of servers, replication
 ------------------------------
 
-**Note**: there a bunch more notes on this in ``multiserver design
-notes <multiserver.html>`_.
-
-This is kind of an obvious feature for Siler Lining, being all "cloud"
-like.  Instead of hosting things like a database locally, it should be
-possible to host it on a central server with many "application"
-servers pointing to it.
-
-And, in turn, it should be possible to use replication or sharding to
-have many database servers, though this is more difficult (this is a
-second step).
-
-Then, though it's largely outside the scope of Silver Lining itself,
-it should be possible to move frontend (varnish) caching to another
-layer, and load balancing around that.  While it might be reasonable
-to manage that with Silver Lining, nothing Silver Lining currently
-does is really interested in that layer.
-
-For the first two it will be necessary to add a new concept of a
-server group.  This is too big to shove in ``~/.silverlining.conf``
-(and should probably be version-control-friendly).  I expect a new
-document describing server groups will be necessary.
-
-Maybe a server group would look like::
-
-    [group:NAME]
-    provider = <name of provider in ~/.silverlining.conf>
-    apps = <number of app servers>
-    service.postgis = <number of postgis servers, or blank means 1>
-
-Probably you should be able to put in ``[provider:NAME]`` sections
-too, though those usually contain private data so maybe it isn't
-important.
-
-Not all services support multiple applications; ``service.files``
-particularly does not support this.  If you had a service like this
-then it'd give an error.  Also not all services would necessarily
-support multiple servers.  To do PostGIS, for instance, you'd need to
-setup replication.  This is relatively easy on CouchDB, but it might
-be a while before it is well configured on PostGIS.
-
-Also there's the possibility of a sharding front-end, or a front-end
-that does "sticky" load balancing (where a user is redirected back to
-the same server they were at before).  On the backend there could be
-sharding, where the application server must select the proper database
-server.  Right now there's only really support for a single database
-server per application, so there'd have to be a concept of usefully
-named servers.  So... sharding is not that easy.  Also there is
-probably a place for code in the VERY front of everything that routes
-a user to the right server, which is not something you can always do
-very automatically (e.g., authentication might have to happen before
-you can route the user).
+There are notes on this in ``multiserver design notes
+<multiserver.html>`_.
 
 Backups
 -------
 
-It should be possible to get a nice backup file of everything, or
-upload one to some location.  It would be very nice if backup files
-were portable.  Then, for instance, you could download the backups to
-replicate live data on your site for your development.  (PostGIS is a
-case where portable backups can be a bit tricky at times.)
+Backup and restore is implemented in a basic fashion.  It would be
+very nice if backup files were portable.  Then, for instance, you
+could download the backups to replicate live data on your site for
+your development.  (PostGIS is a case where portable backups can be a
+bit tricky at times.)
 
 It would be even more neat if backup files were somewhat version
 control friendly.  E.g., well-ordered SQL dumps.  This might make the
 backup process do double duty as a test fixture process, and a process
 to setup data in new instances.
 
-Backup restore should also be handled; writing backup code without
-restore code is just silly.
-
-A backup might look like::
-
-    silver backup hostname DEST
-
-The destination could be a local file, ``-`` (stdout), a URL to PUT to
-(maybe a URI template), some name on the remote server (more like a
-checkpoint), or a ssh/scp location.  Restore would look similar::
-
-    silver restore hostname SOURCE
-
-And then probably something like::
-
-    silver backup-info hostname
-
-Which would note any local checkpoints, and show log information about
-any other backups.
-
-**Note**: this is mostly implemented, though without a strong
-workflow, and without direct site-to-site backups (i.e., transer
-data between sites).
+Site-to-site backups should be supported (which would essentially
+clone the data from one server to another).
 
 Logs
 ----
 
 Log files should also be handled gracefully, tracked, and possibly
-some frontend.  Though I feel like some kind of management programming
-interface is better, and then a "deployed" app would use that
-interface.  Actually, "interface" is probably saying too much;
-documented and conscious server layout that an application can be
-written to inspect.
+some frontend (`frontend in progress
+<http://bitbucket.org/ianb/silverlog>`_).  Though I feel like some
+kind of management programming interface is better, and then a
+"deployed" app would use that interface.  Actually, "interface" is
+probably saying too much; documented and conscious server layout that
+an application can be written to inspect.
 
 There should be a way to get a list of all log files for a host/app.
 Maybe there should be a standard way to effect the Python standard
