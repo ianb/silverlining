@@ -495,3 +495,18 @@ Here's what I want to do right away:
 * Look into the Varnish logs (Apache logs aren't that complete,
   really)
 * Make the instantiated app available in the interactive shell
+* Move towards a general schema for commands (mostly these are
+  arguments with known names):
+  * destination location
+  * app dir
+  * provider
+  * node
+  Then some general conventions could be done for default_app, maybe
+  default_provider and some other stuff, as well as info in
+  ``~/.silverlining.conf``
+* There's some nice features in the `Mozilla AMO Hudson instace
+  <https://hudson.mozilla.org/job/addons.mozilla.org/>`_ that I would
+  like here (checking coding conventions and other details).
+* writable-root should go before static files in precedence.
+* Static files should be per-domain optionally (first look in
+  ``PATH/domain/file`` then ``PATH/file``).
