@@ -63,7 +63,6 @@ def get_app(base_path):
     app_config = AppConfig(os.path.join(base_path, 'app.ini'))
     instance_name = 'localhost'
     os.environ['SILVER_INSTANCE_NAME'] = instance_name
-    os.environ['CANONICAL_HOST'] = 'localhost:8080'
     app_config.activate_services(os.environ)
     app_config.activate_path()
     reloader.watch_file(app_config.config_file)

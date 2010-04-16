@@ -178,7 +178,7 @@ class AppConfig(object):
             if not os.path.exists(tmp):
                 os.makedirs(tmp)
         environ['SILVER_LOGS'] = self.log_dir
-        if not is_production and not os.path.exists(environ['SILVER_LOGS']):
+        if not is_production() and not os.path.exists(environ['SILVER_LOGS']):
             os.makedirs(environ['SILVER_LOGS'])
         return environ
 
