@@ -125,7 +125,8 @@ class ErrorApp(object):
 # dull but used internally; we'll delete them for cleanliness:
 BORING_VARS = [
     'SILVER_APP_DATA', 'SILVER_PROCESS_GROUP', 'SILVER_PLATFORM',
-    'SILVER_PHP_ROOT', 'SILVER_REDIR_HOST', 'SILVER_FORWARDED']
+    'SILVER_PHP_ROOT', 'SILVER_REDIR_HOST', 'SILVER_FORWARDED',
+    'SILVER_HOST', 'SILVER_REMAINING_URI']
 
 
 def delete_boring_vars(environ):

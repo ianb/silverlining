@@ -97,6 +97,9 @@ RewriteRule . - [E=SILVER_REMAINING_URI:%7]
 RewriteCond %{ENV:SILVER_INSTANCE_NAME} ^([^.]*)\.
 RewriteRule . - [E=SILVER_APP_NAME:%1]
 
+RewriteCond %{HTTP_HOST} ^(.*)(?:\:\d+)?$
+RewriteRule . - [E=SILVER_HOST:%1]
+
 # Refuse /index.html files (redirect):
 RewriteCond /var/www/%{ENV:SILVER_INSTANCE_NAME}/static%{ENV:SILVER_REMAINING_URI} -f
 RewriteRule (.*/)index.html %{ENV:SILVER_REDIR_HOST}$1 [L,R=permanent]
@@ -113,7 +116,27 @@ RewriteCond /var/www/%{ENV:SILVER_INSTANCE_NAME}/static%{ENV:SILVER_REMAINING_UR
 RewriteRule . /var/www/%{ENV:SILVER_INSTANCE_NAME}/static%{ENV:SILVER_REMAINING_URI}/index.html [L]
 
 ## FIXME: even when there is no writable root, these all get run:
-## Repeat static serving for writable-root files:
+## Repeat static serving for writable-root files; this entire stanza
+## is repeated twice, first using the host-specific location, then a
+## more general location:
+
+## Per-host:
+# Refuse /index.html files (redirect):
+RewriteCond %{ENV:CONFIG_WRITABLE_ROOT}/%{ENV:SILVER_HOST}%{ENV:SILVER_REMAINING_URI} -f
+RewriteRule (.*/)index.html %{ENV:SILVER_REDIR_HOST}$1 [L,R=permanent]
+# Serve up any static files:
+RewriteCond %{ENV:CONFIG_WRITABLE_ROOT}/%{ENV:SILVER_HOST}%{ENV:SILVER_REMAINING_URI} -f
+RewriteRule . %{ENV:CONFIG_WRITABLE_ROOT}/%{ENV:SILVER_HOST}%{ENV:SILVER_REMAINING_URI} [L]
+# Add a trailing slash when necessary:
+RewriteCond %{ENV:CONFIG_WRITABLE_ROOT}/%{ENV:SILVER_HOST}%{ENV:SILVER_REMAINING_URI} -d
+RewriteCond %{ENV:SILVER_REMAINING_URI} [^/]$
+RewriteCond %{ENV:CONFIG_WRITABLE_ROOT}/%{ENV:SILVER_HOST}%{ENV:SILVER_REMAINING_URI}/index.html -f
+RewriteRule (.*) %{ENV:SILVER_REDIR_HOST}$1/ [L,R=permanent]
+# Otherwise serve up index.html:
+RewriteCond %{ENV:CONFIG_WRITABLE_ROOT}/%{ENV:SILVER_HOST}%{ENV:SILVER_REMAINING_URI}/index.html -f
+RewriteRule . %{ENV:CONFIG_WRITABLE_ROOT}/%{ENV:SILVER_HOST}%{ENV:SILVER_REMAINING_URI}/index.html [L]
+
+## Not per-host:
 # Refuse /index.html files (redirect):
 RewriteCond %{ENV:CONFIG_WRITABLE_ROOT}%{ENV:SILVER_REMAINING_URI} -f
 RewriteRule (.*/)index.html %{ENV:SILVER_REDIR_HOST}$1 [L,R=permanent]

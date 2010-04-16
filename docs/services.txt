@@ -88,6 +88,13 @@ Your application gets the variable::
 
 Note ``index.html`` files will work.
 
+Also you may put files in ``$CONFIG_WRITABLE_ROOT/$HTTP_HOST/...`` for
+per-host files.  E.g., you can have an application serve up
+``alice.myblogservice.com`` and ``bob.myblogservice.com``, and put
+their files in ``$CONFIG_WRITABLE_ROOT/alice.myblogservice.com/`` or
+``$CONFIG_WRITABLE_ROOT/bob.myblogservice.com/`` to keep the files
+host-local.
+
 PostGIS
 ~~~~~~~
 

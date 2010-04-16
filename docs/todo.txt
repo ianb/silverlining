@@ -508,5 +508,3 @@ Here's what I want to do right away:
   <https://hudson.mozilla.org/job/addons.mozilla.org/>`_ that I would
   like here (checking coding conventions and other details).
 * writable-root should go before static files in precedence.
-* Static files should be per-domain optionally (first look in
-  ``PATH/domain/file`` then ``PATH/file``).
