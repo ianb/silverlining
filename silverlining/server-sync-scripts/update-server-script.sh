@@ -63,6 +63,17 @@ python -m compileall -q /usr/local/share/silverlining/mgr-scripts/
 ## This is just a piece of configuration I (Ian) like:
 sed -i "s/ -backup/-backup/" /etc/joe/jmacsrc
 
+# Required workarounds for 14362 Ubuntu 9.10 (karmic)
+if [ ! -e /etc/mailname ] ; then
+    touch /etc/mailname
+    /etc/init.d/postfix restart
+fi
+if [ ! -e /etc/default/locale ] ; then
+    touch /etc/default/locale
+    echo LANG="en_US.UTF-8" > /etc/default/locale
+    echo LANGUAGE="en_US:en" >> /etc/default/locale
+fi
+
 ## Make sure there's a secret:
 if [ ! -e /var/lib/silverlining/secret.txt ] ; then
     python -c '
