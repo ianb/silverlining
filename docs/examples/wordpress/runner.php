@@ -9,4 +9,4 @@ if ($_SERVER['SCRIPT_NAME'] == "/silver-update.php") {
     }
     include $path;
 }
-?><? /*hey */ ?>
+?>
