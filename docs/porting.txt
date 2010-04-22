@@ -1,0 +1,263 @@
+Porting An Application To Silver Lining
+=======================================
+
+This describes some of the steps of taking an existing application and
+"porting" it to Silver Lining.
+
+First steps for a simple Python application
+-------------------------------------------
+
+Imagine you've been developing an application for a while, using your
+Python framework of choice.  It doesn't matter much *what* framework
+you used.  You might have to do a little cleanup to start:
+
+* Make sure everything runs okay with Python 2.6.
+* Make sure you've identified all your requirements.
+
+It's not required to use a ``setup.py`` file or specify your
+requirements in ``setup.py`` with ``install_requires``.  These files
+are good practice, but not necessary.
+
+Clean up your ``site-packages``
+-------------------------------
+
+Some people have installed things into their computer as root, e.g.,
+by using ``sudo easy_install`` or ``sudo pip install``.  This is a bad
+idea.  This will cause all sorts of weird problems and complications
+for you, not just with Silver Lining but with everything.
+
+I recommend deleting as much from ``/usr/lib/python2.6/site-packages``
+as you can.  I recommend *keeping* some select stable libraries like
+PIL, or Database drivers (psycopg, MySQLdb, etc).
+
+Create the file layout
+----------------------
+
+Now you are ready to create a location for storing your application.
+With Silver Lining applications all the code and libraries are stored
+in a single directory.  I usually name this directory ``mything-app``
+(where ``mything`` is the name of my application).  So run::
+
+    $ silver init mything-app
+    $ cd mything-app
+    $ source bin/activate
+
+Now you have an activated `virtualenv
+<http://virtualenv.openplans.org>`_ with some basic Silver Lining
+layout, though no application.
+
+Next, put your application in place::
+
+    $ cd src
+    $ hg/git/svn clone/checkout your-repository mything
+
+If you already have your code checked out into, say, ``~/src/mything``
+then unfortunately you'll either have to move it or deal with two
+separate checkouts -- the code has to be physically located inside the
+``mything-app`` directory, because only that directory will be
+uploaded to the server.  Though you can *probably* do something like
+this, but I haven't tried it::
+
+    $ cd $VIRTUAL_ENV/src
+    $ ln -s ~/src/mything mything
+
+anyway, you probably want to do this work on a branch or separate
+cloned repository.
+
+Next create a new repository for your application's libraries.  You
+won't install libraries during the regular workflow of developing
+applications with Silver Lining, even if you are collaborating with
+other developers or using multiple machines -- you'll only install
+things when you've actually added, updated, or removed a library that
+your application uses.  To do that you'll put all your *installed*
+libraries in another repository.  You can do that like::
+
+    $ cd $VIRTUAL_ENV/lib
+    $ rm -r python
+    $ hg init python
+
+or use ``git init``, or create a repository and clone/check it out.
+This repository will be separate from your main application.
+
+Note that everything gets installed into ``lib/python/``, not into
+``lib/python2.6/site-packages/`` (which exists, but won't be added
+to).
+
+Installing Stuff
+----------------
+
+Now you have some files in place, but nothing is really "installed".
+
+If you have a ``setup.py`` file, then run::
+
+    $ cd $VIRTUAL_ENV
+    $ pip install -e src/mything/
+
+This will make the package importable and install any requirements
+you've specified.
+
+If you *have not* written a ``setup.py`` file (common for Django
+applications) then you'll have to make sure the appropriate directory
+is on the path in a more manual fashion.  Let's say you want
+``src/mything/`` directly on the path, then you'll do::
+
+    $ cd $VIRTUAL_ENV/lib/python/
+    $ echo ../../src/mything/ > mything.pth
+
+If you need to install some additional things, go ahead now::
+
+    $ pip install SomeLibrary
+
+If you are developing a library concurrently with your application
+then you should also check that library out into ``src/`` and use
+``pip install -e``.
+
+You should use **pip** specifically and not easy_install, as pip
+cleans up after itself, uninstalling libraries and old versions of
+libraries.
+
+Non-Python Libraries
+--------------------
+
+If you have any libraries that you need that aren't pure-Python, you
+should install them system-wide.  Ideally you should use your
+operating system facilities to install these libraries (e.g.,
+``apt-get install python-lxml``).
+
+Make note of these libraries.  Database connection libraries will be
+installed automatically, but any other libraries will have to be
+explicitly added (more on that later).
+
+Describe your application with ``app.ini``
+------------------------------------------
+
+Now you have to tell Silver Lining how to start up your application,
+and possibly some other details.  This is done through a configuration
+file ``app.ini`` in the root of your app.
+
+There will be an example file in place.  You might just want to edit
+it, making note of these settings::
+
+    [production]
+    app_name = mything
+    runner = src/mything/silver-runner.py
+
+Those are really the most important settings.  Also if you are using a
+database (likely!) then find the appropriate line and uncomment it.
+In our example we'll imagine you are using PostgreSQL::
+
+    service.postgresql =
+
+Note that you don't need any value there.  (Maybe someday there will
+be a service that isn't just "enabled" but is actually configured, at
+which point it will take some value.)
+
+The most important thing you'll note is that now you have a "runner"
+defined in ``src/mything/silver-runner.py``.  You better write that!
+
+The specific code you'll use depends on your web framework.  This file
+will basically look like a mod_wsgi ``.wsgi`` file: it's some Python
+code that creates an object ``application``.
+
+You shouldn't need to set up your path in this file.  In fact, you
+shouldn't need to set up any of your environment, you just find the
+application object.  You can also use a `Paste Deploy
+<http://pythonpaste.org/deploy/>`_ ini file if you want (but even if
+you are using a framework such as Pylons, you can if you want import
+your ``make_app`` function directly and call it).
+
+Here's an example for Django::
+
+    import django.core.handlers.wsgi
+    application = django.core.handlers.wsgi.WSGIHandler()
+
+Setting Up Your Environment
+---------------------------
+
+One nice thing about Silver Lining is that your environment can
+*always* be setup.  That means, everything importable all the time,
+everything configurable all the time, all data available.
+
+To do this there is a specific file for you to customize (well, a file
+for you to create): ``lib/python/silvercustomize.py`` (similar to
+``sitecustomize.py``).
+
+If you are using Django, you should do at least this::
+
+    import os
+    os.environ['DJANGO_SETTINGS_MODULE'] = 'mything.settings'
+
+On other systems you might import or configure other things.  It is
+preferable to put things here rather than in your runner, as this file
+is always loaded, so it will be available in the interactive
+interpreter, in tests, in scripts, etc.
+
+Configuration
+-------------
+
+Silver Lining uses a different model of configuration than is
+typically used.  You can, if you want, ignore configuration entirely
+-- but this is about *porting* an application, so you certainly
+haven't ignored configuration before.  So you need to adapt that
+configuration.
+
+Silver Lining tells the application about the environment through
+`environmental variables <envvariables.html>`_ (``os.environ``).
+These variables are *always* set.  So if you use a PostgreSQL database
+you would look at these:
+
+``os.environ['CONFIG_PG_DBNAME']``: the name of the database you
+should connect to.
+
+``os.environ['CONFIG_PG_HOST']``: the host of the database (empty
+string means localhost).
+
+``os.environ['CONFIG_PG_PORT']``: the port of the database (empty
+string means default port).
+
+``os.environ['CONFIG_PG_USER']``: the user to connect as.
+
+``os.environ['CONFIG_PG_PASSWORD']``: the password to use (empty string
+means no password).
+
+``os.environ['CONFIG_PG_SQLALCHEMY']``: creating the SQLAlchemy
+connection string from all these pieces is somewhat annoying, so this
+does it for you.
+
+These variables will be set both during local development and when
+deployed, so you can always rely on them -- you don't need any special
+conditionals.
+
+``bin/``
+--------
+
+Yet to be written (it's kind of a pain currently).
+
+Setting Up Your Database
+------------------------
+
+Now you have something that will *run*, but with a blank database.
+That's probably not what you want.
+
+You can tell Silver Lining to fetch a URL or call a script every time
+an application is updated.  It is up to this script to do the right
+thing -- to alter tables, to notice tables that already exists, etc.
+All Silver Lining handles is fetching this program.
+
+To do this, add a setting to ``app.ini``::
+
+    [production]
+    ...
+    update_fetch = /update-database
+
+That gets a URL, to call a script::
+
+    update_fetch = script:bin/django-admin.py syncdb
+
+You can have multiple entries, one per line (indent subsequent lines).
+
+If you have to poke at a database remotely there's also a way to do
+that, with ``silver run``.
+
+These URLs or scripts will also be called everytime you start up the
+application locally using ``silver serve``.
