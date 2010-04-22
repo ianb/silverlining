@@ -316,16 +316,16 @@ class AppConfig(object):
             app_dir += '/'
         cmd = ['rsync',
                '--recursive',
-               '--links',          # Copy over symlinks as symlinks
-               '--safe-links',     # Don't copy over links that are outside of dir
-               '--executability',  # Copy +x modes
-               '--times',          # Copy timestamp
-               '--rsh=ssh',        # Use ssh
-               '--delete',         # Delete files thta aren't in the source dir
+               '--links',              # Copy over symlinks as symlinks
+               '--copy-unsafe-links',  # Copy symlinks that are outside of dir as real files
+               '--executability',      # Copy +x modes
+               '--times',              # Copy timestamp
+               '--rsh=ssh',            # Use ssh
+               '--delete',             # Delete files thta aren't in the source dir
                '--compress',
                #'--skip-compress=.zip,.egg', # Skip some already-compressed files
                '--exclude-from=%s' % exclude_from,
-               '--progress',       # I don't think this does anything given --quiet
+               '--progress',           # I don't think this does anything given --quiet
                '--quiet',
                app_dir,
                os.path.join('%s:%s' % (host, dest_dir)),
