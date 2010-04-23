@@ -261,3 +261,111 @@ that, with ``silver run``.
 
 These URLs or scripts will also be called everytime you start up the
 application locally using ``silver serve``.
+
+Static Files
+------------
+
+If you have static files in your application, they go in ``static/``.
+They can (and should) be symlinks.  Note that ``static`` doesn't
+appear in the URL; so if for example you have a convention that all
+your static files go in ``http://example.com/static/`` then you
+actually have to get the files into ``static/static/``.
+
+So do something like::
+
+    $ cd $VIRTUAL_ENV/static
+    $ ln -s ../src/mything/mything/media media
+
+For Django you might also symlink things from the admin media into a
+location here, like::
+
+    $ ln -s ../lib/python/django/contrib/admin/media admin-media
+
+and in ``settings.py``::
+
+    ADMIN_MEDIA_PREFIX = '/admin-media/'
+
+Non-Python Libraries
+--------------------
+
+Any non-Python libraries have to be installed in production as deb
+packages.  For instance if you need lxml you'll need the
+``python-lxml`` package installed.  You can get this to happen with
+this addition to app.ini::
+
+    packages =
+        python-lxml
+
+You can have multiple packages, one on each line.  This doesn't
+include databases though!  (Well, SQLite is fine, as it runs
+in-process.)
+
+Testing It Out
+--------------
+
+You can run this application locally now, using::
+
+    $ silver serve ~/src/mything-app/
+
+This will run any URLs or scripts in ``update_fetch``, and serve up
+the application at ``http://localhost:8080``.  If you edit any files
+the server will restart to get the refreshed files.
+
+Note that when running locally you have to do things like create
+databases on your own.  You can also `customize the local
+configuration <services.html#local-development-configuration>`_ (this
+is done *outside* the application).
+
+To test an actual deployment you need a server to deploy to.  Silver
+Lining can deploy to any dedicated Ubuntu Karmic machine that has been
+configured by Silver Lining (using ``silver setup-node``), but the
+cloud makes getting a testing server very easy and quite cheap (when
+testing, you can allocate a server just for a few hours for testing
+before getting rid of it), so you might consider opening an account.
+
+
+Problems
+--------
+
+Here are some problems you might encounter, with ideas for solutions:
+
+I can't see errors
+~~~~~~~~~~~~~~~~~~
+
+Silver Lining doesn't do anything very useful with exceptions on its
+own.  You should use whatever facilities your web framework has.
+Projects like `weberror <http://bitbucket.org/bbangert/weberror/>`_
+and `flickzeug <http://dev.pocoo.org/projects/flickzeug/>`_ are a
+generic way of wrapping your application, and could be applied in the
+runner.
+
+To detect if you are in a production environment, you can use::
+
+    from silversupport.env import is_production
+
+    application = normal instantiation
+
+    if not is_production():
+        from flickzeug.debug import DebuggedApplication
+        application = DebuggedApplication(application, evalex=True)
+
+I need custom database setup
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If you want to, you can do things more manually than just using
+``update_fetch``.  One way is to use ``silver run``.  For instance,
+instead of using ``script:bin/django-admin.py syncdb`` you can invoke
+this manually on a server like::
+
+    $ silver run mything-host.com django-admin.py syncdb
+
+This command can be interactive.  There isn't good access directly to
+commands like ``psql`` though.
+
+I need a service that isn't supported
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Then write the code!  You can fork `the project
+<http://bitbucket.org/ianb/silverlining>`_ and add code in
+``silversupport/services/``.  It's not very complicated, or at least
+not more complicated than using a database properly anyway.
