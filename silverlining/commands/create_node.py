@@ -4,12 +4,15 @@ import time
 from cmdutils import CommandError
 from silverlining.etchosts import set_etc_hosts
 from silversupport.shell import run
+from silverlining.nodeset import NodeSet
 
 ESTIMATED_TIME = 60
 AFTER_PING_WAIT = 10
 
 
 def command_create_node(config):
+    if NodeSet.is_nodeset(config.args.node):
+        return command_create_nodeset(config)
     node_hostname = config.node_hostname
     node_exists = False
     if config.args.if_not_exists:
@@ -58,6 +61,21 @@ def command_create_node(config):
         config.args.node = node_hostname
         config.logger.notify('Setting up server')
         command_setup_node(config)
+
+def command_create_nodeset(config):
+    nodeset = NodeSet(config.args.node)
+    nodes = nodeset.nodes
+    all_nodes = config.driver.list_nodes()
+    for node_name, node_config in sorted(nodes.items()):
+        for node in all_nodes:
+            if node.name == node_name:
+                config.logger.notify('Node exists: %s' % node_name)
+                break
+        else:
+            create_node(config, node_name, node_config)
+
+def conditional_create_node(config, node_name, node_config):
+    config.logger.info('Checking if node %s (%s) exists' % (node_name, node_config.create_node_type))
 
 
 def wait_for_node_ready(config, node_name):

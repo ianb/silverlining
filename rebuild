@@ -45,7 +45,7 @@ if [ -z "$DEVEL" ] ; then
     export VERSION="0.1-$(date +%Y-%m-%d)"
 
     source $ENV_PATH/bin/activate
-    
+
     ./silverlining/create-zip.sh
     cp docs/_static/HEADER.html $ZIP_DIR
     sed -i "s/MOST_RECENT/$VERSION/g" $ZIP_DIR/HEADER.html
@@ -53,6 +53,5 @@ if [ -z "$DEVEL" ] ; then
 RewriteRule silverlining-mostrecent.zip http://%{HTTP_HOST}/zip/silverlining-$VERSION.zip [R,L]
 " > $ZIP_DIR/.htaccess
 
-    rsync -r --delete docs/_build/ "$CONFIG_WRITABLE_ROOT/"
+    rsync -r --delete docs/_build/ "$CONFIG_WRITABLE_ROOT/cloudsilverlining.org"
 fi
-
