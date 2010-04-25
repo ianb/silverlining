@@ -97,6 +97,13 @@ def find_package_data(
                 out.setdefault(package, []).append(prefix+name)
     return out
 
+package_data = find_package_data(
+    where=os.path.join(os.path.dirname(__file__), 'silverlining'),
+    package='silverlining')
+package_data.update(find_package_data(
+    where=os.path.join(os.path.dirname(__file__), 'silversupport'),
+    package='silversupport'))
+
 setup(name='SilverLining',
       version=version,
       description="Library for creating cloud servers",
@@ -108,7 +115,7 @@ setup(name='SilverLining',
       author_email='ianb@openplans.org',
       url='',
       license='GPL',
-      packages=['silverlining', 'silverlining.commands', 'silversupport'],
+      packages=['silverlining', 'silverlining.commands', 'silversupport', 'silversupport.service'],
       zip_safe=False,
       install_requires=[
           'CmdUtils',
@@ -124,8 +131,5 @@ setup(name='SilverLining',
       [console_scripts]
       silver = silverlining.runner:main
       """,
-      package_data=find_package_data(
-          where=os.path.join(os.path.dirname(__file__), 'silverlining'),
-          package='silverlining',
-          fake_packages=['silverlining', 'service']),
+      package_data=package_data,
       )
