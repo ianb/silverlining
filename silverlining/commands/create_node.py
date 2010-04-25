@@ -4,7 +4,7 @@ import time
 from cmdutils import CommandError
 from silverlining.etchosts import set_etc_hosts
 from silversupport.shell import run
-from silverlining.nodeset import NodeSet
+#from silverlining.nodeset import NodeSet
 
 ESTIMATED_TIME = 60
 AFTER_PING_WAIT = 10
