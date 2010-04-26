@@ -11,8 +11,8 @@ AFTER_PING_WAIT = 10
 
 
 def command_create_node(config):
-    if NodeSet.is_nodeset(config.args.node):
-        return command_create_nodeset(config)
+    #if NodeSet.is_nodeset(config.args.node):
+    #    return command_create_nodeset(config)
     node_hostname = config.node_hostname
     node_exists = False
     if config.args.if_not_exists:
