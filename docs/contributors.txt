@@ -7,8 +7,8 @@ Ian Bicking:
     Author.
 
 Ben Bangert:
-    Wrote the CouchDB code.  The first user of toppcloud, and helpful
-    contributor.
+    Wrote the CouchDB code.  The first user of silver lining (nee toppcloud),
+    and helpful contributor.
 
 Jose Vargas:
     Wrote the MongoDB code.  Second user and contributor.
