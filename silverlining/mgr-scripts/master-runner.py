@@ -65,7 +65,7 @@ def get_app(environ):
     error_collector.start_request()
     environ['silverlining.apache_errors'] = environ['wsgi.errors']
     environ['wsgi.errors'] = error_collector
-    os.environ['SILVER_CANONICAL_HOST'] = app_config.canonical_hostname()
+    os.environ['SILVER_CANONICAL_HOSTNAME'] = app_config.canonical_hostname()
     ## FIXME: give a real version here...
     environ['SILVER_VERSION'] = os.environ['SILVER_VERSION'] = 'silverlining/0.0'
     if 'SILVER_MATCH_PATH' in environ:
