@@ -48,11 +48,29 @@ reloader = load_paste_reloader()
 reloader.install()
 
 def load_paste_httpserver():
+    try:
+        from paste import httpserver
+        return httpserver
+    except ImportError:
+        pass
     import new
-    mod = new.module('paste.httpserver')
+    import sys
     fn = os.environ['SILVER_PASTE_LOCATION']
     if fn.endswith('.pyc'):
         fn = fn[:-1]
+    util_init = os.path.join(os.path.dirname(fn), 'util', '__init__.py')
+    mod = new.module('paste.util')
+    mod.__file__ = util_init
+    execfile(mod.__file__, mod.__dict__)
+    mod.__path__ = os.path.dirname(util_init)
+    sys.modules['paste.util'] = mod
+    util_converters = os.path.join(os.path.dirname(fn), 'util', 'converters.py')
+    cmod = new.module('paste.util.converters')
+    cmod.__file__ = util_converters
+    execfile(cmod.__file__, cmod.__dict__)
+    sys.modules['paste.util.converters'] = cmod
+    mod.converters = cmod
+    mod = new.module('paste.httpserver')
     mod.__file__ = fn
     execfile(mod.__file__, mod.__dict__)
     return mod
