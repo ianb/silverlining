@@ -21,6 +21,7 @@ def loop():
                 mtime = cur_mtime
                 read_file()
             hostname, path = line.split('^', 1)
+            hostname = hostname.split(':', 1)[0]
             if not path:
                 path = '/'
         except:
