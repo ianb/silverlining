@@ -45,6 +45,7 @@ def wsgi_internal_request(app_config, hostname, path,
 
     This returns ``(status, header_list, body_as_str)``
     """
+    os.environ['SILVER_CANONICAL_HOSTNAME'] = hostname
     wsgi_app = app_config.get_app_from_runner()
     basic_environ = {
         'PATH_INFO': urllib.unquote(str(path)),
@@ -98,7 +99,7 @@ def wsgi_internal_request(app_config, hostname, path,
     return status, headers, out.getvalue()
 
 
-def create_wsgi_app(instance_name):
+def create_wsgi_app(instance_name, hostname):
     ## FIXME: should this even exist?
     os.environ['SITE'] = instance_name
     fn = '/usr/local/share/silverlining/mgr-scripts/master-runner.py'
