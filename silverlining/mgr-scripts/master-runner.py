@@ -44,7 +44,12 @@ def application(environ, start_response):
                 except:
                     lines.append('%s=<error>' % name)
             return ['\n'.join(lines)]
-        return found_app(environ, start_response)
+        try:
+            return found_app(environ, start_response)
+        except:
+            import traceback
+            traceback.print_exc()
+            raise
     finally:
         if error_collector is not None:
             error_collector.flush_request(environ)
