@@ -59,6 +59,22 @@ dpkg --configure -a
 apt-get update -qq
 apt-get -y -q=2 install rsync
 ''')
+    stdout, stderr, returncode = ssh(
+    'root', node, '''
+cat >> /root/config.dat <<EOF
+Name: postfix/mailname
+Template: postfix/mailname
+Value: straylight.bel-epa.com
+Owners: postfix
+Flags: seen
+
+Name: postfix/main_mailer_type
+Template: postfix/main_mailer_type
+Value: Internet site
+Owners: postfix
+Flags: seen
+EOF 
+''')
     if returncode:
         config.logger.fatal(
             "An error occurred (code=%r)"
@@ -75,7 +91,8 @@ apt-get -y -q=2 install rsync
                         for line in lines
                         if line.strip() and not line.strip().startswith('#'))
     stdout, stderr, returncode = ssh(
-        'root', node, 'apt-get -y -q=2 install $(cat)',
+        'root', node, """DEBCONF_DB_OVERRIDE='File{/root/config.dat} """ + \
+                      """apt-get -y -q=2 install $(cat)""",
         stdin=packages)
     if returncode:
         config.logger.fatal(
