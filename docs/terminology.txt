@@ -7,7 +7,7 @@ will be:
 
 Provider:
     This is a provider like Rackspace, EC2, etc.  This is generally
-    defined in ``~/.toppcloud.conf``.  This generally includes account
+    defined in ``~/.silverlining.conf``.  This generally includes account
     information in addition to the actual provider, so if you are
     working with multiple accounts you will have multiple providers.
 
