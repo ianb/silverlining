@@ -6,8 +6,8 @@ This lists the cloud providers and the support available:
 Rackspace Cloud
 ---------------
 
-`Rackspace Cloud <http://rackspacecloud.com>`_ is the first (and
-currently only) provider supported by Silver Lining.
+`Rackspace Cloud <http://www.rackspacecloud.com/918.html>`_ is the
+first (and currently only) provider supported by Silver Lining.
 
 To use Silver Lining you must sign up for an account through their
 website.  You should sign up for "Cloud Servers" and "Cloud Files".
@@ -16,10 +16,6 @@ Lining will be less than a dollar as long as you don't forget to take
 down the servers you create to experiment.  You'll have to have a
 credit card, and Rackspace Cloud will call you to confirm your account
 before you can use it.
-
-If you sign up for Rackspace Cloud to try Silver Lining, please use
-our reference code **REF-IANBICKING** -- this throws a couple bucks to
-me for each signup.
 
 Once you have logged in go to **Your Account > API Access** to view or
 create your API key.  Silver Lining needs to know your username and
@@ -63,4 +59,3 @@ probably to the routine that creates ``~/.silverlining.conf``
 (:mod:`silverlining.commands.create_node`), and *maybe* ``silver
 setup-node`` (:mod:`silverlining.commands.setup_node`) -- though I
 expect setup-node will be fine.
-

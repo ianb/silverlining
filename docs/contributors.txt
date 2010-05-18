@@ -16,6 +16,6 @@ Jose Vargas:
 Graham Dumpleton:
     Supporting mod_wsgi and its use in the project.
 
-Thanks to `Rackspace Cloud <http://rackspacecloud.com>`_ for the space
-to host this site, the continuous integration servers, and other
-support services during the development of this product.
+Thanks to `Rackspace Cloud <http://www.rackspacecloud.com/918.html>`_
+for the space to host this site, the continuous integration servers,
+and other support services during the development of this product.

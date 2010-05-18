@@ -178,13 +178,15 @@ Provider support
 ----------------
 
 This package currently has only been tested with `Rackspace Cloud
-<http://www.rackspacecloud.com/>`_.  The only specific Rackspace
-extension is the use of "files" on server creation (this is part of
-the node-creation API that uploads files on the newly created
+<http://www.rackspacecloud.com/918.html>`_.  The only specific
+Rackspace extension is the use of "files" on server creation (this is
+part of the node-creation API that uploads files on the newly created
 node/server).  The use of the files extension is minimal at this point
 (just setting up ``/root/.ssh/authorized_keys``), and it is usable
-without that.  If you are signing up for an account, you can throw a
-few bucks my way with the reference code ``REF-IANBICKING``.
+without that.  If you are signing up for an account by clicking
+through `this affiliate link
+<http://www.rackspacecloud.com/918.html>`_ you can throw a few bucks
+my way.
 
 Silver Lining uses `libcloud`_, which is a library abstracting several
 provider APIs.  It should be usable with other providers, but it's
