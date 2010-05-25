@@ -1,3 +1,8 @@
+## Fix locale
+locale-gen en_US en_US.UTF-8
+dpkg-reconfigure locales
+update-locale LANG=en_US.UTF-8
+
 ## Set up a standard user for managing apps (www-mgr)
 if [ ! -e /home/www-mgr ] ; then
     ## --gecos=none suppresses the querying for name, room #, etc.:
