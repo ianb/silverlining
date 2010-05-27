@@ -211,8 +211,10 @@ class CompoundApp(object):
 def main(base_path):
     app = CompoundApp(base_path)
     httpserver = load_paste_httpserver()
+    host = os.environ.get('SILVER_SERVE_HOST', '127.0.0.1')
+    port = os.environ.get('SILVER_SERVE_PORT', '8080')
     try:
-        httpserver.serve(app)
+        httpserver.serve(app, host=host, port=port)
     except KeyboardInterrupt:
         pass
 
