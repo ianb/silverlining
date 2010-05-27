@@ -59,12 +59,14 @@ dpkg --configure -a
 apt-get update -qq
 apt-get -y -q=2 install rsync
 ''')
+    config.logger.notify(
+        "Updating postfix configuration")
     stdout, stderr, returncode = ssh(
     'root', node, '''
-cat >> /root/config.dat <<EOF
+echo "
 Name: postfix/mailname
 Template: postfix/mailname
-Value: straylight.bel-epa.com
+Value: %s
 Owners: postfix
 Flags: seen
 
@@ -73,8 +75,8 @@ Template: postfix/main_mailer_type
 Value: Internet site
 Owners: postfix
 Flags: seen
-EOF 
-''')
+" >> /root/config.dat
+''' % node)
     if returncode:
         config.logger.fatal(
             "An error occurred (code=%r)"
@@ -91,7 +93,7 @@ EOF
                         for line in lines
                         if line.strip() and not line.strip().startswith('#'))
     stdout, stderr, returncode = ssh(
-        'root', node, """DEBCONF_DB_OVERRIDE='File{/root/config.dat} """ + \
+        'root', node, """DEBCONF_DB_OVERRIDE='File{/root/config.dat}' """ + \
                       """apt-get -y -q=2 install $(cat)""",
         stdin=packages)
     if returncode:
