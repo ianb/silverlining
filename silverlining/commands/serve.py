@@ -24,6 +24,8 @@ def command_serve(config):
     environ = os.environ.copy()
     environ['SILVER_INSTANCE_NAME'] = 'localhost'
     environ['SILVER_PASTE_LOCATION'] = httpserver.__file__
+    environ['SILVER_SERVE_HOST'] = config.args.host
+    environ['SILVER_SERVE_PORT'] = config.args.port
     proc = None
     try:
         try:

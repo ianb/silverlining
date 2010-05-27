@@ -187,6 +187,18 @@ parser_serve.add_argument(
     metavar='APP_DIR',
     help='Directory holding app')
 
+parser_serve.add_argument(
+    '--port',
+    metavar='PORT',
+    default='8080',
+    help='Port to serve on (default 8080)')
+    
+parser_serve.add_argument(
+    '--host',
+    metavar='IP/INTERFACE',
+    default='127.0.0.1',
+    help='Host/IP/interface to serve on (127.0.0.1 is private, 0.0.0.0 is public)')
+
 ## We can't handle "silver run" well with a subparser, because there's
 ## a bug in subparsers that they can't ignore arguments they don't
 ## understand.  Because there will be arguments passed to the remote
