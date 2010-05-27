@@ -68,7 +68,7 @@ def run_test(name, stage=None, ci=False, setup_node=False):
             print result
             resp = urllib.urlopen('http://%s/update' % name).read()
             print 'Got HTTP response:\n%s' % resp
-            assert ('SILVER_CANONICAL_HOST=%s' % name) in resp
+            assert ('SILVER_CANONICAL_HOSTNAME=%s' % name) in resp
             assert 'wsgi.multiprocess=True' in resp
             assert 'wsgi.multithread=True' in resp
             assert "path='' '/update'" in resp
