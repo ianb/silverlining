@@ -1,0 +1,306 @@
+Zope2 Quickstart
+================
+
+Because we will have binary eggs that are OS architecture specific, we need to build everything on the same
+type of machine that we are going to deploy to.
+
+Install silverlining on a Rackspace Cloud machine running Ubuntu Karmic 9.10::
+
+    $ cd /opt
+    $ virtualenv -p python2.6 silverlining
+    $ silverlining/bin/pip install -r http://bitbucket.org/ianb/silverlining/raw/tip/requirements.txt
+    $ alias silver="/root/silverlining/bin/silver"
+
+Make an SSH key::
+
+    $ ssh-keygen
+    Generating public/private rsa key pair.
+    Enter file in which to save the key (/root/.ssh/id_rsa): 
+    Created directory '/root/.ssh'.
+    Enter passphrase (empty for no passphrase): 
+    Enter same passphrase again: 
+    Your identification has been saved in /root/.ssh/id_rsa.
+    Your public key has been saved in /root/.ssh/id_rsa.pub.
+    The key fingerprint is:
+    39:97:02:d0:57:d7:2e:fa:9c:63:92:18:6c:b7:7e:df root@silverlining
+    The key's randomart image is:
+
+Set up the Rackspace authentication details::
+
+    $ silver
+    /root/.silverlining.conf doesn't exists; let's create it
+    Creating /root/.silverlining.conf
+    Your service-provider username: jazkarta
+    Your service-provider API key: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+    Using /root/.ssh/id_rsa.pub
+
+Initialize the application::
+
+    $ silver init zope-on-wsgi
+    Using real prefix '/Users/nateaune/code/python/parts/opt'
+    New python executable in zope-on-wsgi/bin/python
+    Installing setuptools.............done.
+
+
+Edit the setup.py to install some additional eggs
+-------------------------------------------------
+
+Check out Tres' branch of the Zope2 with WSGI support::
+
+    $ cd zope-on-wsgi/src
+    $ svn co http://svn.zope.org/repos/main/Zope/branches/tseaver-fix_wsgi Zope2
+
+Edit the file src/Zope2/setup.py, and add these lines to the install_requires section::
+
+    install_requires=[
+        ...
+        'zope.app.testing',
+        'repoze.who',
+        'repoze.retry',
+        'repoze.tm2',
+        'Paste',
+        'PasteScript',
+        'PasteDeploy',
+        ],
+
+Install Zope2
+-------------
+
+Use pip to install Zope2::
+
+    $ cd zope-on-wsgi
+    $ source bin/activate
+    (zope-on-wsgi)$ pip install -e src/Zope2
+    ...
+    Successfully installed Acquisition DateTime docutils ExtensionClass five.formlib initgroups mechanize Missing MultiMapping Paste PasteScript Persistence pytz Record repoze.retry repoze.tm2 repoze.who RestrictedPython tempstorage ThreadLock transaction zc.lockfile ZConfig zdaemon zLOG ZODB3 zope.annotation zope.app.appsetup zope.app.debug zope.app.dependable zope.app.form zope.app.publication zope.app.publisher zope.app.schema zope.app.testing zope.authentication zope.broken zope.browser zope.browsermenu zope.browserpage zope.browserresource zope.component zope.componentvocabulary zope.configuration zope.container zope.contentprovider zope.contenttype zope.datetime zope.deferredimport zope.dottedname zope.error zope.event zope.exceptions zope.filerepresentation zope.formlib zope.i18n zope.i18nmessageid zope.interface zope.lifecycleevent zope.location zope.minmax zope.mkzeoinstance zope.pagetemplate zope.password zope.processlifetime zope.proxy zope.ptresource zope.publisher zope.schema zope.security zope.sendmail zope.sequencesort zope.session zope.site zope.size zope.structuredtext zope.tal zope.tales zope.testbrowser zope.testing zope.traversing zope.viewlet Zope2 ZopeUndo
+    Cleaning up...
+
+Make a Zope instance
+--------------------
+
+You need to make a Zope instance::
+
+    $ cd zope-on-wsgi
+    $ ./bin/mkzopeinstance
+    Please choose a directory in which you'd like to install
+    Zope "instance home" files such as database files, configuration
+    files, etc.
+
+    Directory: .
+    Please choose a username and password for the initial user.
+    These will be the credentials you use to initially manage
+    your new Zope instance.
+
+    Username: admin
+    Password: 
+    Verify password: 
+    
+Make a Zope2 admin user
+-----------------------
+
+You need to make a Zope2 admin user so that you can login to the instance::
+
+    $ ./bin/mkzope2user admin admin
+
+Make a zope.conf file
+---------------------
+
+Move the original zope.conf file out of the way::
+
+    $ cd zope-on-wsgi/etc
+    $ mv zope.conf zope.conf.orig
+    
+Edit the zope.conf file to look like this::
+
+    %define INSTANCE <TODO: find out how to use a relative path>
+    instancehome $INSTANCE
+
+    effective-user www-mgr
+    
+    <zodb_db main>
+        <filestorage>
+          path $INSTANCE/var/Data.fs
+        </filestorage>
+        mount-point /
+    </zodb_db>
+
+    <zodb_db temporary>
+        <temporarystorage>
+          name temporary storage for sessioning
+        </temporarystorage>
+        mount-point /temp_folder
+        container-class Products.TemporaryFolder.TemporaryContainer
+    </zodb_db>
+    
+Make sure the www-data user owns the directory
+----------------------------------------------
+
+If you set the effective-user to "www-data", then you need to make sure that 
+this user has ownership of the directory.
+
+    $ chown -R www-data:www-data zope-on-wsgi
+
+    
+Make the WSGI configuration
+---------------------------
+
+Create a file zope-on-wsgi/etc/zope2.ini::
+
+    [DEFAULT]
+    debug = True
+
+    [app:zope]
+    use = egg:Zope2#main
+    zope_conf = %(here)s/zope.conf
+
+    [filter:who]
+    use = egg:repoze.who#config
+    config_file = %(here)s/who.ini
+
+    [pipeline:main]
+    pipeline =
+        egg:paste#evalerror
+        who
+        egg:repoze.retry#retry
+        egg:repoze.tm2#tm
+        zope
+
+    [server:main]
+    use = egg:paste#http
+    host = 0.0.0.0
+    port = 8080
+
+Add the who.ini and passwd file
+-------------------------------
+
+Add the file etc/who.ini::
+
+    [plugin:auth_tkt]
+    # identification and authentication
+    use = repoze.who.plugins.auth_tkt:make_plugin
+    secret = s33kr1t
+    cookie_name = oatmeal
+    secure = False
+    include_ip = False
+
+    [plugin:basicauth]
+    # identification and challenge
+    use = repoze.who.plugins.basicauth:make_plugin
+    realm = 'sample'
+
+    [plugin:htpasswd]
+    # authentication
+    use = repoze.who.plugins.htpasswd:make_plugin
+    filename = %(here)s/passwd
+    #check_fn = repoze.who.plugins.htpasswd:crypt_check
+    check_fn = repoze.who.plugins.htpasswd:plain_check
+
+    [general]
+    request_classifier = repoze.who.classifiers:default_request_classifier
+    challenge_decider = repoze.who.classifiers:default_challenge_decider
+    remote_user_key = REMOTE_USER
+
+    [identifiers]
+    # plugin_name;classifier_name:.. or just plugin_name (good for any)
+    plugins =
+            auth_tkt
+            basicauth
+
+    [authenticators]
+    # plugin_name;classifier_name.. or just plugin_name (good for any)
+    plugins =
+            auth_tkt
+            htpasswd
+
+    [challengers]
+    # plugin_name;classifier_name:.. or just plugin_name (good for any)
+    plugins =
+            basicauth
+
+    [mdproviders]
+    plugins =
+
+And add a password file etc/passwd::
+
+    admin:admin
+    
+Test it with paster
+-------------------
+
+Fire up the WSGI app using paster to make sure it works locally::
+
+    (zope-on-wsgi)$ paster serve etc/zope2.ini
+    No handlers could be found for logger "root"
+    Starting server in PID 3742.
+    serving on 0.0.0.0:8080 view at http://127.0.0.1:8080
+
+Go to http://zope-on-wsgi to see your Zope site.
+
+Set up the WSGI runner
+----------------------
+
+Edit the zope-on-wsgi/app.ini file to point to the zope2.ini file you just created. 
+Replace the <insert your runner here> with etc/zope2.ini.
+
+    [production]
+    app_name = zope-on-wsgi
+    ## Uncomment these to make them available:
+    #service.postgis =
+    #service.files =
+    #service.couchdb =
+    #service.mongodb =
+
+    runner = etc/zope2.ini
+    ## Uncomment to have /url called each time the app is updated:
+    # update_fetch = /url
+    ## If you always upload this app to a particular hostname, use this:
+    #default_host = ...
+    packages = python-setuptools
+    
+Try serving the app using silverlining
+--------------------------------------
+
+You can start the app using silverlining with this command::
+
+    $ silver serve zope-on-wsgi
+    No handlers could be found for logger "root"
+    serving on http://127.0.0.1:8080
+
+Since it's being served on 127.0.0.1, you won't be able to see it in the browser, unless you open it up on the same machine you're running it from.
+
+Create the server node
+----------------------
+
+    # silver create-node wsgify --setup-node
+    Creating node (image=Ubuntu 9.10 (karmic); size=256 server)
+    Status 3 at IP 174.143.146.185
+    The hostname/ip is not setup in /etc/hosts
+    Would you like me to set it up?  [y/n] y
+    Executing sudo python /opt/silverlining/src/silverlining/silverlining/update_etc_hosts.py /etc/hosts 174.143.146.185 wsgify
+    Waiting for server to be ready....Server created (1:01 to create)
+    Waiting 10 seconds for full boot
+    Setting up server
+    Setting up authentication on server...
+    Using key file:  /root/.ssh/id_rsa.pub
+    Warning: Permanently added 'wsgify,174.143.146.185' (RSA) to the list of known hosts.
+    root@wsgify's password: 
+    (check your email for the password)
+    Updating indexes and setting up rsync
+    ...
+    Copying files from `/etc/skel' ...
+    Restarting apache2 and varnish
+    
+Update the server with your app
+-------------------------------
+
+Run this command to rsync the changes locally with the remote server::
+
+    $ silver update --node=wsgify zope2-on-wsgi
+
+Now go to http://zope2-on-wsgi/ to see the Zope application running.
+You might have to add an entry to your local /etc/hosts file (on your Mac).
+
+Troubleshooting
+---------------
+
+If you get WSGI error messages, look at the log file in: /var/log/silverlining/apps/zope-on-wsgi/errors.log
