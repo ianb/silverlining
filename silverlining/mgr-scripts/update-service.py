@@ -42,7 +42,7 @@ def update_service(instance_name, clear=False):
     if (app_config.platform == 'php' and
         (not os.path.exists('/usr/share/doc/php5')
          or not os.path.exists('/usr/bin/php5'))):
-        apt_install(packages)
+        apt_install(php_packages)
         run(['a2enmod', 'php5'])
         run(['/etc/init.d/apache2', 'restart'])
     tmp = os.path.join('/var/lib/silverlining/tmp', app_config.app_name)
