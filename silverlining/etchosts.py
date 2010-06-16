@@ -10,27 +10,7 @@ sudo to do the actual edit.
 import os
 from silversupport.shell import run
 
-__all__ = ['get_host_ip', 'set_etc_hosts']
-
-
-def get_host_ip(hostname):
-    """Get the IP for a given hostname, looking (only) in /etc/hosts"""
-    ## FIXME: this should use DNS, or at least try DNS
-    fp = open('/etc/hosts')
-    try:
-        for line in fp:
-            line = line.strip()
-            if not line or line.startswith('#'):
-                continue
-            ip, hostnames = line.split(None, 1)
-            hostnames = hostnames.split()
-            if hostname in hostnames:
-                return ip
-        raise Exception("Could not find hostname %s in /etc/hosts"
-                        % hostname)
-    finally:
-        fp.close()
-
+__all__ = ['set_etc_hosts']
 
 def set_etc_hosts(config, hostnames, ip):
     """Sets a line in /etc/hosts to assign the hostname to the ip

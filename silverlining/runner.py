@@ -151,6 +151,11 @@ parser_update.add_argument(
     action='store_true',
     help='Clear the database on update (clears all database, files, etc!)')
 
+parser_update.add_argument(
+    '--config',
+    metavar='CONFIG_DIR',
+    help="Configuration to use for this deployment of the application")
+
 parser_init = subcommands.add_parser(
     'init', help="Create a new application file layout")
 
@@ -192,12 +197,17 @@ parser_serve.add_argument(
     metavar='PORT',
     default='8080',
     help='Port to serve on (default 8080)')
-    
+
 parser_serve.add_argument(
     '--host',
     metavar='IP/INTERFACE',
     default='127.0.0.1',
     help='Host/IP/interface to serve on (127.0.0.1 is private, 0.0.0.0 is public)')
+
+parser_serve.add_argument(
+    '--config',
+    metavar='CONFIG_DIR',
+    help="Configuration to use for the application")
 
 ## We can't handle "silver run" well with a subparser, because there's
 ## a bug in subparsers that they can't ignore arguments they don't
@@ -363,6 +373,24 @@ parser_diff.add_argument(
     '--instance-name', metavar='APP_NAME.DATE_VERSION',
     help="Diff with a specific instance (not the active one)")
 
+parser_create_config = subcommands.add_parser(
+    'create-config', help="Create configuration for an application")
+
+parser_create_config.add_argument(
+    'dir', metavar='DIR',
+    help="The application to generate configuration for")
+
+parser_create_config.add_argument(
+    'output', nargs='?', metavar='DIR',
+    help="The place to put the new configuration")
+
+parser_create_config.add_argument(
+    'variable', nargs='*',
+    help="Assign a variable to use for generating the configuration")
+
+parser_create_config.add_argument(
+    '--info', action='store_true',
+    help="Show information about how the configuration is created")
 
 for subparser in subcommands._name_parser_map.values():
     ## FIXME: these options should also be available in the subparsers:

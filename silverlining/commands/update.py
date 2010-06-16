@@ -1,10 +1,11 @@
 """Update/deploy an application"""
 import re
 import os
+import socket
 from cmdutils import CommandError
 import virtualenv
-from silverlining.etchosts import get_host_ip, set_etc_hosts
-from silversupport.shell import ssh
+from silverlining.etchosts import set_etc_hosts
+from silversupport.shell import ssh, run
 from silversupport.appconfig import AppConfig
 from silversupport import appdata
 
@@ -26,6 +27,8 @@ def command_update(config):
             config.args.location = app.default_location
         else:
             config.args.location = config.node_hostname
+    if config.args.config:
+        check_config_in_subprocess(app, config.args.config, config.logger)
     try:
         virtualenv.fixup_pth_and_egg_link(
             config.args.dir,
@@ -50,6 +53,10 @@ def command_update(config):
     instance_name = match.group(1)
     assert instance_name.startswith(app.app_name), instance_name
     app.sync('www-mgr@%s' % config.node_hostname, instance_name)
+    if config.args.config:
+        config.logger.info('Synchronizing configuration %s to server' % config.args.config)
+        app.sync_config('www-mgr@%s' % config.node_hostname, os.path.abspath(config.args.config))
+
     if config.args.clear:
         clear_option = '--clear'
     else:
@@ -74,7 +81,17 @@ def command_update(config):
                location=config.args.location),
         )
 
-    ip = get_host_ip(config.node_hostname)
+    ip = socket.gethostbyname(config.node_hostname)
     hostname = appdata.normalize_location(config.args.location)[0]
     set_etc_hosts(config, [hostname,
                            'prev.' + hostname], ip)
+
+def check_config_in_subprocess(app, config, logger):
+    logger.notify('Checking configuration.')
+    fn = os.path.join(os.path.dirname(__file__), 'update-check-config.py')
+    exe = os.path.join(app.app_dir, 'bin/python')
+    if not os.path.exists(exe):
+        exe = 'python2.6'
+    stdout, stderr, returncode = run([exe, fn, app.app_dir, config])
+    if returncode:
+        raise CommandError('Configuration checking failed')

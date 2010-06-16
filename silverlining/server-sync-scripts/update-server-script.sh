@@ -53,9 +53,10 @@ mkdir -p /var/www
 mkdir -p /var/lib/silverlining
 mkdir -p /var/lib/silverlining/backups
 mkdir -p /var/lib/silverlining/tmp
+mkdir -p /var/lib/silverlining/configs
 chown www-data:www-data /var/lib/silverlining/tmp
 rm -f /var/www/index.html
-chown www-mgr:www-mgr /var/www /var/lib/silverlining/backups
+chown www-mgr:www-mgr /var/www /var/lib/silverlining/backups /var/lib/silverlining/configs
 chown -R root:root /usr/local/share/silverlining/
 # Sometimes it has been reported that the executable bit isn't rsync'd over properly:
 chmod 755 /usr/local/share/silverlining/mgr-scripts/*.py

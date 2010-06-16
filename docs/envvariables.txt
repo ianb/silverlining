@@ -29,6 +29,11 @@ notice).
     This is the name of the application.  If ``SILVER_INSTANCE_NAME`` is
     ``blog.20100319_004`` then this will probably be ``blog``.
 
+``SILVER_APP_CONFIG``:
+
+    This is a directory that contains the application's configuration
+    (as uploaded using ``silver update --config DIR``).
+
 ``SILVER_CANONICAL_HOSTNAME``:
 
     This is what *might* be considered the "canonical" (i.e., main)

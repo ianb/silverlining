@@ -5,9 +5,9 @@ import pwd
 import sys
 import warnings
 from site import addsitedir
-from ConfigParser import ConfigParser
 from silversupport.env import is_production
 from silversupport.shell import run
+from silversupport.util import asbool, read_config
 
 __all__ = ['AppConfig']
 
@@ -16,16 +16,12 @@ class AppConfig(object):
     """This represents an application's configuration file, and by
     extension represents the application itself"""
 
-    def __init__(self, config_file, app_name=None):
+    def __init__(self, config_file, app_name=None,
+                 local_config=None):
         if not os.path.exists(config_file):
             raise OSError("No config file %s" % config_file)
         self.config_file = config_file
-        parser = ConfigParser()
-        parser.read([config_file])
-        self.config = {}
-        for section in parser.sections():
-            for option in parser.options(section):
-                self.config.setdefault(section, {})[option] = parser.get(section, option)
+        self.config = read_config(config_file)
         if not is_production():
             if self.config['production'].get('version'):
                 warnings.warn('version setting in %s is deprecated' % config_file)
@@ -41,6 +37,7 @@ class AppConfig(object):
             else:
                 app_name = self.config['production']['app_name']
         self.app_name = app_name
+        self.local_config = local_config
 
     @classmethod
     def from_instance_name(cls, instance_name):
@@ -153,6 +150,45 @@ class AppConfig(object):
         """A list of packages that should be installed for this application"""
         return self._parse_lines(self.config['production'].get('packages'))
 
+    @property
+    def config_required(self):
+        return asbool(self.config['production'].get('config.required'))
+
+    @property
+    def config_template(self):
+        tmpl = self.config['production'].get('config.template')
+        if not tmpl:
+            return None
+        return os.path.join(self.app_dir, tmpl)
+
+    @property
+    def config_checker(self):
+        obj_name = self.config['production'].get('config.checker')
+        if not obj_name:
+            return None
+        if ':' not in obj_name:
+            raise ValueError('Bad value for config.checker (%r): should be module:obj' % obj_name)
+        mod_name, attrs = obj_name.split(':', 1)
+        __import__(mod_name)
+        mod = sys.modules[mod_name]
+        obj = mod
+        for attr in attrs.split('.'):
+            obj = getattr(obj, attr)
+        return obj
+
+    def check_config(self, config_dir):
+        checker = self.config_checker
+        if not checker:
+            return
+        checker(config_dir)
+
+    @property
+    def config_default(self):
+        dir = self.config['production'].get('config.default')
+        if not dir:
+            return None
+        return os.path.join(self.app_dir, dir)
+
     def _parse_lines(self, lines):
         """Parse a configuration value into a series of lines,
         ignoring empty and comment lines"""
@@ -180,6 +216,20 @@ class AppConfig(object):
         environ['SILVER_LOGS'] = self.log_dir
         if not is_production() and not os.path.exists(environ['SILVER_LOGS']):
             os.makedirs(environ['SILVER_LOGS'])
+        if is_production():
+            config_dir = os.path.join('/var/lib/silverlining/configs', self.app_name)
+            if os.path.exists(config_dir):
+                environ['SILVER_APP_CONFIG'] = config_dir
+            elif self.config_default:
+                environ['SILVER_APP_CONFIG'] = self.config_default
+        else:
+            if self.local_config:
+                environ['SILVER_APP_CONFIG'] = self.local_config
+            elif self.config_default:
+                environ['SILVER_APP_CONFIG'] = self.config_default
+            elif self.config_required:
+                raise Exception('This application requires configuration and config.devel '
+                                'is not set and no --config was given')
         return environ
 
     @property
@@ -305,15 +355,24 @@ class AppConfig(object):
         fp.close()
 
     def sync(self, host, instance_name):
-        """Synchronize this application (locally) with a remove server
+        """Synchronize this application (locally) with a remote server
         at the given host.
         """
-        assert not is_production()
         dest_dir = os.path.join('/var/www', instance_name)
+        self._run_rsync(host, self.app_dir, dest_dir)
+
+    def sync_config(self, host, config_dir):
+        """Synchronise the given configuration (locally) with a remote server
+        at the given host (for this app/app_name)"""
+        dest_dir = os.path.join('/var/lib/silverlining/configs', self.app_name)
+        self._run_rsync(host, config_dir, dest_dir)
+
+    def _run_rsync(self, host, source, dest):
+        assert not is_production()
         exclude_from = os.path.join(os.path.dirname(__file__), 'rsync-exclude.txt')
-        app_dir = self.app_dir
-        if not app_dir.endswith('/'):
-            app_dir += '/'
+        if not source.endswith('/'):
+            source += '/'
+        ## FIXME: does it matter if dest ends with /?
         cmd = ['rsync',
                '--recursive',
                '--links',              # Copy over symlinks as symlinks
@@ -327,7 +386,7 @@ class AppConfig(object):
                '--exclude-from=%s' % exclude_from,
                '--progress',           # I don't think this does anything given --quiet
                '--quiet',
-               app_dir,
-               os.path.join('%s:%s' % (host, dest_dir)),
+               source,
+               os.path.join('%s:%s' % (host, dest)),
                ]
         run(cmd)
