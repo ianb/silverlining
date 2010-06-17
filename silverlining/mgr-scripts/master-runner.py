@@ -168,7 +168,7 @@ class ErrorCollector(object):
             return
         total = time.time() - self.buffers.start_time
         buf = self.buffers.buffer
-        date_formatted = time.strftime('%Y-%d-%m %H:%M:%S', time.gmtime(self.buffers.start_time))
+        date_formatted = time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(self.buffers.start_time))
         req_name = (
             environ['REQUEST_METHOD'] + ' ' +
             environ.get('SCRIPT_NAME', '') +
