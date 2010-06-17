@@ -9,6 +9,7 @@ Silver Lining
     terminology
     services
     appconfig
+    deploymentconfig
     envvariables
     devpatterns
     management-scripts

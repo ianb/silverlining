@@ -31,7 +31,23 @@ symlink it into its location at the root of the app directory.
     This is a default for ``silver update APP LOCATION``, so you don't
     have to enter that location each time you update.
 
-``service.*``
+``service.*``:
     The presence of the setting activates the `service <services.html>`_.
     It can have a value, which is passed to the service, but no
     service uses that yet.
+
+``config.required``:
+    If ``true`` then you must provide configuration to deploy this
+    application.
+
+``config.default``:
+    A path to default configuration for the application.
+
+``config.template``:
+    Configuration template files.  See `Deployment Configuration
+    <deploymentconfig.html>`_ for more.
+
+``config.checker``:
+    A ``module:function`` that checks the configuration and raises an
+    exception if there is a problem.  See `Deployment Configuration
+    <deploymentconfig.html>`_ for more.

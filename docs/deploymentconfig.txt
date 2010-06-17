@@ -1,0 +1,84 @@
+Deployment Configuration
+========================
+
+Sometimes applications require deployment-specific configuration.
+Silver Lining has a few settings/tools to help with this.
+
+An application's configuration is just a directory that contains any
+configuration file or files that are appropriate.  To deploy an
+application with particular configuration, use::
+
+    $ silver update app-path/ --config config-path/
+
+This uploads ``config-path/`` and on the server
+``environ['SILVER_APP_CONFIG']`` will be set to this directory.  You
+can also use ``--config`` with ``silver serve`` to try out a
+configuration locally.
+
+If you upload configuration on a server it will stay on a server until
+you update again with ``--config``.
+
+app.ini configuration
+---------------------
+
+If you want to require configuration, you can place this in your
+``app.ini``::
+
+    config.required = true
+
+Also if you want to check the configuration before deploying an
+application, you can use::
+
+    config.checker = myapp.somemodule:checker
+
+Then ``myapp.somemodule`` will be imported, and
+``checker(config_dir)`` will be called.  It should raise an exception
+if there is an error with the configuration.
+
+You can also give a default configuration.  This is particularly
+useful during development.
+
+::
+
+    config.default = src/myapp/default-config/
+
+Config Templates
+----------------
+
+Lastly you can help people create configuration for your application
+using a config template.  To enable a template, use the setting::
+
+    config.template = src/myapp/config-template/
+
+This is a directory that will be copied when you run::
+
+    $ silver create-config app-path/ new-config-path/
+
+If you want to ask some questions, you can add a file in
+``src/myapp/config-template/template.ini`` and in it::
+
+    [variables]
+    title = The Title Of The Application
+    author = Your Name
+
+Each variable is a variable the user will be asked about, and the
+value is the description of the variable.  In the future probably
+other options for variables will be allowed, but this is all there is
+now.
+
+Then you need to make some files templates by adding the extension
+``.tmpl``, these will be `Tempita <http://pythonpaste.org/tempita/>`_
+templates.  So you can do something like create ``config.ini.tmpl``
+and put in::
+
+    [blog]
+    title = {{title}}
+    author = {{author}}
+
+Interactively Configured Applications
+-------------------------------------
+
+If you want to make a nice interactive configuration (similar to how
+WordPress works, for instance) then you don't want to use any of
+this.  Simply use ``service.files`` and put your configuration
+someplace like ``os.path.join(os.environ['CONFIG_FILES'], 'config')``
