@@ -88,7 +88,11 @@ def lookup_path(record, path):
             return None, 'addslash', None
         if path.startswith(path_prefix):
             path_prefix = path_prefix.rstrip('/') or '/'
-            return path_prefix, data, path[len(path_prefix):]
+            if path_prefix == '/':
+                rest = path
+            else:
+                rest = path[len(path_prefix):]
+            return path_prefix, data, rest
     else:
         ## FIXME: how should this fail?
         raise LookupError('No application mounted to /')
