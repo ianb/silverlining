@@ -26,8 +26,8 @@ def command_serve(config):
     environ['SILVER_PASTE_LOCATION'] = httpserver.__file__
     environ['SILVER_SERVE_HOST'] = config.args.host
     environ['SILVER_SERVE_PORT'] = config.args.port
-    if config.config:
-        environ['SILVER_APP_CONFIG'] = os.path.abspath(config.config)
+    if config.args.config:
+        environ['SILVER_APP_CONFIG'] = os.path.abspath(config.args.config)
     proc = None
     try:
         try:
