@@ -75,7 +75,9 @@ def serve_php(config, appconfig):
         path_prefixes.append(appconfig.writable_root_location
                              + '/%{ENV:SILVER_HOSTNAME}')
         path_prefixes.append(appconfig.writable_root_location)
-    tempdir = '/tmp'
+    tempdir = os.path.join(config.args.dir, '.apache')
+    if not os.path.exists(tempdir):
+        os.makedirs(tempdir)
     includes = glob.glob('/etc/apache2/mods-enabled/*.load')
     includes += glob.glob('/etc/apache2/mods-enabled/*.conf')
     silver_secret_file = os.path.join(tempdir, 'secret.txt')
@@ -90,7 +92,7 @@ def serve_php(config, appconfig):
         path_prefixes=path_prefixes,
         ## FIXME: better values:
         tempdir=tempdir,
-        apache_pid_file='/tmp/apache.pid',
+        apache_pid_file=os.path.join(tempdir, 'apache.pid'),
         mods_dir='/etc/apache2/mods-enabled',
         includes=includes,
         silver_instance_dir=os.path.abspath(config.args.dir),
@@ -98,18 +100,15 @@ def serve_php(config, appconfig):
         silver_env_vars=silver_env_vars,
         silver_funcs=os.path.join(os.path.dirname(silversupport.__file__), 'php', 'functions.php'),
         )
-    temp_file = tempfile.mkstemp('.conf', 'silver-apache-')[1]
-    config.logger.info('Writing config to %s' % temp_file)
-    try:
-        fp = open(temp_file, 'w')
-        fp.write(apache_config)
-        fp.close()
-        exe_name = search_path(['apache2', 'apache', 'httpd'])
-        config.logger.notify('Serving on http://localhost:8080')
-        run([exe_name, '-f', temp_file,
-             '-d', config.args.dir, '-X'])
-    finally:
-        os.unlink(temp_file)
+    conf_file = os.path.join(tempdir, 'apache.conf')
+    config.logger.info('Writing config to %s' % conf_file)
+    fp = open(conf_file, 'w')
+    fp.write(apache_config)
+    fp.close()
+    exe_name = search_path(['apache2', 'apache', 'httpd'])
+    config.logger.notify('Serving on http://localhost:8080')
+    run([exe_name, '-f', conf_file,
+         '-d', config.args.dir, '-X'])
     
 
 def _turn_sigterm_into_systemexit():
