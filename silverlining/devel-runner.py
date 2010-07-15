@@ -104,7 +104,7 @@ def get_app(base_path):
                 app_config, 'localhost',
                 url, environ={'silverlining.update': True})
             if not status.startswith('200'):
-                sys.stdout.write(status+'\n')
+                sys.stdout.write(status + '\n')
                 sys.stdout.flush()
             if body:
                 sys.stdout.write(body)
@@ -157,6 +157,7 @@ class CompoundApp(object):
         exc_info = sys.exc_info()
         error = ''.join(traceback.format_exception(*exc_info))
         print >> sys.stderr, error
+
         def app(environ, start_response):
             start_response('500 Server Error',
                            [('content-type', 'text/plain')])
