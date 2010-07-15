@@ -16,3 +16,4 @@ scratch-build
 docs/_build
 tests/functional/test-data
 docs/examples/wordpress/wordpress
+tmp*
