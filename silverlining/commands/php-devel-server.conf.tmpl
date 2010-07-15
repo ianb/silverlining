@@ -1,0 +1,119 @@
+LockFile {{tempdir}}/apache.lock
+
+PidFile {{apache_pid_file}}
+
+Timeout 600
+
+KeepAlive Off
+
+<IfModule mpm_prefork_module>
+    StartServers 1
+    MinSpareServers 1
+    MaxSpareServers 1
+    MaxClients 10
+    MaxRequestsPerChild 0
+</IfModule>
+
+<IfModule mpm_worker_module>
+    StartServers          1
+    MinSpareThreads      25
+    MaxSpareThreads      75 
+    ThreadLimit          64
+    ThreadsPerChild      25
+    MaxClients          150
+    MaxRequestsPerChild   0
+</IfModule>
+
+AccessFileName .htaccess
+
+<Files ~ "^\.ht">
+    Order allow,deny
+    Deny from all
+</Files>
+
+DefaultType text/plain
+
+HostnameLookups Off
+
+ErrorLog {{tempdir}}/error.log
+
+LogLevel info
+
+## FIXME: Figure out where to look for these?
+# Include module configuration:
+
+{{for inc in includes}}
+Include {{inc}}
+{{endfor}}
+
+## FIXME: How to load and conf mod_rewrite, etc?
+
+## FIXME: do we need this?
+#NameVirtualHost *:8080
+ServerName localhost
+Listen 8080
+
+<VirtualHost 127.0.0.1:8080>
+    ServerAdmin webmaster@localhost
+    <Directory />
+        Options FollowSymLinks
+        AllowOverride None
+    </Directory>
+    <Directory ./>
+        Options Indexes FollowSymLinks MultiViews
+        AllowOverride None
+        Order allow,deny
+        allow from all
+    </Directory>
+
+    <LocationMatch />
+         # Insert filter
+        SetOutputFilter DEFLATE
+
+        # Netscape 4.x has some problems...
+        BrowserMatch ^Mozilla/4 gzip-only-text/html
+
+        # Netscape 4.06-4.08 have some more problems
+        BrowserMatch ^Mozilla/4\.0[678] no-gzip
+
+        # MSIE masquerades as Netscape, but it is fine
+        BrowserMatch \bMSIE !no-gzip !gzip-only-text/html
+        # Don't compress images
+        SetEnvIfNoCase Request_URI \
+        \.(?:gif|jpe?g|png)$ no-gzip dont-vary
+
+        # Make sure proxies don't deliver the wrong content
+        #Header append Vary User-Agent env=!dont-vary
+    </LocationMatch>
+
+    LogFormat "%{SILVER_FORWARDED}e %l %u %t \"%r\" %>s %O \"%{Referer}i\" \"%{User-Agent}i\" %{HTTP_HOST}e \"%{SILVER_APP_NAME}e\" %D" wsgi_combined
+    CustomLog {{tempdir}}/access.log wsgi_combined
+
+
+## Python/WSGI setup:
+RewriteEngine on
+## Uncomment if you want to understand what is happening here:
+#RewriteLog /var/log/apache2/rewrite.log
+#RewriteLogLevel 5
+
+RewriteCond %{HTTP_HOST} ^([^:]*)
+RewriteRule . - [E=SILVER_HOSTNAME:%1]
+RewriteRule . - [E=SILVER_INSTANCE_DIR:{{silver_instance_dir}}]
+RewriteRule . - [E=SILVER_SECRET_FILE:{{silver_secret_file}}]
+RewriteRule . - [E=SILVER_ENV_VARS:{{silver_env_vars}}]
+RewriteRule . - [E=SILVER_FUNCS:{{silver_funcs}}]
+
+{{for prefix in path_prefixes}}
+RewriteCond ./{{prefix}}%{REQUEST_URI} -f
+RewriteRule (.*/)index.html $1 [L,R=permanent]
+RewriteCond ./{{prefix}}%{REQUEST_URI} -d
+RewriteCond %{REQUEST_URI} [^/]$
+RewriteCond ./{{prefix}}%{REQUEST_URI}/index.html -f
+RewriteRule (.*) $1/ [L,R=permanent]
+RewriteCond ./{{prefix}}%{REQUEST_URI} -f
+RewriteRule !\.php$ ./{{prefix}}%{REQUEST_URI} [L]
+{{endfor}}
+
+RewriteRule . {{mgr_scripts}}/master-runner.php [L]
+
+</VirtualHost>
