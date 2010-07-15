@@ -95,6 +95,24 @@ with an analogous but non-mod_wsgi request).  Probably there should be
 some indication of how often the pinging should happen (i.e., if the
 ping is cheap do it often, if it's expensive be more reserved).
 
+Security
+--------
+
+We should have a good quality rotating random value.  (Like
+``silversupport.secret.get_secret``).  Google has a library for this.
+
+We should have a way to do security logging.  E.g., log attempted
+attacks.  There should be a whitelist, so that internal people can do
+bad things (e.g., when testing).
+
+Translation
+-----------
+
+I'd like to integrate Pontoon into applications, so that Silver Lining
+can be a general way to setup applications for localization.  This
+might primarily be a second deployed application that modifies files
+in the other application (somewhere in ``$CONFIG_FiLES``).
+
 Create Virtual Machine Images
 -----------------------------
 
@@ -488,10 +506,8 @@ Here's what I want to do right away:
 * Setup up deployment for Weave Sync 2.0 API implementation
   - Set up multi-server deployments
 * Set up DevAuth for admin access
-* Support apps like a log viewer app (w/ DevAuth)
 * Get https working in some fashion.  (Ad hoc https seems to only get
   harder over time though)
-* Separate out logs more intelligently in a per-app manner.
 * Look into the Varnish logs (Apache logs aren't that complete,
   really)
 * Make the instantiated app available in the interactive shell
@@ -507,4 +523,3 @@ Here's what I want to do right away:
 * There's some nice features in the `Mozilla AMO Hudson instace
   <https://hudson.mozilla.org/job/addons.mozilla.org/>`_ that I would
   like here (checking coding conventions and other details).
-* writable-root should go before static files in precedence.
