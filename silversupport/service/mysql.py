@@ -1,6 +1,7 @@
 """MySQL support"""
 
 import os
+import sys
 from silversupport.shell import run
 from silversupport.abstractservice import AbstractService
 
@@ -120,3 +121,37 @@ class Service(AbstractService):
             stdin='DROP DATABASE %s' % self.env['CONFIG_MYSQL_DBNAME'])
         self.install()
         self.output('Cleared database %s' % self.env['CONFIG_MYSQL_DBNAME'])
+
+    def check_setup(self):
+        try:
+            import MySQLdb
+        except ImportError:
+            return 'Cannot import MySQLdb (cannot check database)'
+        kw = {}
+        for envname, kwname in [
+            ('CONFIG_MYSQL_HOST', 'host'),
+            ('CONFIG_MYSQL_USER', 'user'),
+            ('CONFIG_MYSQL_PASSWORD', 'passwd'),
+            ('CONFIG_MYSQL_DBNAME', 'db'),
+            ('CONFIG_MYSQL_PORT', 'port'),
+            ]:
+            if self.env.get(envname):
+                kw[kwname] = self.env[envname]
+        try:
+            MySQLdb.connect(**kw)
+        except MySQLdb.OperationalError, e:
+            exc_info = sys.exc_info()
+            try:
+                code = int(e.args[0])
+            except:
+                raise exc_info[0], exc_info[1], exc_info[2]
+            if code == 1049:
+                dbname = self.env['CONFIG_MYSQL_DBNAME']
+                result = ['No database by the name %s exists' % dbname]
+                result.append(
+                    'To fix this run:')
+                result.append(
+                    '  echo "CREATE DATABASE %s; GRANT ALL ON %s.* TO %s@localhost" | mysql -u root -p '
+                    % (dbname, dbname, self.env['CONFIG_MYSQL_USER']))
+                return '\n'.join(result)
+            raise

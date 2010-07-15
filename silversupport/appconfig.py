@@ -337,14 +337,15 @@ class AppConfig(object):
         else:
             return None
 
-    def write_php_env(self):
+    def write_php_env(self, filename=None):
         """Writes out a PHP file that loads up all the environmental variables
 
         This is because we don't run any Python during the actual
         request cycle for PHP applications.
         """
         assert self.platform == 'php'
-        filename = os.path.join(self.app_dir, 'silver-env-variables.php')
+        if filename is None:
+            filename = os.path.join(self.app_dir, 'silver-env-variables.php')
         fp = open(filename, 'w')
         fp.write('<?\n')
         env = {}
@@ -390,3 +391,28 @@ class AppConfig(object):
                os.path.join('%s:%s' % (host, dest)),
                ]
         run(cmd)
+
+    def check_service_setup(self, logger):
+        import traceback
+        for service in self.service_list:
+            try:
+                warning = service.check_setup()
+            except Exception, e:
+                logger.notify(
+                    'Error with service %s:' % service.name)
+                logger.indent += 2
+                try:
+                    logger.info(
+                        traceback.format_exc())
+                    logger.notify('%s: %s' %
+                                  (e.__class__.__name__, str(e)))
+                finally:
+                    logger.indent -= 2
+            else:
+                if warning:
+                    logger.notify('Warning with service %s:' % service.name)
+                    logger.indent += 2
+                    try:
+                        logger.notify(warning)
+                    finally:
+                        logger.indent -= 2
