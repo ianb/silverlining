@@ -493,6 +493,14 @@ You can use `mod_negotiation
 <http://httpd.apache.org/docs/2.2/mod/mod_negotiation.html>`_ to serve
 static files without extensions.
 
+Security Headers
+----------------
+
+`Content Security Policy
+<https://wiki.mozilla.org/Security/CSP/Specification>`_ seems like you
+*might* want to enable it globally (not as part of the application).
+Specifically for static file headers.
+
 Short-term list
 ---------------
 
