@@ -26,6 +26,7 @@ def command_serve(config):
 
 
 def serve_python(config, appconfig):
+    dir = config.args.dir
     if os.path.exists(os.path.join(dir, 'bin', 'python')):
         # We are in a virtualenv situation...
         cmd = [os.path.join(dir, 'bin', 'python'),
@@ -107,8 +108,9 @@ def serve_php(config, appconfig):
     fp.close()
     exe_name = search_path(['apache2', 'apache', 'httpd'])
     config.logger.notify('Serving on http://localhost:8080')
+    ## FIXME: -X would also be an alternative to -DFOREGROUND; not sure which is better
     run([exe_name, '-f', conf_file,
-         '-d', config.args.dir, '-X'])
+         '-d', config.args.dir, '-DFOREGROUND'])
     
 
 def _turn_sigterm_into_systemexit():
