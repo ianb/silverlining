@@ -2,7 +2,7 @@
 
 
 def command_list_sizes(config):
-    sizes = config.driver.list_sizes(expiration=0)
+    sizes = config.driver.list_sizes()
     try:
         default_size = config.select_size(sizes=sizes)
     except LookupError:
