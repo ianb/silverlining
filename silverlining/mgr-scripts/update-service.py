@@ -35,6 +35,9 @@ php_packages = [
 def update_service(instance_name, clear=False):
     app_config = AppConfig.from_instance_name(instance_name)
     app_config.install_services(clear)
+    for script in app_config.package_install_script:
+        print 'Running install script %s' % script
+        run([script])
     packages = app_config.packages
     if packages:
         print 'Confirming packages installed: %s' % ', '.join(packages)
@@ -57,7 +60,9 @@ def update_service(instance_name, clear=False):
         os.makedirs(tmp)
     if not os.path.exists(app_config.log_dir):
         run(['sudo', '-u', 'www-data', 'mkdir', '-p', app_config.log_dir])
-
+    for script in app_config.after_install_script:
+        print 'Running post script %s' % script
+        run([script])
 
 if __name__ == '__main__':
     options, args = parser.parse_args()

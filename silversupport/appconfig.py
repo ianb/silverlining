@@ -151,6 +151,21 @@ class AppConfig(object):
         return self._parse_lines(self.config['production'].get('packages'))
 
     @property
+    def package_install_script(self):
+        """A list of scripts to call to install package stuff like apt
+        repositories"""
+        return self._parse_lines(
+            self.config['production'].get('package_install_script'),
+            relative_to=self.app_dir)
+
+    @property
+    def after_install_script(self):
+        """A list of scripts to call after installing packages"""
+        return self._parse_lines(
+            self.config['production'].get('after_install_script'),
+            relative_to=self.app_dir)
+
+    @property
     def config_required(self):
         return asbool(self.config['production'].get('config.required'))
 
@@ -189,14 +204,18 @@ class AppConfig(object):
             return None
         return os.path.join(self.app_dir, dir)
 
-    def _parse_lines(self, lines):
+    def _parse_lines(self, lines, relative_to=None):
         """Parse a configuration value into a series of lines,
         ignoring empty and comment lines"""
         if not lines:
             return []
-        return [
+        lines = [
             line.strip() for line in lines.splitlines()
             if line.strip() and not line.strip().startswith('#')]
+        if relative_to:
+            lines = [os.path.normpath(os.path.join(relative_to, line))
+                     for line in lines]
+        return lines
 
     def activate_services(self, environ=None):
         """Activates all the services for this application/configuration.
