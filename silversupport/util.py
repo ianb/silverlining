@@ -1,7 +1,8 @@
 import os
+import string
 from ConfigParser import ConfigParser
 
-__all__ = ['unique_name', 'asbool']
+__all__ = ['unique_name', 'asbool', 'read_config', 'fill_config_environ']
 
 
 def unique_name(dest_dir, name):
@@ -36,3 +37,45 @@ def read_config(filename):
         for option in parser.options(section):
             config.setdefault(section, {})[option] = parser.get(section, option)
     return config
+
+
+def fill_config_environ(config, default=''):
+    """Fills in configuration values using string.Template
+    substitution of environ variables
+
+    If default is KeyError, then empty substitutions will raise KeyError
+    """
+    vars = _EnvironDict(os.environ, default)
+
+    def fill(value):
+        return string.Template(value).substitute(vars)
+    config = config.copy()
+    _recursive_dict_fill(config, fill)
+    return config
+
+
+def _recursive_dict_fill(obj, filler):
+    for key, value in obj.items():
+        if isinstance(value, basestring):
+            obj[key] = filler(value)
+        elif isinstance(value, dict):
+            _recursive_dict_fill(value, filler)
+
+
+class _EnvironDict(object):
+
+    def __init__(self, source, default=''):
+        self.source = source
+        self.default = default
+
+    def __getitem__(self, key):
+        if key in self.source:
+            obj = self.source[key]
+            if obj is None:
+                return ''
+            return obj
+        if self.default is KeyError:
+            raise KeyError(key)
+        else:
+            return self.default
+
