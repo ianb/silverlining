@@ -16,9 +16,8 @@ from silverlining.config import Config
 
 ## Following is a HUGE BLOCK of argument definitions:
 
-## The long description of how this command works:
 description = """\
-Runs a variety of cloud-related commands
+Runs a variety of deployment-related commands
 """
 
 parser = argparse.ArgumentParser(
