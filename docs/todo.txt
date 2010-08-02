@@ -420,10 +420,10 @@ in a file like::
 
 And then an API like::
 
-    <script src="${tcsupport.href['jquery']}"></script>
+    <script src="${silversupport.href['jquery']}"></script>
 
 Using ``__getitem__`` would make this more Django-template friendly I
-believe (though a more traditional ``tcsupport.href('jquery')`` could
+believe (though a more traditional ``silversupport.href('jquery')`` could
 also be supported).
 
 This could also be the basis for the CDN setup, and it's possible that
@@ -434,9 +434,9 @@ minimization could happen using this.  Maybe like::
     app.js file = static/js/app.js
     all_js combine = jquery.json app.js
 
-Then in production ``tcsupport.href('all_js')`` would return a URL
+Then in production ``silversupport.href('all_js')`` would return a URL
 pointing to the minimized and combined version of all those files, and
-``tcsupport.href('jquery.json')`` and ``tcsupport.href('app.js')``
+``silversupport.href('jquery.json')`` and ``silversupport.href('app.js')``
 would both return None.  In development the inverse would be true.
 
 Using ``silver serve`` there should be an option to do
@@ -448,7 +448,7 @@ images, so you might do:
     [images]
     images directory = static/images/
 
-And then use ``${tcsupport.href('images')}/folder.png``
+And then use ``${silversupport.href('images')}/folder.png``
 
 Start Up Local Service
 ----------------------
