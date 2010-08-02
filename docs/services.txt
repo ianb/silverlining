@@ -21,7 +21,7 @@ Secrets
 If you need a "secret" (something random value that is persistent on
 the server), get it like::
 
-    from tcsupport.secret import get_secret
+    from silversupport.secret import get_secret
     secret = get_secret()
 
 This is a stable, ASCII secret.  You don't *have* to use this secret
