@@ -223,7 +223,7 @@ settings::
 
 With this::
 
-    from tcsupport.secret import get_secret
+    from silversupport.secret import get_secret
     SECRET_KEY = get_secret()
 
 Then you don't have to worry about checking a secret into version
