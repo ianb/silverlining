@@ -16,12 +16,16 @@ def ssh(user, host, command, **kw):
 
     This will use sudo for some users, and ssh in directory in other cases.
     """
-    if isinstance(command, (list, tuple)):
-        command = ' '.join(conditional_shell_escape(i) for i in command)
     if user == 'www-data':
         # This is a bit tricky:
         user = 'www-mgr'
-        command = 'sudo -H -u www-data %s' % shell_escape(command)
+        if isinstance(command, (list, tuple)):
+            command = ' '.join(conditional_shell_escape(i) for i in command)
+        else:
+            command = conditional_shell_escape(command)
+        command = 'sudo -H -u www-data %s' % command
+    elif isinstance(command, (list, tuple)):
+        command = ' '.join(conditional_shell_escape(i) for i in command)
     ssh_args = kw.pop('ssh_args', [])
     return run(['ssh'] + ssh_args + ['-l', user, host, command], **kw)
 
@@ -82,7 +86,7 @@ def apt_install(packages, **kw):
     return run(['apt-get', 'install', '-q=2', '-y', '--force-yes'] + packages, **kw)
 
 
-_end_quote_re = re.compile(r"^('*)(.*?)('*)$")
+_end_quote_re = re.compile(r"^('*)(.*?)('*)$", re.S)
 _quote_re = re.compile("'+")
 
 
