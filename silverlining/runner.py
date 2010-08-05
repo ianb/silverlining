@@ -23,7 +23,6 @@ Runs a variety of deployment-related commands
 parser = argparse.ArgumentParser(
     description=description)
 
-## FIXME: these options should also be available in the subparsers:
 parser.add_argument(
     '-p', '--provider',
     metavar='NAME',
@@ -392,7 +391,6 @@ parser_create_config.add_argument(
     help="Show information about how the configuration is created")
 
 for subparser in subcommands._name_parser_map.values():
-    ## FIXME: these options should also be available in the subparsers:
     subparser.add_argument(
         '-p', '--provider',
         metavar='NAME',
