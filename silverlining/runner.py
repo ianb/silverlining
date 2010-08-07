@@ -34,6 +34,10 @@ parser.add_argument(
     action='store_true',
     help="Answer yes to any questions")
 
+parser.add_argument(
+    '--debug-libcloud', metavar='FILENAME',
+    help="Write any libcloud interactions (HTTP request log)")
+
 add_verbose(parser, add_log=True)
 
 subcommands = parser.add_subparsers(dest="command")

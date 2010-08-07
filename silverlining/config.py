@@ -58,6 +58,13 @@ class Config(UserDict):
             else:
                 DriverClass = libcloud_get_driver(getattr(Provider, provider.upper()))
             self._driver = DriverClass(self['username'], self['secret'])
+            if getattr(self.args, 'debug_libcloud', False):
+                print 'XXX', self.args.debug_libcloud, self._driver.connection.conn_classes
+                from libcloud.base import LoggingHTTPConnection, LoggingHTTPSConnection
+                fp = open(self.args.debug_libcloud, 'a')
+                LoggingHTTPConnection.log = LoggingHTTPSConnection.log = fp
+                self._driver.connection.conn_classes = (
+                    LoggingHTTPConnection, LoggingHTTPSConnection)
         return self._driver
 
     @property
