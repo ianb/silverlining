@@ -95,11 +95,11 @@ def run_test(name, stage=None, ci=False, setup_node=False):
 
         if run_stage(stage, 'logs'):
             print 'Doing log check'
-            ssh('www-data', name, 'rm /var/log/silverlining/apps/functest/*')
+            ssh('www-data', name, ['bash', '-c', 'rm /var/log/silverlining/apps/functest/*'])
             url = 'http://%s/test/update' % name
             resp = urllib.urlopen(url).read()
             text, _, _ = ssh('www-data', name,
-                             'cat /var/log/silverlining/apps/functest/errors.log',
+                             ['cat', '/var/log/silverlining/apps/functest/errors.log'],
                              capture_stdout=True)
             text_lines = ''.join(text.strip().splitlines(True)[1:-1]).strip()
             assert text_lines == """\
