@@ -107,7 +107,7 @@ Then look for these environmental variables:
 ``CONFIG_PG_DBNAME``:
     The database name.
 
-``CONFIG_PG_USERNAME``:
+``CONFIG_PG_USER``:
     The username to connect as.
 
 ``CONFIG_PG_PASSWORD``:
