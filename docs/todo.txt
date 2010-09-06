@@ -64,8 +64,9 @@ some frontend (`frontend in progress
 <http://bitbucket.org/ianb/silverlog>`_).  Though I feel like some
 kind of management programming interface is better, and then a
 "deployed" app would use that interface.  Actually, "interface" is
-probably saying too much; documented and conscious server layout that
-an application can be written to inspect.
+probably saying too much; it should be sufficient to simply have a
+documented and conscious server layout that an application can be
+written to inspect.
 
 There should be a way to get a list of all log files for a host/app.
 Maybe there should be a standard way to effect the Python standard
@@ -94,6 +95,13 @@ fetched in-process in the live server (management URLs get fetched
 with an analogous but non-mod_wsgi request).  Probably there should be
 some indication of how often the pinging should happen (i.e., if the
 ping is cheap do it often, if it's expensive be more reserved).
+
+CloudKick
+~~~~~~~~~
+
+CloudKick has started doing a bunch of monitoring things, and has an
+API.  A quick way of doing monitoring might simply be via CloudKick
+(or maybe just an option).
 
 Security
 --------
@@ -159,7 +167,7 @@ similar to how ``update_fetch`` works.  This would be fetched on
 update, but before the update was really made live (the internal
 request mechanism can be run on any instance, even one that is not
 live yet).  If this returned a non-2xx result, then the update would
-be aborted.
+be aborted (or if it's a test script, exit with an error code).
 
 Backup/Restore/Revert on update
 -------------------------------
@@ -173,6 +181,11 @@ be restored and the update aborted.
 
 I think this should be run before test-before-activate, but if
 test-before-activate fails then the databases should also be reverted.
+
+There are fancy ways of doing really fast checkpoints, like backups
+without actually backing things up.  These should be accessible even
+in a VPS, but they require some fancy sysadmin knowledge that I don't
+have.
 
 Debugging
 ---------
@@ -226,17 +239,9 @@ servers.
 
 Cron is a higher priority.
 
-Configuration
--------------
-
-I'm not even sure what this *means*, but I know it needs to be
-implemented in some way.  I'm kind of holding off because I don't want
-apps/servers to get configured a lot.  But for reusable application
-packages *something* has to be implemented.  And I suspect there are
-places where this is really sensible.
-
-I will probably resist this until it is clear what it should mean,
-which means an actual circumstance where it is needed arises.
+For persistence of the jobs, Redis seems quite possible (small enough
+that I don't feel bad having it always installed, seems relatively
+robust and easy to use).
 
 API Keys
 --------
@@ -246,6 +251,13 @@ support for this already, but it is poorly exposed.
 
 This is something that might be good to manage organization-wide.
 Which just makes the workflow slightly different.
+
+In some ways this is just global configuration (as opposed to
+application-specific configuration).  This same configuration could
+potentially be used for things like admin email addresses, logging
+information, etc.  Applications would have to pull it in, but it would
+be updated on a machine basis, not a per-application basis (though
+possibly you could have per-application overrides?)
 
 Inter-application communication
 -------------------------------
@@ -360,6 +372,76 @@ That's the easy way.  Plugin installation?
 It feels a bit crude.  Maybe another command besides ``silver`` for
 pre-packaged apps?  Or another set of subcommands.
 
+Middleware Packs
+----------------
+
+Sometimes you want to apply middleware in a deployment-specific
+fashion (not application-specific).  Some examples:
+
+* Site disabling
+* Error catching
+* Password protecting a site before it is public
+* Ad hoc authorization
+
+I'd like the ability to apply a piece of middleware to an
+application.  This wouldn't *just* be WSGI middleware, it would
+probably include some extra information (description, etc).  Also a
+PHP equivalent version ("fat" middleware) would be nice to include.
+Using PHP's output buffer operations you can simulate middleware.
+
+I'm not sure what the command would look like.  Maybe just::
+
+  silver apply-middleware path/to/middleware LOCATION
+
+There's also be ``show-middleware`` and ``remove-middleware``
+operations, I suppose.  Like applications, there's a missing notion of
+versions here.  Also middleware would have to be compatible with the
+libraries of the hosted application, as they would run in the same
+process.  Probably middleware libraries would be added after the path,
+and the middleware should be written to be as library-version-agnostic
+as possible.  There should be a fairly finite number of middleware
+packs.
+
+Configuration should apply to middleware, though maybe a second set of
+configuration to avoid overlap.
+
+Configuration Management
+------------------------
+
+Now that there's a ``--config`` option you can have
+deployment-specific configuration of your application, but it's only
+exposed through ``silver update``.  It should be exposed as a separate
+operation, to view, edit, backup, etc. the configuration, you
+shouldn't have to deploy just to change the configuration.  A complete
+set of commands might be:
+
+Show the configuration (all past revisions)::
+
+  silver config-query LOCATION
+  # To show info about files:
+  silver config-query LOCATION --files
+  # To download config:
+  silver config-query LOCATION --dump=path/
+
+Then operations to actually modify the configuration::
+
+  # Upload new configuration:
+  silver config LOCATION path/to/config
+  # Revert configuration to some previous version ("PREV" literal, or
+  # some revision number as shown by config-query):
+  silver config LOCATION --revert VERSION
+  # Remove configuration:
+  silver config LOCATION --delete
+  # Copy configuration from another site:
+  silver config LOCATION --copy=SOURCE_LOCATION
+
+Doing version control on the configuration would be nice.  Also
+supporting an app that did generic through-the-web application
+configuration (needs a DevAuth-style thing again).  Such configuration
+would just do through-the-web-editing of the source files, and
+probably call the validation function if available.  It might also
+allow for operations like reverting, seeing logs, etc.
+
 Application Versions
 --------------------
 
@@ -420,7 +502,7 @@ in a file like::
 
 And then an API like::
 
-    <script src="${tcsupport.href['jquery']}"></script>
+    <script src="${silversupport.href['jquery']}"></script>
 
 Using ``__getitem__`` would make this more Django-template friendly I
 believe (though a more traditional ``tcsupport.href('jquery')`` could
@@ -434,10 +516,11 @@ minimization could happen using this.  Maybe like::
     app.js file = static/js/app.js
     all_js combine = jquery.json app.js
 
-Then in production ``tcsupport.href('all_js')`` would return a URL
+Then in production ``silversupport.href('all_js')`` would return a URL
 pointing to the minimized and combined version of all those files, and
-``tcsupport.href('jquery.json')`` and ``tcsupport.href('app.js')``
-would both return None.  In development the inverse would be true.
+``silversupport.href('jquery.json')`` and
+``silversupport.href('app.js')`` would both return None.  In
+development the inverse would be true.
 
 Using ``silver serve`` there should be an option to do
 minimization, so the minimized versions could be tested.  The same
@@ -491,7 +574,9 @@ Serve general files
 
 You can use `mod_negotiation
 <http://httpd.apache.org/docs/2.2/mod/mod_negotiation.html>`_ to serve
-static files without extensions.
+static files without extensions.  These are files that include headers
+(that indicate things like Content-Type) as well as the body.
+Probably they'd have a different extension.
 
 Security Headers
 ----------------
@@ -500,6 +585,8 @@ Security Headers
 <https://wiki.mozilla.org/Security/CSP/Specification>`_ seems like you
 *might* want to enable it globally (not as part of the application).
 Specifically for static file headers.
+
+Maybe a middleware pack would handle this case.
 
 Short-term list
 ---------------
