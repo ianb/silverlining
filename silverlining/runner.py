@@ -301,10 +301,6 @@ parser_deactivate.add_argument(
     "they must all be on the same node.  Can be a wildcard.")
 
 parser_deactivate.add_argument(
-    '--disable', action='store_true',
-    help="Set the host to the status disabled, pointing it at the disabled application (good for a temporary removal)")
-
-parser_deactivate.add_argument(
     '--keep-prev', action='store_true',
     help="Keep the prev.* host activate (by default it is deleted)")
 
@@ -393,6 +389,21 @@ parser_create_config.add_argument(
 parser_create_config.add_argument(
     '--info', action='store_true',
     help="Show information about how the configuration is created")
+
+parser_disable = subcommands.add_parser(
+    'disable', help="Temporarily disable an application")
+
+parser_enable = subcommands.add_parser(
+    'enable', help="Re-enable a disabled application")
+
+for subparser in (parser_disable, parser_enable):
+    group = subparser.add_mutually_exclusive_group(required=True)
+    group.add_argument('--by-name', metavar="APPNAME",
+                       help="Identify the application by its name")
+    group.add_argument('--by-location', metavar="LOCATION",
+                       help="Identify the application by its location")
+    subparser.add_argument('--node', metavar="NODE_HOSTNAME",
+                           help="Node to act on")
 
 for subparser in subcommands._name_parser_map.values():
     subparser.add_argument(

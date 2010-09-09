@@ -19,7 +19,7 @@ sub vcl_recv {
     remove req.http.X-Forwarded-For;
     set req.http.X-Forwarded-For = client.ip;
     if (req.request == "POST") {
-        pass;
+        return(pass);
     }
     if (req.request != "GET" && req.request != "HEAD" &&
         req.request != "PUT" && req.request != "POST" &&
@@ -27,40 +27,40 @@ sub vcl_recv {
         req.request != "DELETE") {
 
         # Non-RFC2616 or CONNECT which is weird. #
-        pass;
+        return(pass);
     }
     if (req.http.Authorization) {
         # Not cacheable by default #
-        pass;
+        return(pass);
     }
 }
 
 sub vcl_fetch {
-    if(obj.http.Pragma ~ "no-cache" ||
-       obj.http.Cache-Control ~ "no-cache" ||
-       obj.http.Cache-Control ~ "private") {
-            pass;
+    if(beresp.http.Pragma ~ "no-cache" ||
+       beresp.http.Cache-Control ~ "no-cache" ||
+       beresp.http.Cache-Control ~ "private") {
+            return(pass);
     }
-    if (obj.status >= 300) {
-        pass;
+    if (beresp.status >= 300) {
+        return(pass);
     }
     # Django regularly sends pages with Set-Cookie and cache control, 
     # we'll ignore Cache-Control in that case, as there's no point to
     # caching something that sets a cookie.
-    if (obj.http.Set-Cookie) {
-        unset obj.http.Cache-Control;
-        pass;
+    if (beresp.http.Set-Cookie) {
+        unset beresp.http.Cache-Control;
+        return(pass);
     }
-    if (obj.http.Cache-Control ~ "max-age" || obj.http.Expires) {
-        unset obj.http.Set-Cookie;
-        deliver;
+    if (beresp.http.Cache-Control ~ "max-age" || beresp.http.Expires) {
+        unset beresp.http.Set-Cookie;
+        return(deliver);
     }
-    pass;
+    return(pass);
 }
 
 sub vcl_hit {
     if (!obj.cacheable) {
-        pass;
+        return(pass);
     }
 
     if (req.http.Cache-Control ~ "no-cache") {
@@ -71,5 +71,5 @@ sub vcl_hit {
             return (restart);
         } 
     }
-    deliver;
+    return(deliver);
 }

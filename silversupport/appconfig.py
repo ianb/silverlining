@@ -8,8 +8,11 @@ from site import addsitedir
 from silversupport.env import is_production
 from silversupport.shell import run
 from silversupport.util import asbool, read_config
+from silversupport.disabledapps import DisabledSite, is_disabled
 
 __all__ = ['AppConfig']
+
+DEPLOYMENT_LOCATION = "/var/www"
 
 
 class AppConfig(object):
@@ -42,7 +45,7 @@ class AppConfig(object):
     @classmethod
     def from_instance_name(cls, instance_name):
         """Loads an instance given its name; only valid in production"""
-        return cls(os.path.join('/var/www', instance_name, 'app.ini'))
+        return cls(os.path.join(DEPLOYMENT_LOCATION, instance_name, 'app.ini'))
 
     @classmethod
     def from_location(cls, location):
@@ -303,7 +306,8 @@ class AppConfig(object):
             execfile(sitecustomize, ns)
 
     def get_app_from_runner(self):
-        """Returns the WSGI app that the runner indicates"""
+        """Returns the WSGI app that the runner indicates
+        """
         assert self.platform == 'python', (
             "get_app_from_runner() shouldn't be run on an app with the platform %s"
             % self.platform)
@@ -318,20 +322,25 @@ class AppConfig(object):
             runner = 'config:%s' % runner
             global_conf = os.environ.copy()
             global_conf['SECRET'] = get_secret()
-            return loadapp(runner, name=spec,
-                           global_conf=global_conf)
+            app = loadapp(runner, name=spec,
+                          global_conf=global_conf)
         elif runner.endswith('.py'):
             ## FIXME: not sure what name to give it
             ns = {'__file__': runner, '__name__': 'main_py'}
             execfile(runner, ns)
             spec = spec or 'application'
             if spec in ns:
-                return ns[spec]
+                app = ns[spec]
             else:
                 raise Exception("No application %s defined in %s"
                                 % (spec, runner))
         else:
             raise Exception("Unknown kind of runner (%s)" % runner)
+        if is_production() and is_disabled(self.app_name):
+            disabled_appconfig = AppConfig.from_location('disabled')
+            return DisabledSite(app, disabled_appconfig.get_app_from_runner())
+        else:
+            return app
 
     def canonical_hostname(self):
         """Returns the 'canonical' hostname for this application.
@@ -378,7 +387,7 @@ class AppConfig(object):
         """Synchronize this application (locally) with a remote server
         at the given host.
         """
-        dest_dir = os.path.join('/var/www', instance_name)
+        dest_dir = os.path.join(DEPLOYMENT_LOCATION, instance_name)
         self._run_rsync(host, self.app_dir, dest_dir)
 
     def sync_config(self, host, config_dir):
