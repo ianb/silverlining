@@ -69,7 +69,7 @@ parser_create.add_argument(
 
 parser_create.add_argument(
     '--image',
-    default='name *karmic*',
+    default='name *lucid*',
     metavar="IMAGE",
     help='Image to use, can be "id 10", and can contain wildcards like "name *karmic*".  '
     'Default is "name *karmic*" which will select an Ubuntu Karmic image.')
