@@ -26,7 +26,7 @@ def command_serve(config):
 
 
 def serve_python(config, appconfig):
-    dir = config.args.dir
+    dir = os.path.abspath(config.args.dir)
     if os.path.exists(os.path.join(dir, 'bin', 'python')):
         # We are in a virtualenv situation...
         cmd = [os.path.join(dir, 'bin', 'python'),
@@ -48,7 +48,11 @@ def serve_python(config, appconfig):
     try:
         try:
             while 1:
-                proc = subprocess.Popen(cmd, cwd=dir, env=environ)
+                try:
+                    proc = subprocess.Popen(cmd, cwd=dir, env=environ)
+                except:
+                    config.logger.warn('Error running command: %s' % ' '.join(cmd))
+                    raise
                 proc.communicate()
                 if proc.returncode == 3:
                     # Signal to do a restart
@@ -111,7 +115,7 @@ def serve_php(config, appconfig):
     ## FIXME: -X would also be an alternative to -DFOREGROUND; not sure which is better
     run([exe_name, '-f', conf_file,
          '-d', config.args.dir, '-DFOREGROUND'])
-    
+
 
 def _turn_sigterm_into_systemexit():
     """

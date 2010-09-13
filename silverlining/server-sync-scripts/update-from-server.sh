@@ -18,8 +18,6 @@ echo rsync root@$SERVER:/var/www/README.txt www-README.txt
 rsync root@$SERVER:/var/www/README.txt www-README.txt
 echo rsync root@$SERVER:/etc/init.d/silverlining-setup silverlining-setup
 rsync root@$SERVER:/etc/init.d/silverlining-setup silverlining-setup
-echo rsync root@$SERVER:/etc/postgresql/8.3/main/pg_hba.conf pg_hba.conf
-rsync root@$SERVER:/etc/postgresql/8.3/main/pg_hba.conf pg_hba.conf
 echo ssh root@$SERVER '"dpkg-query -W" >' dpkg-query.txt
 ssh root@$SERVER "dpkg-query -W" > dpkg-query.txt
 

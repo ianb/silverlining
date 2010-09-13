@@ -7,7 +7,9 @@ from silversupport.shell import ssh
 def command_query(config):
     stdout, stderr, returncode = ssh(
         'www-mgr', config.node_hostname,
-        'cat /var/www/appdata.map; echo "END" ; ls /var/www',
+        'cat /var/www/appdata.map; echo "END"; '
+        'cat /var/www/disabledapps.txt; echo END; '
+        'ls /var/www',
         capture_stdout=True)
     hosts = {}
     lines = [line.strip()
@@ -17,6 +19,9 @@ def command_query(config):
     site_instances = {}
     instance_site = {}
     sites = set()
+    disabled = set()
+
+    # parse appdata.map
     while 1:
         if not lines:
             break
@@ -25,9 +30,20 @@ def command_query(config):
             break
         hostname, path, data = line.split(None, 2)
         instance_name = data.split('|')[0]
-        hosts[hostname+path] = instance_name
+        hosts[hostname + path] = instance_name
+
+    # parse disabledsites.txt
+    while 1:
+        if not lines:
+            break
+        line = lines.pop(0)
+        if line == 'END':
+            break
+        disabled.add(line)
+
+    # parse directory listing
     for line in lines:
-        if line == 'appdata.map':
+        if line == 'appdata.map' or line == 'disabledapps.txt':
             continue
         match = re.match(r'^(?:([a-z0-9_.-]+)\.(.*)|default-[a-z]+)$',
                          line)
@@ -72,6 +88,8 @@ def command_query(config):
     for hostname, site in hosts.items():
         if site in ('disabled', 'notfound'):
             special_hosts.setdefault(site, []).append(hostname)
+        elif site in disabled:
+            special_hosts.setdefault('disabled', []).append(hostname)
     for site in sorted(sites):
         if len(sites) > 1:
             notify('Site: %s' % site)

@@ -11,6 +11,8 @@ _tmp_re = re.compile(r'tmp="(.*)"')
 
 
 def command_run(config):
+    if not hasattr(config.args, 'unknown_args'):
+        raise CommandError("You may not place any arguments before 'run'")
     args = config.args
     out = StringIO()
     zip = zipfile.ZipFile(out, 'w')

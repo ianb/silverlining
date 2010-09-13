@@ -18,6 +18,7 @@ Silver Lining
     providers
     examples
     django-quickstart
+    disabling-sites
     docswanted
     todo
     comparisons

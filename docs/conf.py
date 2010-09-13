@@ -73,7 +73,7 @@ pygments_style = 'sphinx'
 
 html_theme = 'nature'
 html_theme_path = ['_theme']
-html_favicon = 'favicon.ico'
+#html_favicon = 'favicon.ico'
 
 # The style sheet to use for HTML and HTML Help pages. A file of that name
 # must exist either in Sphinx' static/ path, or in one of the custom paths

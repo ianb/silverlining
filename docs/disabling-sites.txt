@@ -1,0 +1,63 @@
+.. -*- mode: rst -*-
+
+=================
+ Disabling Sites
+=================
+
+When hosting a site it's likely that from time to time it will be
+necessary to make it unavailable to the general public while some
+maintenance is carried out.  Silver Lining provides a mechanism for
+allowing this.  It is important to recognise that it is *applications*
+that are disabled via this mechanism, rather than locations, so if the
+same application is accessible via two different locations (even if it
+is two different *deployments* of the application), and it is
+disabled, then it will appear to be disabled at both locations.  This
+is because if your application uses a database, then all different
+deployments of the application will share the database, and cleaning
+up databases is one of the key use-cases for this feature.
+
+Disabling an application
+========================
+
+The following command will disable an application called blog::
+
+    $ silver disable --by-name blog
+
+You can also disable the application by giving a path that it appears
+at::
+
+    silver disable --by-location www.example.com/blog
+
+Enabling an application
+=======================
+
+To re-enable an application you use the ``silver enable`` command,
+which takes the same options as silver disable command.
+
+The disabled special location
+=============================
+When an application is disabled, visitors to it will be shown a page
+explaining that the site is unavailable (similarly there is a
+not-found location which is shown when a URL is not resolved).  It is
+possible to replace this page by uploading a new WSGI application to
+the special location "disabled".  To restore the default application,
+use the ``silver activate`` command to point the disabled location to
+"default-disabled".
+
+Headers for disabled apps
+-------------------------
+It is sensible to return a "503 Service Unavailable" response from a
+disabled app and use the following headers:
+
+:Cache-Control: no-store, no-cache, max-age=0
+:Pragma: no-cache
+
+Access To disabled apps
+=======================
+While an application is disabled, it is still possible to access it
+via the command line tools.  ``silver backup``, ``restore``, ``run``
+etc. will all work as usual.  It's also possible to access the site
+through a web browser.  At present the application is only made
+available to clients connecting from localhost, so to view the site
+and access management facilities you will probably need to set up an
+SSH tunnel and manually update ``/etc/hosts`` on your own machine.

@@ -25,7 +25,8 @@ if [ ! -e /var/www/appdata.map ] ; then
 disabled / default-disabled|general_debug|/dev/null|python|
 " > /var/www/appdata.map
 fi
-chown www-mgr:www-mgr /var/www/appdata.map
+touch /var/www/disabledapps.txt
+chown www-mgr:www-mgr /var/www/appdata.map /var/www/disabledapps.txt
 
 ## Now setup Apache.  Ubuntu installs 000-default, which we don't
 ## want, so we delete it, and make sure the necessary modules are

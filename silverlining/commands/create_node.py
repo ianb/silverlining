@@ -40,7 +40,7 @@ def command_create_node(config):
             name=node_hostname,
             image=image,
             size=size,
-            files={'/root/.ssh/authorized_keys': config.get('root_authorized_keys')},
+            ex_files={'/root/.ssh/authorized_keys': config.get('root_authorized_keys')},
             )
         public_ip = resp.public_ip[0]
         config.logger.notify('Status %s at IP %s' % (

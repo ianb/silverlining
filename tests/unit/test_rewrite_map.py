@@ -39,7 +39,7 @@ nothing.notfound^/blog/foo /blog all-blog""".splitlines()
     for line in tests:
         input, output = line.split(None, 1)
         hostname, path = input.split('^')
-        path_match, data = rewritemap.lookup(hostname, path)
+        path_match, data, _rest = rewritemap.lookup(hostname, path)
         result = '%s %s' % (path_match, data)
         assert result == output, (
             "Bad result: %r -> %r" % (line, result))
