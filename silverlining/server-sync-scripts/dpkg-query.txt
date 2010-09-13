@@ -63,3 +63,4 @@ varnish 2.0.5-1
 xml-core	0.12
 zip	2.32-1
 python-software-properties
+ufw
