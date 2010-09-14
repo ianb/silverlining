@@ -7,9 +7,10 @@ update-locale LANG=en_US.UTF-8
 if [ ! -e /home/www-mgr ] ; then
     ## --gecos=none suppresses the querying for name, room #, etc.:
     adduser --disabled-password --gecos=none www-mgr
-    mkdir -p /home/www-mgr/.ssh
+    mkdir -p -m 700 /home/www-mgr/.ssh
     cp /root/.ssh/authorized_keys /home/www-mgr/.ssh/authorized_keys
     chown -R www-mgr:www-mgr /home/www-mgr/.ssh/
+    chmod 600 /home/www-mgr/.ssh/*
 fi
 
 ## Make www-data part of the adm group, which means it can read
