@@ -177,8 +177,12 @@ class CompoundApp(object):
         if self.writable_root:
             paths.append(os.path.join(self.writable_root, path_info))
         for path in paths:
-            ## FIXME: this should redirect (add / etc) same as wsgi_runner does:
             if os.path.exists(path) and os.path.isdir(path) and os.path.exists(os.path.join(path, 'index.html')):
+                if not environ['PATH_INFO'].endswith('/'):
+                    start_response(
+                        '301 Moved Permanently',
+                        [('Location', environ.get('SCRIPT_NAME', '') + environ['PATH_INFO'] + '/')])
+                    return ['']
                 return self.serve_file(os.path.join(path, 'index.html'), environ, start_response)
             if os.path.exists(path) and not os.path.isdir(path):
                 return self.serve_file(path, environ, start_response)
