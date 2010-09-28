@@ -49,7 +49,6 @@ mkdir -p /usr/local/share/silverlining/lib
 mkdir -p /root/.ssh
 cat >> /root/.ssh/authorized_keys
 ''',
-        ssh_args=['-o', 'StrictHostKeyChecking=no'],
         stdin=key)
     config.logger.notify(
         "Updating indexes and setting up rsync")

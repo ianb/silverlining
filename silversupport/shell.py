@@ -26,7 +26,10 @@ def ssh(user, host, command, **kw):
         command = 'sudo -H -u www-data %s' % command
     elif isinstance(command, (list, tuple)):
         command = ' '.join(conditional_shell_escape(i) for i in command)
-    ssh_args = kw.pop('ssh_args', [])
+    ssh_args = list(kw.pop('ssh_args', []))
+    strict_host_key_checking = kw.pop('strict_host_key_checking', False)
+    if not strict_host_key_checking:
+        ssh_args.extend(['-o', 'StrictHostKeyChecking=no'])
     return run(['ssh'] + ssh_args + ['-l', user, host, command], **kw)
 
 
