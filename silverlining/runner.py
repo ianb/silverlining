@@ -225,11 +225,18 @@ Run a command for an application; this runs a script in bin/ on the
 remote server.
 
 Use it like:
-    silver run import-something --option-for-import-something
+    silver run LOCATION import-something --option-for-import-something
 
 Note any arguments that point to existing files or directories will
 cause those files/directories to be uploaded, and substituted with the
 location of the remote name.
+
+This will run *Python* scripts in your application's bin/ directory,
+in another directory (e.g., silver run LOCATION src/myapp/script.py),
+or a global command (e.g., ipython).
+
+Use 'silver run LOCATION python' to get an interactive prompt on the
+remote server.
 """)
 
 parser_run.add_argument(

@@ -198,7 +198,7 @@ add ``'django.contrib.admin'`` to get the admin app in place.  Run
 ``manage.py syncdb`` to get the tables in place.
 
 You can try ``silver serve .`` and go to ``/admin/`` to login and
-see your tables.  You might notice all the CSS is broken.  
+see your tables.  You might notice all the CSS is broken.
 
 Silver Lining serves static files out of the ``static/`` directory.
 You don't actually put ``static`` in the URLs, these files are
@@ -237,10 +237,9 @@ After you write an app and are ready to deploy it, you just run
 use, it will be empty until you run ``syncdb``.  A good way to do that
 is::
 
-    $ silver run HOSTNAME manage.py syncdb
+    $ silver run HOSTNAME src/myapp/manage.py syncdb
 
-This runs ``bin/manage.py`` on the host named ``HOSTNAME``.  You can
-use this for imports or other management tasks as well.
+You can use this for data imports or other management tasks as well.
 
 A more robust mechanism is to use the ``update_fetch`` setting in
 ``app.ini``: this is a URL (provided *by* your application) that is
