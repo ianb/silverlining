@@ -3,7 +3,9 @@ import os
 import sys
 import subprocess
 import glob
-import tempfile
+import shlex
+import urlparse
+import urllib
 from cmdutils import CommandError
 from tempita import Template
 from paste import httpserver
@@ -75,12 +77,13 @@ def serve_python(config, appconfig):
 def serve_php(config, appconfig):
     apache_config_tmpl = Template.from_filename(
         os.path.join(os.path.dirname(__file__), 'php-devel-server.conf.tmpl'))
-    path_prefixes = ['./static', appconfig.php_root]
-    if appconfig.writable_root_location:
+    path_prefixes = [os.path.join(appconfig.app_dir, 'static'),
+                     appconfig.php_root]
+    if appconfig.writable_root_location != '/dev/null':
         path_prefixes.append(appconfig.writable_root_location
                              + '/%{ENV:SILVER_HOSTNAME}')
         path_prefixes.append(appconfig.writable_root_location)
-    tempdir = os.path.join(config.args.dir, '.apache')
+    tempdir = os.path.join(os.path.abspath(config.args.dir), '.apache')
     if not os.path.exists(tempdir):
         os.makedirs(tempdir)
     includes = glob.glob('/etc/apache2/mods-enabled/*.load')
@@ -113,8 +116,31 @@ def serve_php(config, appconfig):
     exe_name = search_path(['apache2', 'apache', 'httpd'])
     config.logger.notify('Serving on http://localhost:8080')
     ## FIXME: -X would also be an alternative to -DFOREGROUND; not sure which is better
+    ## FIXME: this logic (and call_script()) repeats stuff in devel-server.py:
+    for url in appconfig.update_fetch:
+        if url.startswith('script:'):
+            script = url[len('script:'):]
+            print 'Running update script %s' % script
+            call_script(appconfig, script)
+        else:
+            print 'Fetching update URL %s' % url
+            url = urlparse.urljoin('http://localhost:8080', url)
+            r = urllib.urlopen(url)
+            ## FIXME: handle non-200 status
+            body = r.read()
+            if body:
+                sys.stdout.write(body)
+                if not body.endswith('\n'):
+                    sys.stdout.write('\n')
+                sys.stdout.flush()
     run([exe_name, '-f', conf_file,
          '-d', config.args.dir, '-DFOREGROUND'])
+
+
+def call_script(app_config, script):
+    run([sys.executable, os.path.join(os.path.dirname(os.path.dirname(__file__)),
+                                      'mgr-scripts', 'call-script.py'),
+         app_config.app_dir] + shlex.split(script))
 
 
 def _turn_sigterm_into_systemexit():
