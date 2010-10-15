@@ -155,3 +155,18 @@ class Service(AbstractService):
                     % (dbname, dbname, self.env['CONFIG_MYSQL_USER']))
                 return '\n'.join(result)
             raise
+
+
+def mysql_connect(**kw):
+    """Connect to the configured database, returning a DBAPI/MySQLdb
+    connection object."""
+    import MySQLdb
+    for environ_name, kw_name in [('CONFIG_MYSQL_HOST', 'host'),
+                                  ('CONFIG_MYSQL_USER', 'user'),
+                                  ('CONFIG_MYSQL_DBNAME', 'db'),
+                                  ('CONFIG_MYSQL_PASSWORD', 'passwd'),
+                                  ]:
+        if os.environ.get(environ_name):
+            kw.setdefault(kw_name, os.environ[environ_name])
+    db = MySQLdb.connect(**kw)
+    return db
