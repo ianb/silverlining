@@ -317,7 +317,13 @@ class AppConfig(object):
         else:
             spec = None
         if runner.endswith('.ini'):
-            from paste.deploy import loadapp
+            try:
+                from paste.deploy import loadapp
+            except ImportError:
+                print >> sys.stderr, (
+                    "To use a .ini runner (%s) you must have PasteDeploy "
+                    "installed in your application." % runner)
+                raise
             from silversupport.secret import get_secret
             runner = 'config:%s' % runner
             global_conf = os.environ.copy()
