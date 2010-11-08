@@ -69,7 +69,7 @@ parser_create.add_argument(
 
 parser_create.add_argument(
     '--image',
-    default='name *karmic*',
+    default='name *lucid*',
     metavar="IMAGE",
     help='Image to use, can be "id 10", and can contain wildcards like "name *karmic*".  '
     'Default is "name *karmic*" which will select an Ubuntu Karmic image.')
@@ -225,11 +225,18 @@ Run a command for an application; this runs a script in bin/ on the
 remote server.
 
 Use it like:
-    silver run import-something --option-for-import-something
+    silver run LOCATION import-something --option-for-import-something
 
 Note any arguments that point to existing files or directories will
 cause those files/directories to be uploaded, and substituted with the
 location of the remote name.
+
+This will run *Python* scripts in your application's bin/ directory,
+in another directory (e.g., silver run LOCATION src/myapp/script.py),
+or a global command (e.g., ipython).
+
+Use 'silver run LOCATION python' to get an interactive prompt on the
+remote server.
 """)
 
 parser_run.add_argument(
@@ -299,10 +306,6 @@ parser_deactivate.add_argument(
     'locations', nargs='+',
     help="The hostname/path to act on; if you give more than one, "
     "they must all be on the same node.  Can be a wildcard.")
-
-parser_deactivate.add_argument(
-    '--disable', action='store_true',
-    help="Set the host to the status disabled, pointing it at the disabled application (good for a temporary removal)")
 
 parser_deactivate.add_argument(
     '--keep-prev', action='store_true',
@@ -393,6 +396,21 @@ parser_create_config.add_argument(
 parser_create_config.add_argument(
     '--info', action='store_true',
     help="Show information about how the configuration is created")
+
+parser_disable = subcommands.add_parser(
+    'disable', help="Temporarily disable an application")
+
+parser_enable = subcommands.add_parser(
+    'enable', help="Re-enable a disabled application")
+
+for subparser in (parser_disable, parser_enable):
+    group = subparser.add_mutually_exclusive_group(required=True)
+    group.add_argument('--by-name', metavar="APPNAME",
+                       help="Identify the application by its name")
+    group.add_argument('--by-location', metavar="LOCATION",
+                       help="Identify the application by its location")
+    subparser.add_argument('--node', metavar="NODE_HOSTNAME",
+                           help="Node to act on")
 
 for subparser in subcommands._name_parser_map.values():
     subparser.add_argument(

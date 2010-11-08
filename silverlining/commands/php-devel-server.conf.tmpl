@@ -17,7 +17,7 @@ KeepAlive Off
 <IfModule mpm_worker_module>
     StartServers          1
     MinSpareThreads      25
-    MaxSpareThreads      75 
+    MaxSpareThreads      75
     ThreadLimit          64
     ThreadsPerChild      25
     MaxClients          150
@@ -93,7 +93,7 @@ Listen 8080
 ## Python/WSGI setup:
 RewriteEngine on
 ## Uncomment if you want to understand what is happening here:
-#RewriteLog /var/log/apache2/rewrite.log
+#RewriteLog {{tempdir}}/rewrite.log
 #RewriteLogLevel 5
 
 RewriteCond %{HTTP_HOST} ^([^:]*)
@@ -104,14 +104,14 @@ RewriteRule . - [E=SILVER_ENV_VARS:{{silver_env_vars}}]
 RewriteRule . - [E=SILVER_FUNCS:{{silver_funcs}}]
 
 {{for prefix in path_prefixes}}
-RewriteCond ./{{prefix}}%{REQUEST_URI} -f
+RewriteCond {{prefix}}%{REQUEST_URI} -f
 RewriteRule (.*/)index.html $1 [L,R=permanent]
-RewriteCond ./{{prefix}}%{REQUEST_URI} -d
+RewriteCond {{prefix}}%{REQUEST_URI} -d
 RewriteCond %{REQUEST_URI} [^/]$
-RewriteCond ./{{prefix}}%{REQUEST_URI}/index.html -f
+RewriteCond {{prefix}}%{REQUEST_URI}/index.html -f
 RewriteRule (.*) $1/ [L,R=permanent]
-RewriteCond ./{{prefix}}%{REQUEST_URI} -f
-RewriteRule !\.php$ ./{{prefix}}%{REQUEST_URI} [L]
+RewriteCond {{prefix}}%{REQUEST_URI} -f
+RewriteRule !\.php$ {{prefix}}%{REQUEST_URI} [L]
 {{endfor}}
 
 RewriteRule . {{mgr_scripts}}/master-runner.php [L]

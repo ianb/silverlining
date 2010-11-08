@@ -6,14 +6,12 @@ from silversupport.abstractservice import AbstractService
 
 class Service(AbstractService):
 
-    ## Note that PostGIS only works with 8.3, even though 8.4 is the more
-    ## modern version available on Karmic
     packages = [
         'postgis',
-        'postgresql-8.3',
-        'postgresql-8.3-postgis',
+        'postgresql-8.4',
+        'postgresql-8.4-postgis',
         'postgresql-client',
-        'postgresql-client-8.3',
+        'postgresql-client-8.4',
         'postgresql-client-common',
         'postgresql-common',
         'proj',
@@ -37,10 +35,10 @@ class Service(AbstractService):
             self.install_packages()
             shutil.copyfile(os.path.join(os.path.dirname(__file__),
                                          'postgis-pg_hba.conf'),
-                            '/etc/postgresql/8.3/main/pg_hba.conf')
+                            '/etc/postgresql/8.4/main/pg_hba.conf')
             run(['chown', 'postgres:postgres',
-                 '/etc/postgresql/8.3/main/pg_hba.conf'])
-            run(['/etc/init.d/postgresql-8.3', 'restart'])
+                 '/etc/postgresql/8.4/main/pg_hba.conf'])
+            run(['/etc/init.d/postgresql-8.4', 'restart'])
 
         stdout, stderr, returncode = run(
             ['psql', '-U', 'postgres', '--tuples-only'],
@@ -57,10 +55,10 @@ class Service(AbstractService):
             run(['createdb', '-U', 'postgres', 'template_postgis'])
             parts = ['CREATE LANGUAGE plpgsql;\n']
             parts.append("UPDATE pg_database SET datistemplate='true' WHERE datname='template_postgis';")
-            for filename in ['lwpostgis.sql', 'lwpostgis_upgrade.sql',
+            for filename in ['postgis.sql',
                              'spatial_ref_sys.sql']:
                 filename = os.path.join(
-                    '/usr/share/postgresql-8.3-postgis', filename)
+                    '/usr/share/postgresql/8.4/contrib', filename)
                 fp = open(filename)
                 parts.append(fp.read())
                 parts.append('\n;\n')

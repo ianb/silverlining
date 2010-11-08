@@ -76,7 +76,7 @@ ideal.
 
 If you have needs that aren't met by Silver Lining, the best way is to
 modify Silver Lining itself.  It's a good chance you want to put
-something in ``tcsupport.services.*``.  This isn't perfect, but it has
+something in ``silversupport.services.*``.  This isn't perfect, but it has
 a side-effect that there's a collective benefit to these new features
 (since it's something reusable), and applications stay a bit simpler.
 Big features (a bunch are listed in the `todo <todo.html>`_ also

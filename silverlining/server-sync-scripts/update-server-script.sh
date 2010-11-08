@@ -7,9 +7,10 @@ update-locale LANG=en_US.UTF-8
 if [ ! -e /home/www-mgr ] ; then
     ## --gecos=none suppresses the querying for name, room #, etc.:
     adduser --disabled-password --gecos=none www-mgr
-    mkdir -p /home/www-mgr/.ssh
+    mkdir -p -m 700 /home/www-mgr/.ssh
     cp /root/.ssh/authorized_keys /home/www-mgr/.ssh/authorized_keys
     chown -R www-mgr:www-mgr /home/www-mgr/.ssh/
+    chmod 600 /home/www-mgr/.ssh/*
 fi
 
 ## Make www-data part of the adm group, which means it can read
@@ -25,7 +26,8 @@ if [ ! -e /var/www/appdata.map ] ; then
 disabled / default-disabled|general_debug|/dev/null|python|
 " > /var/www/appdata.map
 fi
-chown www-mgr:www-mgr /var/www/appdata.map
+touch /var/www/disabledapps.txt
+chown www-mgr:www-mgr /var/www/appdata.map /var/www/disabledapps.txt
 
 ## Now setup Apache.  Ubuntu installs 000-default, which we don't
 ## want, so we delete it, and make sure the necessary modules are

@@ -22,7 +22,8 @@ def main():
         rest = [
             r.replace('$TMP', tmp_dir)
             for r in rest]
-    path = os.path.join(app_config.app_dir, 'bin', command)
+    path = find_command_path(app_config.app_dir, command)
+    check_command_python(path)
     os.environ['SILVER_VERSION'] = 'silverlining/0.0'
     app_config.activate_services()
     app_config.activate_path()
@@ -32,7 +33,56 @@ def main():
     sys.argv = [path] + rest
     os.chdir(app_config.app_dir)
     ns = {'__file__': path, '__name__': '__main__'}
-    execfile(path, ns)
+    if os.path.basename(path) == 'ipython':
+        ## ipython-specific hack
+        if not os.access(os.environ['HOME'], os.W_OK):
+            os.environ['HOME'] = '/tmp'
+    os.chdir(app_config.app_dir)
+    if os.path.basename(path) in ('python', 'python2.6'):
+        from code import InteractiveConsole
+        console = InteractiveConsole()
+        console.interact()
+    else:
+        execfile(path, ns)
+
+
+def find_command_path(app_dir, command_name):
+    if command_name.startswith(os.path.sep):
+        # Absolute path
+        return command_name
+    places = [os.path.join(app_dir, 'bin'),
+              app_dir,
+              '/bin',
+              '/usr/bin']
+    for place in places:
+        place = os.path.join(place, command_name)
+        if os.path.exists(place):
+            return place
+    print >> sys.stderr, (
+        "%s not found (looked in %s)"
+        % (command_name, ', '.join(places)))
+    sys.exit(1000)
+
+
+def check_command_python(path):
+    if path.endswith('.py'):
+        # Good enough
+        return
+    if path.endswith('python') or path.endswith('python2.6'):
+        return
+    fp = open(path)
+    first = fp.readline()
+    fp.close()
+    if not first.startswith('#!'):
+        print >> sys.stderr, (
+            "Not a #! script: %s" % path)
+        sys.exit(1001)
+    if not 'python' in first:
+        print >> sys.stderr, (
+            "#! line in script is not for Python (%s): %s"
+            % (first.strip(), path))
+        sys.exit(1001)
+
 
 if __name__ == '__main__':
     sys.exit(main())

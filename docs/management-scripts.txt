@@ -10,13 +10,13 @@ Silver Lining has support for running commands on applications, as
 though they were local applications.  It looks like this::
 
      $ cd myapp-app
-     $ silver run import-script --setting=value ~/import-data.zip
+     $ silver run LOCATION import-script --setting=value ~/import-data.zip
 
 ``silver run`` takes as an argument the name of the script to run;
-this should be a script in the ``bin/`` directory (in this example
-``myapp-app/bin``) that has been uploaded to the server.  If you edit
-the file locally and don't do ``silver update`` remember that it will
-use the old version of the script.
+this should be a script that has been uploaded to the server (either a
+path relative to your app root, or a script in your app's ``bin/``
+directory).  If you edit the file locally and don't do ``silver
+update`` remember that it will use the old version of the script.
 
 The script must be a Python script.  The path will be appropriately
 setup so all your libraries will be ready, and environmental variables

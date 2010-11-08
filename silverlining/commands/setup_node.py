@@ -6,7 +6,7 @@ from silversupport.shell import ssh, run
 
 def setup_rsync(config, source, dest, delete=False):
     cwd = os.path.abspath(os.path.join(__file__, '../..'))
-    options = ['--quiet', '-prvC']
+    options = ['--quiet', '-ErvC']
     if delete:
         options.append('--delete')
     stdout, stderr, returncode = run(
@@ -49,7 +49,6 @@ mkdir -p /usr/local/share/silverlining/lib
 mkdir -p /root/.ssh
 cat >> /root/.ssh/authorized_keys
 ''',
-        ssh_args=['-o', 'StrictHostKeyChecking=no'],
         stdin=key)
     config.logger.notify(
         "Updating indexes and setting up rsync")

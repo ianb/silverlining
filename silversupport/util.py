@@ -15,7 +15,8 @@ def unique_name(dest_dir, name):
         n += 1
         result = '%s_%03i' % (name, n)
 
-def asbool(obj):
+
+def asbool(obj, default=ValueError):
     if isinstance(obj, (str, unicode)):
         obj = obj.strip().lower()
         if obj in ['true', 'yes', 'on', 'y', 't', '1']:
@@ -23,9 +24,12 @@ def asbool(obj):
         elif obj in ['false', 'no', 'off', 'n', 'f', '0']:
             return False
         else:
+            if default is not ValueError:
+                return default
             raise ValueError(
                 "String is not true/false: %r" % obj)
     return bool(obj)
+
 
 def read_config(filename):
     if not os.path.exists(filename):
@@ -78,4 +82,3 @@ class _EnvironDict(object):
             raise KeyError(key)
         else:
             return self.default
-
