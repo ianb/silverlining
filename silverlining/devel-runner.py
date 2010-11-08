@@ -96,7 +96,7 @@ def get_app(base_path):
     for url in update_fetch:
         if url.startswith('script:'):
             script = url[len('script:'):]
-            print 'Calling update script %s' % script
+            print 'Running update script %s' % script
             call_script(app_config, script)
         else:
             print 'Fetching update URL %s' % url
