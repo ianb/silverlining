@@ -235,6 +235,8 @@ class AppConfig(object):
             tmp = environ['TEMP'] = os.path.join('/var/lib/silverlining/tmp/', self.app_name)
             if not os.path.exists(tmp):
                 os.makedirs(tmp)
+        elif not environ.get('TEMP'):
+            environ['TEMP'] = '/tmp'
         environ['SILVER_LOGS'] = self.log_dir
         if not is_production() and not os.path.exists(environ['SILVER_LOGS']):
             os.makedirs(environ['SILVER_LOGS'])
