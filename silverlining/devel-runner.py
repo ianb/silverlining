@@ -144,6 +144,7 @@ class CompoundApp(object):
         prev_modules = sys.modules.keys()
         try:
             self._app, self.writable_root = get_app(self.base_path)
+            return self._app
         except:
             self._app = None
             # Make sure any stale/SyntaxError modules are removed:
