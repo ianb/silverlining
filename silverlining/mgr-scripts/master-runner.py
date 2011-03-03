@@ -150,10 +150,13 @@ class ErrorCollector(object):
         self.buffers.buffer = []
 
     def write(self, text):
+        if isinstance(text, unicode):
+            text = text.encode('utf8')
         self.buffers.buffer.append(text)
 
     def writelines(self, lines):
-        self.buffers.buffer.extend(lines)
+        for line in lines:
+            self.write(line)
 
     def flush(self):
         ## FIXME: should this do something?
