@@ -55,6 +55,10 @@ sub vcl_fetch {
         unset beresp.http.Set-Cookie;
         return(deliver);
     }
+    # Apache adds Vary: X-Forwarded-For to each response, which would
+    # mean a separate cache for each client; not our intent, so we'll
+    # ignore it:
+    set beresp.http.Vary = regsub(beresp.http.Vary, "X-Forwarded-For,", "");
     return(pass);
 }
 
