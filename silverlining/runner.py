@@ -240,6 +240,11 @@ remote server.
 """)
 
 parser_run.add_argument(
+    '--node',
+    metavar="NODE_HOSTNAME",
+    help="Node to run command on")
+
+parser_run.add_argument(
     '-p', '--provider',
     metavar='NAME',
     help="The [provider:NAME] section from ~/.silverlining.conf to use (default [provider:default])",

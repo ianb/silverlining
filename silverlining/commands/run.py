@@ -46,13 +46,12 @@ def command_run(config):
             translated_args.append(arg)
     zip.close()
     zip_content = out.getvalue()
-    host = normalize_location(args.location)[0]
     if args.user not in ['root', 'www-mgr', 'www-data']:
         raise CommandError(
             "Unknown --user=%s" % args.user)
     if any_translated:
         stdout, stderr, returncode = ssh(
-            args.user, host, '/usr/local/share/silverlining/mgr-scripts/save-tmp-file.py',
+            args.user, config.node_hostname, '/usr/local/share/silverlining/mgr-scripts/save-tmp-file.py',
             stdin=zip_content, capture_stdout=True, capture_stderr=True)
         match = _tmp_re.search(stdout)
         if not match:
@@ -62,7 +61,7 @@ def command_run(config):
     else:
         tmp_location = 'NONE'
     stdout, stderr, returncode = ssh(
-        args.user, host,
+        args.user, config.node_hostname,
         ['/usr/local/share/silverlining/mgr-scripts/run-command.py',
          args.location, tmp_location, args.script] + translated_args)
     return returncode
