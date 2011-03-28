@@ -6,7 +6,7 @@ from silversupport.shell import ssh, run
 
 def setup_rsync(config, source, dest, delete=False):
     cwd = os.path.abspath(os.path.join(__file__, '../..'))
-    options = ['--quiet', '-ErvC']
+    options = ['--quiet', '--executability', '-rvC']
     if delete:
         options.append('--delete')
     stdout, stderr, returncode = run(
