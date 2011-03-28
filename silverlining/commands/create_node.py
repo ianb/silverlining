@@ -111,7 +111,7 @@ def wait_for_node_ready_ping(config, node_hostname):
     while 1:
         config.logger.show_progress()
         stdout, stderr, returncode = run(
-            ['ping', '-c 2', '-w', '10', node_hostname],
+            ['ping', '-c', '2', '-w', '10', node_hostname],
             capture_stdout=True, capture_stderr=True)
         if returncode:
             config.logger.debug('Ping did not return successful result')
