@@ -317,7 +317,7 @@ configuration <services.html#local-development-configuration>`_ (this
 is done *outside* the application).
 
 To test an actual deployment you need a server to deploy to.  Silver
-Lining can deploy to any dedicated Ubuntu Karmic machine that has been
+Lining can deploy to any dedicated Ubuntu Lucid machine that has been
 configured by Silver Lining (using ``silver setup-node``), but the
 cloud makes getting a testing server very easy and quite cheap (when
 testing, you can allocate a server just for a few hours for testing

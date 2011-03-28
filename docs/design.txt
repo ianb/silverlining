@@ -220,13 +220,9 @@ worry is a bit big; but admittedly I haven't looked closely).
 Ubuntu
 ======
 
-This system is based on Ubuntu.  Jaunty, Karmic, in the future no
-doubt other updates will come around.  For the most part the
-Jaunty/Karmic distinction is temporary (I suppose it should just be
-upgraded to Karmic), and supporting multiple revisions isn't ideal or
-desired.
+This system is based on Ubuntu.
 
-Support for other Linux distributions is not desired.  No one has
+Support for other Linux distributions is not desired.  Few people have
 asked about this so far, so I'm hoping this will be a
 non-controversial choice.  Many parts of the system expose Ubuntu
 (especially the ``packages`` configuration).  The config files are
@@ -268,4 +264,3 @@ each other's bugs.  There are a lot of moving pieces.  I want this to
 be a finely tuned machine; complex, but refined.  That takes a lot of
 iterating, and I need a community of people iterating with me to get
 there.
-

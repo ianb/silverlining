@@ -4,7 +4,7 @@ Zope2 Quickstart
 Because we will have binary eggs that are OS architecture specific, we need to build everything on the same
 type of machine that we are going to deploy to.
 
-Install silverlining on a Rackspace Cloud machine running Ubuntu Karmic 9.10::
+Install silverlining on a Rackspace Cloud machine running Ubuntu Lucid::
 
     $ cd /opt
     $ virtualenv -p python2.6 silverlining
@@ -15,10 +15,10 @@ Make an SSH key::
 
     $ ssh-keygen
     Generating public/private rsa key pair.
-    Enter file in which to save the key (/root/.ssh/id_rsa): 
+    Enter file in which to save the key (/root/.ssh/id_rsa):
     Created directory '/root/.ssh'.
-    Enter passphrase (empty for no passphrase): 
-    Enter same passphrase again: 
+    Enter passphrase (empty for no passphrase):
+    Enter same passphrase again:
     Your identification has been saved in /root/.ssh/id_rsa.
     Your public key has been saved in /root/.ssh/id_rsa.pub.
     The key fingerprint is:
@@ -92,9 +92,9 @@ You need to make a Zope instance::
     your new Zope instance.
 
     Username: admin
-    Password: 
-    Verify password: 
-    
+    Password:
+    Verify password:
+
 Make a Zope2 admin user
 -----------------------
 
@@ -109,14 +109,14 @@ Move the original zope.conf file out of the way::
 
     $ cd zope-on-wsgi/etc
     $ mv zope.conf zope.conf.orig
-    
+
 Edit the zope.conf file to look like this::
 
     %define INSTANCE <TODO: find out how to use a relative path>
     instancehome $INSTANCE
 
     effective-user www-mgr
-    
+
     <zodb_db main>
         <filestorage>
           path $INSTANCE/var/Data.fs
@@ -131,16 +131,16 @@ Edit the zope.conf file to look like this::
         mount-point /temp_folder
         container-class Products.TemporaryFolder.TemporaryContainer
     </zodb_db>
-    
+
 Make sure the www-data user owns the directory
 ----------------------------------------------
 
-If you set the effective-user to "www-data", then you need to make sure that 
+If you set the effective-user to "www-data", then you need to make sure that
 this user has ownership of the directory.
 
     $ chown -R www-data:www-data zope-on-wsgi
 
-    
+
 Make the WSGI configuration
 ---------------------------
 
@@ -223,7 +223,7 @@ Add the file etc/who.ini::
 And add a password file etc/passwd::
 
     admin:admin
-    
+
 Test it with paster
 -------------------
 
@@ -239,7 +239,7 @@ Go to http://zope-on-wsgi to see your Zope site.
 Set up the WSGI runner
 ----------------------
 
-Edit the zope-on-wsgi/app.ini file to point to the zope2.ini file you just created. 
+Edit the zope-on-wsgi/app.ini file to point to the zope2.ini file you just created.
 Replace the <insert your runner here> with etc/zope2.ini.
 
     [production]
@@ -256,7 +256,7 @@ Replace the <insert your runner here> with etc/zope2.ini.
     ## If you always upload this app to a particular hostname, use this:
     #default_host = ...
     packages = python-setuptools
-    
+
 Try serving the app using silverlining
 --------------------------------------
 
@@ -272,7 +272,7 @@ Create the server node
 ----------------------
 
     # silver create-node wsgify --setup-node
-    Creating node (image=Ubuntu 9.10 (karmic); size=256 server)
+    Creating node (image=Ubuntu 10.04 LTS (lucid); size=256 server)
     Status 3 at IP 174.143.146.185
     The hostname/ip is not setup in /etc/hosts
     Would you like me to set it up?  [y/n] y
@@ -283,13 +283,13 @@ Create the server node
     Setting up authentication on server...
     Using key file:  /root/.ssh/id_rsa.pub
     Warning: Permanently added 'wsgify,174.143.146.185' (RSA) to the list of known hosts.
-    root@wsgify's password: 
+    root@wsgify's password:
     (check your email for the password)
     Updating indexes and setting up rsync
     ...
     Copying files from `/etc/skel' ...
     Restarting apache2 and varnish
-    
+
 Update the server with your app
 -------------------------------
 

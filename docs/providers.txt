@@ -26,7 +26,7 @@ Host It Yourself
 
 You don't *need* to use commands like ``silver create-node`` to make
 use of Silver Lining.  If you have a machine with a fresh install of
-Ubuntu Jaunty (or Karmic) then you can use ``silver setup-node`` to
+Ubuntu Lucid then you can use ``silver setup-node`` to
 configure the machine and ``silver update`` to deploy applications.
 It's harder to test things without the ability to create and destroy
 servers on demand, but the basic infrastructure is not really

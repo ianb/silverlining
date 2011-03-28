@@ -149,7 +149,7 @@ The Server
 
 The server is setup thusly:
 
-* Ubuntu Jaunty (Karmic seems to work too).
+* Ubuntu Lucid 10.04 LTS
 
 * Python 2.6.
 
@@ -267,4 +267,4 @@ the hostname setup in ``/etc/hosts``.
     in future.
 
 ``silver setup-node``:
-    This takes a bare Ubuntu Jaunty system and sets it up.
+    This takes a bare Ubuntu Lucid system and sets it up.
