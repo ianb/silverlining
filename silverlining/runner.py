@@ -158,6 +158,10 @@ parser_update.add_argument(
     metavar='CONFIG_DIR',
     help="Configuration to use for this deployment of the application")
 
+parser_update.add_argument(
+    '--noetchosts', help="Do not try to update /etc/hosts",
+    dest='update_etc_hosts', action='store_const', const=False, default=True)
+
 parser_init = subcommands.add_parser(
     'init', help="Create a new application file layout")
 
