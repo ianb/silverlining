@@ -93,7 +93,7 @@ Flags: seen
                         if line.strip() and not line.strip().startswith('#'))
     stdout, stderr, returncode = ssh(
         'root', node, """DEBCONF_DB_OVERRIDE='File{/root/config.dat}' """ + \
-                      """apt-get -y -q=2 install $(cat)""",
+                      """apt-get -y -q=2 install --no-install-recommends $(cat)""",
         stdin=packages)
     if returncode:
         config.logger.fatal(

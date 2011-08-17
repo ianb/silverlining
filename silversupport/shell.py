@@ -86,7 +86,8 @@ def run(command, extra_env=None, stdin=None,
 
 def apt_install(packages, **kw):
     """Install the given list of packages"""
-    return run(['apt-get', 'install', '-q=2', '-y', '--force-yes'] + packages, **kw)
+    return run(['apt-get', 'install', '-q=2', '-y', '--force-yes',
+                '--no-install-recommends'] + packages, **kw)
 
 
 _end_quote_re = re.compile(r"^('*)(.*?)('*)$", re.S)
