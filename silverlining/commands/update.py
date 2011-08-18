@@ -62,6 +62,7 @@ def command_update(config):
     else:
         clear_option = ''
     ssh('root', config.node_hostname,
+        'find /var/www/%(instance_name)s -name "*.pyc" -delete; '
         'python -m compileall -q /var/www/%(instance_name)s; '
         '/usr/local/share/silverlining/mgr-scripts/update-service.py %(instance_name)s %(clear_option)s'
         % dict(instance_name=instance_name,
