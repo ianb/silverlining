@@ -60,8 +60,10 @@ def command_run(config):
         tmp_location = match.group(1)
     else:
         tmp_location = 'NONE'
+    ssh_args = ['-t'] if args.interactive else []
     stdout, stderr, returncode = ssh(
         args.user, config.node_hostname,
         ['/usr/local/share/silverlining/mgr-scripts/run-command.py',
-         args.location, tmp_location, args.script] + translated_args)
+         args.location, tmp_location, args.script] + translated_args,
+        ssh_args=ssh_args)
     return returncode

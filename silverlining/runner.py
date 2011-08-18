@@ -259,6 +259,12 @@ parser_run.add_argument(
     action='store_true',
     help="Answer yes to any questions")
 
+parser_run.add_argument(
+    '-i', '--interactive',
+    action='store_true',
+    help=("Tells ssh to force pseudo-tty allocation.  Useful when what you're"
+          " running is a shell of some sort"))
+
 #add_verbose(parser_run, add_log=True)
 
 parser_run.add_argument(
