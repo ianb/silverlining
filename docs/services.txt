@@ -191,7 +191,7 @@ Currently this has several limitations:
 
 It's based on the very alpha ubuntu packages from 10gen
 It works on 9.10 (patching for older versions is simple, choosing is harder)
-It runs the lastest unsable mongodb currently 1.3.x it won't install 1.2.x as no packages are avaliable for it
+It runs the lastest unstable mongodb currently 1.3.x it won't install 1.2.x as no packages are avaliable for it
 
 NFS
 ~~~
