@@ -158,6 +158,10 @@ parser_update.add_argument(
     metavar='CONFIG_DIR',
     help="Configuration to use for this deployment of the application")
 
+parser_update.add_argument(
+    '--noetchosts', help="Do not try to update /etc/hosts",
+    dest='update_etc_hosts', action='store_const', const=False, default=True)
+
 parser_init = subcommands.add_parser(
     'init', help="Create a new application file layout")
 
@@ -254,6 +258,12 @@ parser_run.add_argument(
     '-y', '--yes',
     action='store_true',
     help="Answer yes to any questions")
+
+parser_run.add_argument(
+    '-i', '--interactive',
+    action='store_true',
+    help=("Tells ssh to force pseudo-tty allocation.  Useful when what you're"
+          " running is a shell of some sort"))
 
 #add_verbose(parser_run, add_log=True)
 

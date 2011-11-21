@@ -62,6 +62,7 @@ def command_update(config):
     else:
         clear_option = ''
     ssh('root', config.node_hostname,
+        'find /var/www/%(instance_name)s -name "*.pyc" -delete; '
         'python -m compileall -q /var/www/%(instance_name)s; '
         '/usr/local/share/silverlining/mgr-scripts/update-service.py %(instance_name)s %(clear_option)s'
         % dict(instance_name=instance_name,
@@ -81,10 +82,11 @@ def command_update(config):
                location=config.args.location),
         )
 
-    ip = socket.gethostbyname(config.node_hostname)
-    hostname = appdata.normalize_location(config.args.location)[0]
-    set_etc_hosts(config, [hostname,
-                           'prev.' + hostname], ip)
+    if config.args.update_etc_hosts:
+        ip = socket.gethostbyname(config.node_hostname)
+        hostname = appdata.normalize_location(config.args.location)[0]
+        set_etc_hosts(config, [hostname,
+                               'prev.' + hostname], ip)
 
 def check_config_in_subprocess(app, config, logger):
     logger.notify('Checking configuration.')
